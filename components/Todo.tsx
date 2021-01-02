@@ -4,7 +4,6 @@ import { useContext, useEffect, useState } from "react";
 import { ITodo } from "../interfaces/todos";
 import { ITodosContext, TodosContext } from "../contexts/TodosContextProvider";
 import Image from "next/image";
-import _ from "lodash";
 
 interface Props {
   placeholder?: string;
@@ -24,7 +23,10 @@ export default function Todo({
   const [focus, setFocus] = useState<boolean>(false);
 
   const createTodo = async (newTodo: ITodo) => {
-    // todo create a new todo in backend!
+    // optimisticly update TodosContext
+    setTodos((prevTodos) => [...prevTodos, newTodo] as ITodo[]);
+
+    // create new Todo in database
     try {
       const response = await fetch("/api/todos", {
         method: "POST",
@@ -36,13 +38,14 @@ export default function Todo({
 
       const createdTodo: ITodo = await response.json();
 
-      // update TodoContext
-      setTodos((prevTodos) => {
-        const filteredTodos = prevTodos!.filter(
-          (todo) => todo.id !== createdTodo.id
-        );
-        return [...filteredTodos, createdTodo];
-      });
+      // update TodoContext that adds the database id
+      setTodos((prevTodos) =>
+        prevTodos.map((prevTodo) =>
+          !prevTodo.id && prevTodo.title === newTodo.title
+            ? { ...prevTodo, id: createdTodo.id }
+            : prevTodo
+        )
+      );
     } catch (e) {
       console.error(e.message);
     }
