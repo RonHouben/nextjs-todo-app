@@ -1,26 +1,19 @@
-import { NextPageContext } from "next";
 import React, { useContext, useEffect } from "react";
+import useSWR from "swr";
 import Layout from "../components/Layout";
 import Todo from "../components/Todo";
 import { ITodosContext, TodosContext } from "../contexts/TodosContextProvider";
-import { ITodo } from "../interfaces/todos";
-import { getTodos } from "./api/todos/index";
 
-interface Props {
-  initialTodos: ITodo[];
-  error?: {
-    message: string;
-  };
-}
-export default function Home({ initialTodos, error }: Props) {
+export default function Home() {
+  const { data, error } = useSWR("/api/todos");
   const { todos, setTodos } = useContext<ITodosContext>(TodosContext);
-  // TODO: CHANGE TO useSWR hook!
 
   useEffect(() => {
-    setTodos(initialTodos);
-  }, [initialTodos]);
+    setTodos(data);
+  }, [data]);
 
   if (error) return <div>ERROR! {error.message}</div>;
+  if (!data) return <div>LOADING!</div>;
 
   return (
     <Layout pageTitle="TODO">
@@ -34,23 +27,23 @@ export default function Home({ initialTodos, error }: Props) {
   );
 }
 
-export async function getServerSideProps(_context: NextPageContext) {
-  try {
-    // get todos from database
-    const initialTodos = await getTodos();
+// export async function getServerSideProps(_context: NextPageContext) {
+//   try {
+//     // get todos from database
+//     const initialTodos = await getTodos();
 
-    return {
-      props: {
-        initialTodos,
-      } as Props,
-    };
-  } catch (error) {
-    return {
-      props: {
-        error: {
-          message: error.message,
-        },
-      } as Props,
-    };
-  }
-}
+//     return {
+//       props: {
+//         initialTodos,
+//       } as Props,
+//     };
+//   } catch (error) {
+//     return {
+//       props: {
+//         error: {
+//           message: error.message,
+//         },
+//       } as Props,
+//     };
+//   }
+// }
