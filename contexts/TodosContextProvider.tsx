@@ -3,7 +3,7 @@ import { ITodo } from "../interfaces/todos";
 
 export interface ITodosContext {
   todos?: ITodo[];
-  setTodos: React.Dispatch<SetStateAction<ITodo[] | undefined>>;
+  setTodos: React.Dispatch<SetStateAction<ITodo[]>>;
 }
 
 interface ITodosContextProvider {
@@ -15,7 +15,7 @@ export const TodosContext = createContext<Partial<ITodosContext>>(
 ) as React.Context<ITodosContext>;
 
 export const TodosContextProvider = ({ children }: ITodosContextProvider) => {
-  const [todos, setTodos] = useState<ITodo[]>();
+  const [todos, setTodos] = useState<ITodo[]>([]);
 
   return (
     <TodosContext.Provider
