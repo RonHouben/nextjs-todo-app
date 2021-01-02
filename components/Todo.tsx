@@ -22,7 +22,7 @@ export default function Todo({
   const { setTodos } = useContext<ITodosContext>(TodosContext);
   const [focus, setFocus] = useState<boolean>(false);
 
-  const createTodo = async (newTodo: ITodo) => {
+  const createTodo = async (newTodo: ITodo): Promise<void> => {
     // optimisticly update TodosContext
     setTodos((prevTodos) => [...prevTodos, newTodo] as ITodo[]);
 
@@ -54,28 +54,27 @@ export default function Todo({
   const updateTodo = async (
     id: ITodo["id"],
     update: Partial<ITodo>
-  ): Promise<ITodo> => {
+  ): Promise<void> => {
+    // optimistically update the local Todo state
+    setTodo((prevTodo) => (prevTodo ? { ...prevTodo, ...update } : undefined));
+    // optimistically update TodosContex
+    setTodos((prevTodos) =>
+      prevTodos.map((prevTodo) =>
+        prevTodo.id === id ? { ...prevTodo, ...update } : prevTodo
+      )
+    );
     // call changeTodo api in backend
-    const response = await fetch(`/api/todos/${id}`, {
+    await fetch(`/api/todos/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(update),
     });
-
-    const updatedTodo = (await response.json()) as ITodo;
-
-    return updatedTodo;
   };
 
   // handlers
   const handleChangeTitle = (title: string): void => {
-    // update the local state
-    setTodo((prevTodo) =>
-      prevTodo ? ({ ...prevTodo, title } as ITodo) : undefined
-    );
-
     // create a new todo if createNewTodo === true
     if (createNewTodo) {
       createTodo({ ...todo, title } as ITodo);
@@ -84,7 +83,6 @@ export default function Todo({
       updateTodo(todo!.id, { ...todo, title });
 
       // set focus on Todo
-      // get submit key
       document.getElementById(todo?.id || "new-todo")?.focus();
     }
   };
@@ -98,6 +96,8 @@ export default function Todo({
   };
 
   const handleDelete = async (id: ITodo["id"]): Promise<void> => {
+    // optimistically update TodoContext
+    setTodos((prevTodos) => prevTodos!.filter((todo) => todo.id !== id));
     // delete the todo in backend
     try {
       await fetch(`/api/todos/${id}`, {
@@ -106,9 +106,6 @@ export default function Todo({
           "Content-Type": "application/json",
         },
       });
-
-      // update TodoContext
-      setTodos((prevTodos) => prevTodos!.filter((todo) => todo.id !== id));
     } catch (e) {
       console.error(e.message);
     }
