@@ -10,8 +10,6 @@ interface Props {
   placeholder?: string;
   todoData?: ITodo;
   createNewTodo?: boolean;
-  fadeIn?: boolean;
-  fadeOut?: boolean;
   autoFocus?: boolean;
 }
 
@@ -19,8 +17,6 @@ export default function Todo({
   todoData,
   placeholder,
   createNewTodo = false,
-  fadeIn = false,
-  // fadeOut = false,
   autoFocus = false,
 }: Props) {
   const [todo, setTodo] = useState<ITodo | undefined>(todoData);
