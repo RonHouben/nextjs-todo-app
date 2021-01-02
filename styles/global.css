@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import url("https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;700&display=swap");
+
+.fade-in {
+  animation: animation-fade-in 1s;
+}
+
+.fade-in-fast {
+  animation: animation-fade-in 0.3s;
+}
+
+.fade-in-slow {
+  animation: animation-fade-it 1.5s;
+}
+
+.fade-out {
+  animation: animation-fade-out 1s;
+}
+
+.fade-out-fast {
+  animation: animation-fade-out 0.3s;
+}
+
+.fade-out-slow {
+  animation: animation-fade-out 1.5s;
+}
+
+@keyframes animation-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes animation-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
