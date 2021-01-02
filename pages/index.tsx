@@ -27,8 +27,7 @@ export default function Home({ initialTodos, error }: Props) {
       <div className="flex flex-col justify-start items-center space-y-7 w-full">
         <Todo createNewTodo autoFocus placeholder="Create a new todo..." />
         <div className="w-full h-full rounded-md">
-          {todos &&
-            todos.map((todo, i) => <Todo key={i} todoData={todo} fadeIn />)}
+          {todos && todos.map((todo, i) => <Todo key={i} todoData={todo} />)}
         </div>
       </div>
     </Layout>
