@@ -4,8 +4,8 @@ module.exports = {
   theme: {
     extend: {
       screens: {
-        mobile: "375px",
-        desktop: "1440px",
+        mobile: { max: "375px" },
+        desktop: { min: "376px", max: "1440px" },
       },
       backgroundImage: (theme) => ({
         "mobile-light": "url('/images/bg-mobile-light.jpg')",
