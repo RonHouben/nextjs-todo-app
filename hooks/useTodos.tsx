@@ -36,10 +36,7 @@ export default function useTodos(): IUseTodos {
       ...newTodo,
     } as ITodo;
     // optimistically update local state
-    mutate(
-      data ? [...data, newTodoWithDefaults] : [newTodoWithDefaults],
-      false
-    );
+    mutate(data ? [...data, newTodoWithDefaults] : [newTodoWithDefaults], true);
 
     // create new Todo in database
     try {
@@ -54,6 +51,8 @@ export default function useTodos(): IUseTodos {
       console.error(err);
       error = err as FetchError;
     }
+    // revalidate after db call
+    mutate();
   }
 
   async function updateTodo(
@@ -65,21 +64,29 @@ export default function useTodos(): IUseTodos {
       data
         ? data.map((todo) => (todo.id === id ? { ...todo, ...update } : todo))
         : data,
-      false
+      true
     );
+
     // call changeTodo api in backend
-    await fetch(`/api/todos/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(update),
-    });
+    try {
+      await fetch(`/api/todos/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(update),
+      });
+      // revalidate after db call
+      mutate();
+    } catch (err) {
+      console.error(err);
+      error = err as FetchError;
+    }
   }
 
   async function deleteTodo(id: ITodo["id"]): Promise<void> {
     // optimistically update local state
-    mutate(data ? data.filter((todo) => todo.id !== id) : data, false);
+    mutate(data ? data.filter((todo) => todo.id !== id) : data, true);
     // delete the todo in backend
     try {
       await fetch(`/api/todos/${id}`, {
@@ -92,6 +99,8 @@ export default function useTodos(): IUseTodos {
       console.error(err);
       error = err as FetchError;
     }
+    // revalidate after db call
+    mutate();
   }
 
   // set TodosContext every time data changes
