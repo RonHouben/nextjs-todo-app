@@ -26,7 +26,7 @@ export default function Todo({
   const handleChangeTitle = (id: ITodo["id"], title: string): void => {
     // create a new todo if createNewTodo === true
     if (createNewTodo) {
-      createTodo({ ...todo, title, completed: false });
+      createTodo({ ...todo, title });
     } else {
       updateTodo(id, { ...todo, title });
 
@@ -36,7 +36,6 @@ export default function Todo({
   };
 
   const handleToggleCompleted = (id: ITodo["id"], completed: boolean): void => {
-    console.log("PING", id, completed);
     if (id !== "new-todo") {
       updateTodo(id, { ...todo, completed });
     }

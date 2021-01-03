@@ -5,7 +5,6 @@ import useTodos from "../hooks/useTodos";
 
 export default function Home() {
   const { todos, error } = useTodos();
-  console.log("ERROR", error);
 
   if (error) return <div>ERROR! {error.message}</div>;
   if (!todos) return <div>LOADING!</div>;
