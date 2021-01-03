@@ -1,9 +1,9 @@
 import RoundCheckbox from "./RoundCheckbox";
 import Textbox from "./Textbox";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ITodo } from "../interfaces/todos";
-import { ITodosContext, TodosContext } from "../contexts/TodosContextProvider";
 import Image from "next/image";
+import useTodos from "../hooks/useTodos";
 
 interface Props {
   placeholder?: string;
@@ -19,75 +19,26 @@ export default function Todo({
   autoFocus = false,
 }: Props) {
   const [todo, setTodo] = useState<ITodo | undefined>(todoData);
-  const { setTodos } = useContext<ITodosContext>(TodosContext);
+  const { createTodo, updateTodo, deleteTodo } = useTodos();
   const [focus, setFocus] = useState<boolean>(false);
 
-  const createTodo = async (newTodo: ITodo): Promise<void> => {
-    // optimisticly update TodosContext
-    setTodos((prevTodos) => [...prevTodos, newTodo] as ITodo[]);
-
-    // create new Todo in database
-    try {
-      const response = await fetch("/api/todos", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newTodo),
-      });
-
-      const createdTodo: ITodo = await response.json();
-
-      // update TodoContext that adds the database id
-      setTodos((prevTodos) =>
-        prevTodos.map((prevTodo) =>
-          !prevTodo.id && prevTodo.title === newTodo.title
-            ? { ...prevTodo, id: createdTodo.id }
-            : prevTodo
-        )
-      );
-    } catch (e) {
-      console.error(e.message);
-    }
-  };
-
-  const updateTodo = async (
-    id: ITodo["id"],
-    update: Partial<ITodo>
-  ): Promise<void> => {
-    // optimistically update the local Todo state
-    setTodo((prevTodo) => (prevTodo ? { ...prevTodo, ...update } : undefined));
-    // optimistically update TodosContex
-    setTodos((prevTodos) =>
-      prevTodos.map((prevTodo) =>
-        prevTodo.id === id ? { ...prevTodo, ...update } : prevTodo
-      )
-    );
-    // call changeTodo api in backend
-    await fetch(`/api/todos/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(update),
-    });
-  };
-
   // handlers
-  const handleChangeTitle = (title: string): void => {
+  const handleChangeTitle = (id: ITodo["id"], title: string): void => {
     // create a new todo if createNewTodo === true
     if (createNewTodo) {
-      createTodo({ ...todo, title } as ITodo);
+      createTodo({ ...todo, title });
     } else {
-      // update existing todo
-      updateTodo(todo!.id, { ...todo, title });
+      updateTodo(id, { ...todo, title });
 
       // set focus on Todo
-      document.getElementById(todo?.id || "new-todo")?.focus();
+      document.getElementById(id || "new-todo")?.focus();
     }
   };
 
-  const handleToggleCompleted = (): void => {
+  const handleToggleCompleted = (id: ITodo["id"], completed: boolean): void => {
+    if (id !== "new-todo") {
+      updateTodo(id, { ...todo, completed });
+    }
     setTodo((prevTodo) =>
       prevTodo
         ? ({ ...prevTodo, completed: !prevTodo.completed } as ITodo)
@@ -95,20 +46,8 @@ export default function Todo({
     );
   };
 
-  const handleDelete = async (id: ITodo["id"]): Promise<void> => {
-    // optimistically update TodoContext
-    setTodos((prevTodos) => prevTodos!.filter((todo) => todo.id !== id));
-    // delete the todo in backend
-    try {
-      await fetch(`/api/todos/${id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-    } catch (e) {
-      console.error(e.message);
-    }
+  const handleDelete = (id: ITodo["id"]): void => {
+    deleteTodo(id);
   };
 
   // update local states
@@ -128,12 +67,13 @@ export default function Todo({
     >
       <RoundCheckbox
         id={todo?.id || "new-todo"}
+        checked={todo?.completed || false}
         onChange={handleToggleCompleted}
       />
       <Textbox
         value={todo?.title}
         placeholder={placeholder || "Add a title"}
-        onChange={handleChangeTitle}
+        onChange={(newTitle) => handleChangeTitle(todo?.id, newTitle)}
         debounceDelay={2000}
         submitOnEnterKey
         // submitOnBlur={!createNewTodo}

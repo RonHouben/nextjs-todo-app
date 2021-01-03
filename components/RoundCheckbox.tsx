@@ -1,18 +1,15 @@
 import Image from "next/image";
-import { useState } from "react";
 import { Key } from "../interfaces/Key.enum";
 
 interface Props {
   id: string;
-  onChange: (checked: boolean) => {} | void;
+  checked: boolean;
+  onChange: (id: string, checked: boolean) => void;
 }
 
-export default function RoundCheckbox({ id, onChange }: Props) {
-  const [checked, setChecked] = useState(false);
-
+export default function RoundCheckbox({ id, checked, onChange }: Props) {
   const handleChange = () => {
-    setChecked(!checked);
-    onChange(!checked);
+    onChange(id, !checked);
   };
 
   return (

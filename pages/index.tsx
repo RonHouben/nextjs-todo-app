@@ -1,19 +1,13 @@
-import React, { useContext, useEffect } from "react";
-import useSWR from "swr";
+import React from "react";
 import Layout from "../components/Layout";
 import Todo from "../components/Todo";
-import { ITodosContext, TodosContext } from "../contexts/TodosContextProvider";
+import useTodos from "../hooks/useTodos";
 
 export default function Home() {
-  const { data, error } = useSWR("/api/todos");
-  const { todos, setTodos } = useContext<ITodosContext>(TodosContext);
-
-  useEffect(() => {
-    setTodos(data);
-  }, [data]);
+  const { todos, error } = useTodos();
 
   if (error) return <div>ERROR! {error.message}</div>;
-  if (!data) return <div>LOADING!</div>;
+  if (!todos) return <div>LOADING!</div>;
 
   return (
     <Layout pageTitle="TODO">
@@ -26,24 +20,3 @@ export default function Home() {
     </Layout>
   );
 }
-
-// export async function getServerSideProps(_context: NextPageContext) {
-//   try {
-//     // get todos from database
-//     const initialTodos = await getTodos();
-
-//     return {
-//       props: {
-//         initialTodos,
-//       } as Props,
-//     };
-//   } catch (error) {
-//     return {
-//       props: {
-//         error: {
-//           message: error.message,
-//         },
-//       } as Props,
-//     };
-//   }
-// }

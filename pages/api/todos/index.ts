@@ -58,7 +58,7 @@ export async function getTodos(): Promise<ITodo[]> {
 }
 
 export async function createTodo(todo: ITodo): Promise<ITodo> {
-  const newTodoDoc = await firebase.collection("todos").add(todo);
+  const newTodoDoc = await firebase.collection("todos").add({ ...todo });
   const snapshot = await newTodoDoc.get();
 
   return { ...snapshot.data(), id: snapshot.id } as ITodo;
