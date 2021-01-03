@@ -36,6 +36,9 @@ export default function useTodos(): IUseTodos {
       ...newTodo,
     } as ITodo;
     // optimistically update local state
+    setTodos((prevTodos) =>
+      prevTodos ? [...prevTodos, newTodoWithDefaults] : [newTodoWithDefaults]
+    );
     mutate(
       data ? [...data, newTodoWithDefaults] : [newTodoWithDefaults],
       false
