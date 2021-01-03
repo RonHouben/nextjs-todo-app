@@ -1,9 +1,11 @@
 import RoundCheckbox from "./RoundCheckbox";
 import Textbox from "./Textbox";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ITodo } from "../interfaces/todos";
 import Image from "next/image";
 import useTodos from "../hooks/useTodos";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import { useTheme } from "next-themes";
 
 interface Props {
   placeholder?: string;
@@ -21,6 +23,7 @@ export default function Todo({
   const [todo, setTodo] = useState<ITodo | undefined>(todoData);
   const { createTodo, updateTodo, deleteTodo } = useTodos();
   const [focus, setFocus] = useState<boolean>(false);
+  const { theme } = useTheme();
 
   // handlers
   const handleChangeTitle = (id: ITodo["id"], title: string): void => {
@@ -57,7 +60,7 @@ export default function Todo({
 
   return (
     <div
-      id={todo?.id || "new-todo"}
+      id={createNewTodo ? "new-todo" : todo?.id}
       className="flex w-full h-full justify-center items-center rounded-md p-3 shadow-lg bg-light-0 dark:bg-dark-1 "
       tabIndex={0}
       onFocus={() => setFocus(true)}
@@ -65,21 +68,37 @@ export default function Todo({
       onMouseEnter={() => setFocus(true)}
       onMouseLeave={() => setFocus(false)}
     >
-      <RoundCheckbox
-        id={todo?.id || "new-todo"}
-        checked={todo?.completed || false}
-        onChange={handleToggleCompleted}
-      />
-      <Textbox
-        value={todo?.title}
-        placeholder={placeholder || "Add a title"}
-        onChange={(newTitle) => handleChangeTitle(todo?.id, newTitle)}
-        debounceDelay={2000}
-        submitOnEnterKey
-        // submitOnBlur={!createNewTodo}
-        autoFocus={autoFocus}
-        clearOnEnterKey={createNewTodo}
-      />
+      {!todo && !createNewTodo ? (
+        <div className="p-2 ">
+          <SkeletonTheme>
+            <Skeleton circle width="1.5rem" height="1.5rem" />
+          </SkeletonTheme>
+        </div>
+      ) : (
+        <RoundCheckbox
+          id={createNewTodo ? "new-todo" : todo?.id || "loading"}
+          checked={todo?.completed || false}
+          onChange={handleToggleCompleted}
+        />
+      )}
+      {!todo?.title && !createNewTodo ? (
+        <div className="h-full w-full">
+          <SkeletonTheme color={theme}>
+            <Skeleton />
+          </SkeletonTheme>
+        </div>
+      ) : (
+        <Textbox
+          value={todo?.title}
+          placeholder={placeholder || "Add a title"}
+          onChange={(newTitle) => handleChangeTitle(todo?.id, newTitle)}
+          debounceDelay={2000}
+          submitOnEnterKey
+          // submitOnBlur={!createNewTodo}
+          autoFocus={autoFocus}
+          clearOnEnterKey={createNewTodo}
+        />
+      )}
       {/* delete Todo button */}
       <div
         className={`relative w-5 h-5 m-2 ${
