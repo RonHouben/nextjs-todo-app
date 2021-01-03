@@ -11,7 +11,7 @@ import { Key } from "../interfaces/Key.enum";
 
 interface Props {
   value?: string;
-  onChange: (update: string) => {} | void;
+  onChange: (newTitle: string) => void;
   placeholder?: string;
   debounceDelay?: number;
   autoSubmit?: boolean;
