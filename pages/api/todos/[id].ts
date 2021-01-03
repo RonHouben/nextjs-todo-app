@@ -62,10 +62,9 @@ export async function updateTodo(
     await snapshot.update(update);
 
     const updatedTodoSnapshot = await snapshot.get();
+    const updatedTodo = updatedTodoSnapshot.data() as ITodo;
 
-    const test = { ...(updatedTodoSnapshot.data() as ITodo), id };
-    console.log("TEST", test);
-    return test;
+    return { ...updatedTodo, id };
   } catch (error) {
     throw new Error(`Couldn't find Todo with id: ${id} ${error.message}`);
   }

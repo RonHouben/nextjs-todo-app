@@ -27,9 +27,10 @@ export default function Todo({
 
   // handlers
   const handleChangeTitle = (id: ITodo["id"], title: string): void => {
-    // create a new todo if createNewTodo === true
     if (createNewTodo) {
       createTodo({ ...todo, title });
+    } else if (!title) {
+      deleteTodo(id);
     } else {
       updateTodo(id, { ...todo, title });
 
