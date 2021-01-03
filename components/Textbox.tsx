@@ -79,7 +79,7 @@ export default function Textbox({
   };
 
   const handleOnBlur = (_e: FocusEvent<HTMLInputElement>) => {
-    if (submitOnBlur && textValue && textChanged) {
+    if (submitOnBlur && textChanged) {
       // call external onChange
       onChange(textValue);
     }
