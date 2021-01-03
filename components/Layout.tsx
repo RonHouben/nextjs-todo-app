@@ -32,7 +32,7 @@ export default function Layout({ children, pageTitle = "Todo App" }: Props) {
         }`}
       >
         {/* CONTENT */}
-        <div className="relative container mx-auto desktop:w-1/2 mobile:w-full bg-transparent">
+        <div className="relative container mx-auto w-screen mobile:w-screen desktop:w-1/2 bg-transparent">
           <div className="absolute top-16 w-full bg-transparent space-y-10">
             <Navbar pageTitle={pageTitle} />
             {children}
