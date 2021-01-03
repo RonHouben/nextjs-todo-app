@@ -24,7 +24,7 @@ export default function useTodos(): IUseTodos {
 
   async function createTodo(newTodo: ITodo): Promise<void> {
     // optimistically update local state
-    mutate(data ? [...data, newTodo] : [newTodo], false);
+    mutate(data ? [...data, newTodo] : [newTodo], true);
 
     // create new Todo in database
     try {
@@ -35,6 +35,8 @@ export default function useTodos(): IUseTodos {
         },
         body: JSON.stringify(newTodo),
       });
+
+      mutate();
     } catch (err) {
       console.error(err);
       error = err as FetchError;
