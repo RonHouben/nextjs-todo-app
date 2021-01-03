@@ -94,7 +94,7 @@ export default function Todo({
           onChange={(newTitle) => handleChangeTitle(todo?.id, newTitle)}
           debounceDelay={2000}
           submitOnEnterKey
-          // submitOnBlur={!createNewTodo}
+          submitOnBlur={!createNewTodo}
           autoFocus={autoFocus}
           clearOnEnterKey={createNewTodo}
         />
