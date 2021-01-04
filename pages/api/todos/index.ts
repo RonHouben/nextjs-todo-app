@@ -1,91 +1,128 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import { ITodo } from "../../../interfaces/todos";
-import HttpStatusCode from "../../../interfaces/HttpStatusCodes.enum";
-import firebase from "../../../utils/firebase";
-import { FilterLabel } from "../../../components/Filterbar";
+import { NextApiRequest, NextApiResponse } from 'next'
+import { ITodo } from '../../../interfaces/todos'
+import HttpStatusCode from '../../../interfaces/HttpStatusCodes.enum'
+import firestore, { appendIds } from '../../../utils/firebase'
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   // get update from the request body
-  const body: ITodo = req.body;
-
-  console.log("QUERY", req.query);
+  const body: ITodo = req.body
+  const query = req.query
 
   // Get data from your database
   switch (req.method) {
-    case "GET":
+    case 'GET':
       // get all Todo's from the database
       try {
-        const filterBy = req.query.filter as FilterLabel;
-        console.log("PING", filterBy);
-        const todos: ITodo[] = await getTodos(filterBy);
+        const todos: ITodo[] = await getTodos()
 
-        res.status(HttpStatusCode.OK).json(todos);
-        break;
+        res.status(HttpStatusCode.OK).json(todos)
+        return
       } catch (err) {
-        res.status(HttpStatusCode.INTERNAL_SERVER_ERROR);
-        break;
+        res.status(HttpStatusCode.INTERNAL_SERVER_ERROR)
+        return
       }
-    case "POST":
+    case 'POST':
       try {
-        const createdTodo = await createTodo(body);
-        res.status(HttpStatusCode.OK).json(createdTodo);
+        const createdTodo = await createTodo(body)
+        res.status(HttpStatusCode.CREATED).json(createdTodo)
+        return
       } catch (e) {
         res.status(HttpStatusCode.BAD_REQUEST).json({
           error: {
             message: e.message,
           },
-        });
+        })
+        return
       }
-      break;
+    case 'DELETE':
+      // get id's from query string
+      try {
+        if (!query.ids) {
+          // return a bad request that tells the user to add ids in the query params
+          res.status(HttpStatusCode.BAD_REQUEST).json({
+            error: {
+              message:
+                "Please add the `ids=[]` query parameter that contains the id's in a comma seperated list i.e. `ids=[1, 2, 3]`",
+            },
+          })
+          return
+        }
+        // create an array out of the query.ids
+        const ids = JSON.parse(query.ids as string)
+
+        // delete the ids from the DB
+        const result = await deleteTodos(ids)
+
+        res.status(HttpStatusCode.OK).json(result)
+        return
+      } catch (err) {
+        console.error(err)
+        res.status(HttpStatusCode.BAD_REQUEST).json({
+          error: {
+            message: err.message,
+          },
+        })
+        return
+      }
     default:
       res.status(HttpStatusCode.METHOD_NOT_ALLOWED).json({
         error: {
           message: `${req.method} is not allowed`,
         },
-      });
-      break;
+      })
+      return
   }
 }
 
-export async function getTodos(filterBy: FilterLabel): Promise<ITodo[]> {
-  let snapshot: any;
-
-  console.log("getTodos filterBy", filterBy);
-  const query = await firebase.collection("todos");
-
-  switch (filterBy) {
-    case "All":
-      snapshot = await query.get();
-      break;
-    case "Active":
-      snapshot = await query.where("completed", "==", false).get();
-      break;
-    case "Completed":
-      snapshot = await query.where("completed", "==", true).get();
-      break;
-    // default:
-    // snapshot = await query.get();
-    // break;
-  }
-
-  // console.log("SNAPSHOT", snapshot);
-  let todosData: ITodo[] = [];
-
-  snapshot.forEach(
-    (doc) =>
-      (todosData = [...todosData, { ...doc.data(), id: doc.id } as ITodo])
-  );
-
-  console.log("TODOS_DATA", todosData);
-  return todosData;
+export async function getTodos(): Promise<ITodo[]> {
+  const query = await firestore.collection('todos')
+  return appendIds(await query.get())
 }
 
 export async function createTodo(todo: ITodo): Promise<ITodo> {
-  const newTodoDoc = await firebase.collection("todos").add({ ...todo });
-  const snapshot = await newTodoDoc.get();
+  const newTodoDoc = await firestore.collection('todos').add({ ...todo })
+  const snapshot = await newTodoDoc.get()
 
-  return { ...snapshot.data(), id: snapshot.id } as ITodo;
+  return { ...snapshot.data(), id: snapshot.id } as ITodo
+}
+
+interface IDeleteTodos {
+  successfull: string[]
+  failed: string[]
+}
+export async function deleteTodos(ids: string[]): Promise<IDeleteTodos> {
+  // set variables for the result
+  const successfull: IDeleteTodos['successfull'] = []
+  const failed: IDeleteTodos['failed'] = []
+
+  // delete Todo for each ids
+  ids.forEach(async (id) => {
+    try {
+      // delete from DB
+      const docRef = firestore.collection('todos').doc(id)
+      const todo = await docRef.get()
+
+      if (todo.data()) {
+        await docRef.delete()
+        // add to successful array
+        successfull.push(id)
+      } else {
+        console.error("Couldn't find id:" + id)
+        throw new Error("couldn't find id: " + id)
+      }
+    } catch (err) {
+      console.error('ERROR', err)
+      // add to failed array
+      failed.push(id)
+    }
+  })
+
+  // return result
+  return {
+    successfull,
+    failed,
+  }
 }
