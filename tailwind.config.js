@@ -16,7 +16,7 @@ module.exports = {
       colors: {
         "background-cyan": "hsl(192, 100%, 67%)",
         "background-purple-pink": "hsl(280, 87%, 65%)",
-        primary: "hsl(220, 98%, 61%)",
+        active: "hsl(220, 98%, 61%)",
         light: {
           0: "hsl(0, 0%, 98%)",
           1: "hsl(236, 33%, 92%)",

@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { ITodo } from "../../../interfaces/todos";
 import HttpStatusCode from "../../../interfaces/HttpStatusCodes.enum";
 import firebase from "../../../utils/firebase";
+import { FilterLabel } from "../../../components/Filterbar";
 
 export default async function handler(
   req: NextApiRequest,
@@ -10,12 +11,17 @@ export default async function handler(
   // get update from the request body
   const body: ITodo = req.body;
 
+  console.log("QUERY", req.query);
+
   // Get data from your database
   switch (req.method) {
     case "GET":
       // get all Todo's from the database
       try {
-        const todos: ITodo[] = await getTodos();
+        const filterBy = req.query.filter as FilterLabel;
+        console.log("PING", filterBy);
+        const todos: ITodo[] = await getTodos(filterBy);
+
         res.status(HttpStatusCode.OK).json(todos);
         break;
       } catch (err) {
@@ -44,9 +50,28 @@ export default async function handler(
   }
 }
 
-export async function getTodos(): Promise<ITodo[]> {
-  const snapshot = await firebase.collection("todos").get();
+export async function getTodos(filterBy: FilterLabel): Promise<ITodo[]> {
+  let snapshot: any;
 
+  console.log("getTodos filterBy", filterBy);
+  const query = await firebase.collection("todos");
+
+  switch (filterBy) {
+    case "All":
+      snapshot = await query.get();
+      break;
+    case "Active":
+      snapshot = await query.where("completed", "==", false).get();
+      break;
+    case "Completed":
+      snapshot = await query.where("completed", "==", true).get();
+      break;
+    // default:
+    // snapshot = await query.get();
+    // break;
+  }
+
+  // console.log("SNAPSHOT", snapshot);
   let todosData: ITodo[] = [];
 
   snapshot.forEach(
@@ -54,6 +79,7 @@ export async function getTodos(): Promise<ITodo[]> {
       (todosData = [...todosData, { ...doc.data(), id: doc.id } as ITodo])
   );
 
+  console.log("TODOS_DATA", todosData);
   return todosData;
 }
 
