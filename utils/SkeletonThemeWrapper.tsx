@@ -15,12 +15,12 @@ export default function SkeletonThemeWrapper({ children }: Props) {
       color={
         theme === 'light'
           ? tailwindConfig.theme.extend.colors.light[2]
-          : tailwindConfig.theme.extend.colors.dark[0]
+          : tailwindConfig.theme.extend.colors.dark[1]
       }
       highlightColor={
         theme === 'light'
           ? tailwindConfig.theme.extend.colors.light[1]
-          : tailwindConfig.theme.extend.colors.dark[1]
+          : tailwindConfig.theme.extend.colors.dark[0]
       }
     >
       {children}
