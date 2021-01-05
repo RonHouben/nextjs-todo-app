@@ -29,7 +29,7 @@ export default function Home() {
           shadows
           roundedBorders='all'
         />
-        <div className='w-full h-full rounded-md shadow-lg '>
+        <div className='w-full h-full rounded-md shadow-lg'>
           {!todos && <Todo />}
           {filteredTodos &&
             filteredTodos.map((todo, i) => (
@@ -40,17 +40,19 @@ export default function Home() {
                 divider
               />
             ))}
-          <Filterbar
-            itemsLeft={itemsLeft}
-            filters={[
-              TodoStatusEnum.ALL,
-              TodoStatusEnum.ACTIVE,
-              TodoStatusEnum.COMPLETED,
-            ]}
-            selected={selectedFilter}
-            onChangeFilter={setSelectedFilter}
-            onClearCompleted={clearCompleted}
-          />
+          {filteredTodos && filteredTodos.length > 0 && (
+            <Filterbar
+              itemsLeft={itemsLeft}
+              filters={[
+                TodoStatusEnum.ALL,
+                TodoStatusEnum.ACTIVE,
+                TodoStatusEnum.COMPLETED,
+              ]}
+              selected={selectedFilter}
+              onChangeFilter={setSelectedFilter}
+              onClearCompleted={clearCompleted}
+            />
+          )}
         </div>
       </div>
     </Layout>

@@ -55,8 +55,13 @@ export default async function handler(
 
         // delete the ids from the DB
         const result = await deleteTodos(ids)
+        const isBadRequest: boolean = result.failed.length > 0
 
-        res.status(HttpStatusCode.OK).json(result)
+        res
+          .status(
+            isBadRequest ? HttpStatusCode.MULTI_STATUS : HttpStatusCode.OK
+          )
+          .json(result)
         return
       } catch (err) {
         console.error(err)
@@ -89,17 +94,23 @@ export async function createTodo(todo: ITodo): Promise<ITodo> {
   return { ...snapshot.data(), id: snapshot.id } as ITodo
 }
 
-interface IDeleteTodos {
-  successfull: string[]
-  failed: string[]
+interface IFailedTodo {
+  id: ITodo['id']
+  reason: string
 }
-export async function deleteTodos(ids: string[]): Promise<IDeleteTodos> {
+
+export interface IDeleteTodosResult {
+  successfull: ITodo['id'][]
+  failed: IFailedTodo[]
+}
+
+export async function deleteTodos(ids: string[]): Promise<IDeleteTodosResult> {
   // set variables for the result
-  const successfull: IDeleteTodos['successfull'] = []
-  const failed: IDeleteTodos['failed'] = []
+  let successfull = [] as IDeleteTodosResult['successfull']
+  let failed = [] as IDeleteTodosResult['failed']
 
   // delete Todo for each ids
-  ids.forEach(async (id) => {
+  for (const id of ids) {
     try {
       // delete from DB
       const docRef = firestore.collection('todos').doc(id)
@@ -108,17 +119,16 @@ export async function deleteTodos(ids: string[]): Promise<IDeleteTodos> {
       if (todo.data()) {
         await docRef.delete()
         // add to successful array
-        successfull.push(id)
+        successfull = [...successfull, id]
       } else {
-        console.error("Couldn't find id:" + id)
-        throw new Error("couldn't find id: " + id)
+        throw new Error("couldn't find the todo in the database")
       }
     } catch (err) {
       console.error('ERROR', err)
       // add to failed array
-      failed.push(id)
+      failed = [...failed, { id, reason: err.message }]
     }
-  })
+  }
 
   // return result
   return {

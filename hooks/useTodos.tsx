@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import useSWR, { mutate } from 'swr'
 import { ITodo } from '../interfaces/todos'
+import { IDeleteTodosResult } from '../pages/api/todos'
 import { fetcher, FetchError } from '../utils/fetcher'
 
 export enum TodoStatusEnum {
@@ -121,6 +122,34 @@ export default function useTodos(): IUseTodos {
   async function clearCompleted(): Promise<void> {
     // optimistically update local state
     mutate(TODOS_URI, filterByStatus(TodoStatusEnum.ACTIVE))
+    // get id's from the completed todos
+    const completedTodosIds = filterByStatus(TodoStatusEnum.COMPLETED).map(
+      (a) => a.id
+    )
+    // remove all completed todos from the DB
+    const response = await fetch(
+      `/api/todos?ids=${JSON.stringify(completedTodosIds)}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+
+    // get result from the response
+    const { failed } = (await response.json()) as IDeleteTodosResult
+
+    // show notification for the failed todo's
+    if (failed.length > 0) {
+      // TODO: implement
+      console.error(
+        'Something went wrong with deleting the following todos:',
+        failed
+      )
+    }
+
+    // revalidate
     mutate(TODOS_URI)
   }
 
