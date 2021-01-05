@@ -30,7 +30,9 @@ export default function Home() {
           roundedBorders='all'
         />
         <div className='w-full h-full rounded-md shadow-lg'>
-          {!todos && <Todo />}
+          {/* show loading skeleton Todo */}
+          {!todos && <Todo roundedBorders='t' />}
+          {/* show todos */}
           {filteredTodos &&
             filteredTodos.map((todo, i) => (
               <Todo
@@ -51,7 +53,7 @@ export default function Home() {
             onChangeFilter={setSelectedFilter}
             onClearCompleted={clearCompleted}
             roundedBorders={
-              filteredTodos && filteredTodos.length === 0 ? 'all' : 'b'
+              !todos ? 'b' : filteredTodos?.length === 0 ? 'all' : 'b'
             }
           />
         </div>
