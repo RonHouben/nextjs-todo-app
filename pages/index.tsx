@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Filterbar from '../components/Filterbar'
 import Layout from '../components/Layout'
+import Paper from '../components/Paper'
 import Todo from '../components/Todo'
 import useTodos, { TodoStatusEnum } from '../hooks/useTodos'
 import { ITodo } from '../interfaces/todos'
@@ -10,7 +11,7 @@ export default function Home() {
     TodoStatusEnum.ALL
   )
   const { todos, error, itemsLeft, filterByStatus, clearCompleted } = useTodos()
-  const [filteredTodos, setFilteredTodos] = useState<ITodo[] | undefined>(todos)
+  const [filteredTodos, setFilteredTodos] = useState<ITodo[]>(todos || [])
 
   if (error) return <div>ERROR! {error.message}</div>
 
@@ -22,26 +23,16 @@ export default function Home() {
   return (
     <Layout pageTitle='TODO'>
       <div className='flex flex-col justify-start items-center space-y-7 w-full'>
-        <Todo
-          placeholder='Create a new todo...'
-          createNewTodo
-          autoFocus
-          shadows
-          roundedBorders='all'
-        />
-        <div className='w-full h-full rounded-md shadow-lg'>
+        <Paper rounded shadow>
+          <Todo placeholder='Create a new todo...' createNewTodo autoFocus />
+        </Paper>
+        <Paper rounded shadow verticalDivider>
           {/* show loading skeleton Todo */}
-          {!todos && <Todo roundedBorders='t' />}
+          {!todos && <Todo />}
           {/* show todos */}
-          {filteredTodos &&
-            filteredTodos.map((todo, i) => (
-              <Todo
-                key={i}
-                todoData={todo}
-                roundedBorders={i === 0 ? 't' : undefined}
-                divider
-              />
-            ))}
+          {filteredTodos.map((todo, i) => (
+            <Todo key={i} todoData={todo} />
+          ))}
           <Filterbar
             itemsLeft={itemsLeft}
             filters={[
@@ -52,11 +43,8 @@ export default function Home() {
             selected={selectedFilter}
             onChangeFilter={setSelectedFilter}
             onClearCompleted={clearCompleted}
-            roundedBorders={
-              !todos ? 'b' : filteredTodos?.length === 0 ? 'all' : 'b'
-            }
           />
-        </div>
+        </Paper>
       </div>
     </Layout>
   )

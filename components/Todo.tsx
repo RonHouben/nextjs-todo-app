@@ -12,19 +12,6 @@ interface Props {
   todoData?: ITodo
   createNewTodo?: boolean
   autoFocus?: boolean
-  shadows?: boolean
-  roundedBorders?:
-    | 't'
-    | 'tr'
-    | 'r'
-    | 'rb'
-    | 'b'
-    | 'bl'
-    | 'l'
-    | 'tl'
-    | 'all'
-    | undefined
-  divider?: boolean
 }
 
 export default function Todo({
@@ -32,9 +19,6 @@ export default function Todo({
   placeholder,
   createNewTodo = false,
   autoFocus = false,
-  shadows = false,
-  roundedBorders,
-  divider = false,
 }: Props) {
   const [todo, setTodo] = useState<ITodo | undefined>(todoData)
   const { createTodo, updateTodo, deleteTodo } = useTodos()
@@ -78,20 +62,7 @@ export default function Todo({
   return (
     <div
       id={createNewTodo ? 'new-todo' : todo?.id}
-      className={`
-      ${shadows ? 'shadow-lg' : ''}
-      ${
-        roundedBorders
-          ? roundedBorders === 'all'
-            ? `rounded-md`
-            : `rounded-${roundedBorders}-md`
-          : ''
-      }
-      ${
-        divider
-          ? 'border-b-2 border-light-2 dark:border-dark-6 border-opacity-20'
-          : ''
-      } flex w-full h-full justify-center items-center p-3 bg-light-0 dark:bg-dark-1`}
+      className={`flex w-full h-full justify-center items-center p-2 bg-light-0 dark:bg-dark-1`}
       tabIndex={0}
       onFocus={() => setFocus(true)}
       onBlur={() => setFocus(false)}
