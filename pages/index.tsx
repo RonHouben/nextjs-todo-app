@@ -40,19 +40,19 @@ export default function Home() {
                 divider
               />
             ))}
-          {filteredTodos && filteredTodos.length > 0 && (
-            <Filterbar
-              itemsLeft={itemsLeft}
-              filters={[
-                TodoStatusEnum.ALL,
-                TodoStatusEnum.ACTIVE,
-                TodoStatusEnum.COMPLETED,
-              ]}
-              selected={selectedFilter}
-              onChangeFilter={setSelectedFilter}
-              onClearCompleted={clearCompleted}
-            />
-          )}
+
+          <Filterbar
+            itemsLeft={itemsLeft}
+            filters={[
+              TodoStatusEnum.ALL,
+              TodoStatusEnum.ACTIVE,
+              TodoStatusEnum.COMPLETED,
+            ]}
+            selected={selectedFilter}
+            onChangeFilter={setSelectedFilter}
+            onClearCompleted={clearCompleted}
+            roundedBorders={filteredTodos!.length === 0 ? 'all' : 'b'}
+          />
         </div>
       </div>
     </Layout>
