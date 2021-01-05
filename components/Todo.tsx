@@ -4,8 +4,8 @@ import React, { useEffect, useState } from 'react'
 import { ITodo } from '../interfaces/todos'
 import Image from 'next/image'
 import useTodos from '../hooks/useTodos'
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
-import { useTheme } from 'next-themes'
+import Skeleton from 'react-loading-skeleton'
+import SkeletonThemeWrapper from '../utils/SkeletonThemeWrapper'
 
 interface Props {
   placeholder?: string
@@ -23,7 +23,6 @@ export default function Todo({
   const [todo, setTodo] = useState<ITodo | undefined>(todoData)
   const { createTodo, updateTodo, deleteTodo } = useTodos()
   const [focus, setFocus] = useState<boolean>(false)
-  const { theme } = useTheme()
 
   // handlers
   const handleChangeTitle = (id: ITodo['id'], title: string): void => {
@@ -70,10 +69,13 @@ export default function Todo({
       onMouseLeave={() => setFocus(false)}
     >
       {!todo && !createNewTodo ? (
-        <div className='p-2 '>
-          <SkeletonTheme>
-            <Skeleton circle width='1.5rem' height='1.5rem' />
-          </SkeletonTheme>
+        <div className='p-2'>
+          <Skeleton
+            wrapper={SkeletonThemeWrapper}
+            circle
+            width='1.5rem'
+            height='1.5rem'
+          />
         </div>
       ) : (
         <RoundCheckbox
@@ -83,10 +85,8 @@ export default function Todo({
         />
       )}
       {!todo?.title && !createNewTodo ? (
-        <div className='h-full w-full'>
-          <SkeletonTheme color={theme}>
-            <Skeleton />
-          </SkeletonTheme>
+        <div className='h-full w-full pl-4'>
+          <Skeleton wrapper={SkeletonThemeWrapper} />
         </div>
       ) : (
         <Textbox
@@ -103,13 +103,13 @@ export default function Todo({
       {/* delete Todo button */}
       <div
         className={`${
-          !focus || createNewTodo ? 'invisible' : 'visible'
+          (todo && !focus) || createNewTodo ? 'invisible' : 'visible'
         } relative w-5 h-5 m-2 cursor-pointer`}
         onClick={() => handleDelete(todo!.id)}
         onKeyPress={() => handleDelete(todo!.id)}
         tabIndex={0}
       >
-        {focus && !createNewTodo && (
+        {todo && focus && !createNewTodo && (
           <Image layout='fill' src='/images/icon-cross.svg' />
         )}
       </div>
