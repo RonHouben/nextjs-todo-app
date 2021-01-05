@@ -40,7 +40,6 @@ export default function Home() {
                 divider
               />
             ))}
-
           <Filterbar
             itemsLeft={itemsLeft}
             filters={[
@@ -51,7 +50,9 @@ export default function Home() {
             selected={selectedFilter}
             onChangeFilter={setSelectedFilter}
             onClearCompleted={clearCompleted}
-            roundedBorders={filteredTodos!.length === 0 ? 'all' : 'b'}
+            roundedBorders={
+              filteredTodos && filteredTodos.length === 0 ? 'all' : 'b'
+            }
           />
         </div>
       </div>
