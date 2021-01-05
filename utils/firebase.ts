@@ -1,5 +1,5 @@
-import firebase from "firebase";
-import "firebase/firestore";
+import firebase from 'firebase'
+import 'firebase/firestore'
 
 const config = {
   appId: process.env.FIREBASE_APP_ID,
@@ -10,8 +10,20 @@ const config = {
   storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
   measurementId: process.env.FIREBASE_MEASUREMENT_ID,
-};
+}
+
+export const appendIds = <T>(
+  snapShot: firebase.firestore.QuerySnapshot<firebase.firestore.DocumentData>
+): T[] => {
+  let result: T[] = []
+
+  snapShot.forEach(
+    (doc) => (result = [...result, { ...doc.data(), id: doc.id }] as T[])
+  )
+
+  return result
+}
 
 export default !firebase.apps.length
   ? firebase.initializeApp(config).firestore()
-  : firebase.app().firestore();
+  : firebase.app().firestore()

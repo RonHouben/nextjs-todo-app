@@ -87,7 +87,7 @@ export default function Textbox({
 
   return (
     <input
-      className={`w-full bg-transparent p-2 focus-within:text-light-4 text-light-3 dark:text-dark-4`}
+      className={`w-full bg-transparent p-2 focus-within:text-light-4 text-light-3 dark:text-dark-2`}
       placeholder={placeholder}
       value={textValue}
       type="text"
