@@ -22,7 +22,7 @@ export default function Paper({
           ? 'divide-y divide-light-2 dark:divide-dark-6 divide-opacity-50 divide-y-2'
           : ''
       }
-      ${shadow ? 'shadow-lg' : ''}
+      ${shadow ? 'shadow-md' : ''}
       ${rounded ? 'rounded-md' : ''}
       ${className}`}
     >
