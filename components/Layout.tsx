@@ -27,12 +27,12 @@ export default function Layout({ children, pageTitle = 'Todo App' }: Props) {
       <div
         className={`h-2/3 bg-no-repeat bg-contain ${
           theme === 'dark'
-            ? 'mobile:bg-mobile-dark desktop:bg-desktop-dark'
-            : 'mobile:bg-mobile-light desktop:bg-desktop-light'
+            ? 'bg-mobile-dark sm:bg-desktop-dark'
+            : 'bg-mobile-light sm:bg-desktop-light'
         }`}
       >
         {/* CONTENT */}
-        <div className='relative container mx-auto w-screen mobile:w-screen desktop:w-1/2 bg-transparent'>
+        <div className='relative container mx-auto w-screen md:w-1/2 bg-transparent'>
           <div className='absolute top-16 w-full bg-transparent space-y-10'>
             <Navbar pageTitle={pageTitle} />
             {children}

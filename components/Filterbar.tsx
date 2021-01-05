@@ -28,10 +28,10 @@ export default function Filterbar({
 
   return (
     <div
-      className={`flex flex-wrap w-full h-full justify-center items-center p-2 text-dark-5 bg-light-0 dark:bg-dark-1 divide-x-2 divide-light-2 dark:divide-dark-6 divide-solid divide-opacity-50`}
+      className={`flex flex-wrap w-full h-full justify-center items-center p-2 text-dark-5 bg-light-0 dark:bg-dark-1 divide-x-2 xs:divide-x-0 xs:divide-y-2 divide-light-1 dark:divide-dark-6 divide-solid divide-opacity-50`}
     >
       <div className='px-4'>{itemsLeft} items left</div>
-      <div className='flex flex-wrap justify-between space-x-4 px-4'>
+      <div className='flex justify-between space-x-4 px-4'>
         {filters.map(({ label, active }, i) => (
           <div
             key={i}
