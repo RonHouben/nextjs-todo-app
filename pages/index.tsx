@@ -23,15 +23,15 @@ export default function Home() {
   return (
     <Layout pageTitle='TODO'>
       <div className='flex flex-col justify-start items-center space-y-7 w-full'>
-        <Paper>
+        <Paper rounded shadow>
           <Todo placeholder='Create a new todo...' createNewTodo autoFocus />
         </Paper>
-        <Paper verticalDivider>
+        <Paper rounded shadow verticalDivider>
           {/* show loading skeleton Todo */}
           {!todos && <Todo />}
           {/* show todos */}
           {filteredTodos.map((todo, i) => (
-            <Todo key={i} todoData={todo} divider />
+            <Todo key={i} todoData={todo} />
           ))}
           <Filterbar
             itemsLeft={itemsLeft}
