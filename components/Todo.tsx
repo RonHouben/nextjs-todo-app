@@ -2,10 +2,10 @@ import RoundCheckbox from './RoundCheckbox'
 import Textbox from './Textbox'
 import React, { useEffect, useState } from 'react'
 import { ITodo } from '../interfaces/todos'
-import Image from 'next/image'
 import useTodos from '../hooks/useTodos'
 import Skeleton from 'react-loading-skeleton'
 import SkeletonThemeWrapper from '../utils/SkeletonThemeWrapper'
+import IconButton from './IconButton'
 
 interface Props {
   placeholder?: string
@@ -101,18 +101,14 @@ export default function Todo({
         />
       )}
       {/* delete Todo button */}
-      <div
-        className={`${
-          (todo && !focus) || createNewTodo ? 'invisible' : 'visible'
-        } relative w-5 h-5 m-2 cursor-pointer`}
-        onClick={() => handleDelete(todo!.id)}
-        onKeyPress={() => handleDelete(todo!.id)}
-        tabIndex={0}
-      >
-        {todo && focus && !createNewTodo && (
-          <Image layout='fill' src='/images/icon-cross.svg' />
-        )}
-      </div>
+      {todo && focus && !createNewTodo && (
+        <IconButton
+          src='/images/icon-cross.svg'
+          size='small'
+          onClick={() => handleDelete(todo!.id)}
+          onKeyPress={() => handleDelete(todo!.id)}
+        />
+      )}
     </div>
   )
 }

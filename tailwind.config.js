@@ -47,6 +47,7 @@ module.exports = {
   variants: {
     extend: {
       gradientColorStops: "hover",
+      animation: ['hover', 'focus']
     },
   },
   plugins: [],
