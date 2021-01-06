@@ -1,15 +1,15 @@
-import { TodoStatusEnum } from '../hooks/useTodos'
+import { ITodoStatusEnum } from '../interfaces/todos'
 
 interface Props {
   itemsLeft: number
-  filters: TodoStatusEnum[]
-  selected: TodoStatusEnum
-  onChangeFilter: (newStatus: TodoStatusEnum) => void
+  filters: ITodoStatusEnum[]
+  selected: ITodoStatusEnum
+  onChangeFilter: (newStatus: ITodoStatusEnum) => void
   onClearCompleted: () => void
 }
 
 interface Filter {
-  label: TodoStatusEnum
+  label: ITodoStatusEnum
   active: boolean
 }
 
