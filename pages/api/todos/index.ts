@@ -1,7 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { ITodo } from '../../../interfaces/todos'
 import HttpStatusCode from '../../../interfaces/HttpStatusCodes.enum'
-import firestore, { appendIds } from '../../../utils/firebase'
+import firestore, {
+  appendIds,
+  serverValueTimestamp,
+} from '../../../utils/firebase'
 
 export default async function handler(
   req: NextApiRequest,
@@ -88,10 +91,19 @@ export async function getTodos(): Promise<ITodo[]> {
 }
 
 export async function createTodo(todo: ITodo): Promise<ITodo> {
-  const newTodoDoc = await firestore.collection('todos').add({ ...todo })
+  // append default data
+  const newTodoWithDefaults = {
+    ...todo,
+    created: serverValueTimestamp,
+    completed: false,
+  } as ITodo
+
+  const newTodoDoc = await firestore
+    .collection('todos')
+    .add({ ...newTodoWithDefaults })
   const snapshot = await newTodoDoc.get()
 
-  return { ...snapshot.data(), id: snapshot.id } as ITodo
+  return { id: snapshot.id, ...snapshot.data() } as ITodo
 }
 
 interface IFailedTodo {

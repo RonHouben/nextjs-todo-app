@@ -35,7 +35,7 @@ export default function RoundCheckbox({ id, checked, onChange }: Props) {
         {checked && (
           <div className='relative flex justify-center items-center rounded-full bg-gradient-to-br from-background-cyan to-background-purple-pink h-full w-full'>
             <div className='absolute mx-auto h-3 w-3'>
-              <Image layout='fill' src='/images/icon-check.svg' />
+              <Image layout='fill' src='/icons/icon-check.svg' />
             </div>
           </div>
         )}

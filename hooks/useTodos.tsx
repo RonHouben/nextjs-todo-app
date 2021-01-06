@@ -3,6 +3,7 @@ import useSWR, { mutate } from 'swr'
 import { ITodo, ITodoStatusEnum } from '../interfaces/todos'
 import { IDeleteTodosResult } from '../pages/api/todos'
 import { fetcher, FetchError } from '../utils/fetcher'
+import { serverValueTimestamp } from '../utils/firebase'
 
 interface IUseTodoProps {
   initialData?: ITodo[]
@@ -35,11 +36,10 @@ export default function useTodos({
   async function createTodo(newTodo: Partial<ITodo>): Promise<void> {
     // append default data
     const newTodoWithDefaults = {
-      created: new Date(),
-      completed: false,
       ...newTodo,
+      created: serverValueTimestamp,
+      completed: false,
     } as ITodo
-
     // optimistically update local state
     mutate(
       TODOS_URI,
@@ -82,7 +82,7 @@ export default function useTodos({
     // call changeTodo api in backend
     try {
       await fetch(`${TODOS_URI}/${id}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
