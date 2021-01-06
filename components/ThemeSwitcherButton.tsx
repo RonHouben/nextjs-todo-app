@@ -10,7 +10,7 @@ export default function ThemeSwitcherButton() {
     <React.Fragment>
       {theme === 'light' && (
         <IconButton
-          src='/images/icon-moon.svg'
+          src='/icons/icon-moon.svg'
           size='medium'
           onClick={() => setTheme('dark')}
           onKeyPress={(e) => (e.key === Key.Spacebar ? setTheme('dark') : null)}
@@ -18,7 +18,7 @@ export default function ThemeSwitcherButton() {
       )}
       {theme === 'dark' && (
         <IconButton
-          src='/images/icon-sun.svg'
+          src='/icons/icon-sun.svg'
           size='large'
           onClick={() => setTheme('light')}
           onKeyPress={(e) =>

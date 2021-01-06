@@ -103,7 +103,7 @@ export default function Todo({
       {/* delete Todo button */}
       {todo && focus && !createNewTodo && (
         <IconButton
-          src='/images/icon-cross.svg'
+          src='/icons/icon-cross.svg'
           size='small'
           onClick={() => handleDelete(todo!.id)}
           onKeyPress={() => handleDelete(todo!.id)}

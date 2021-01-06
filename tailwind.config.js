@@ -17,6 +17,7 @@ module.exports = {
         "background-purple-pink": "hsl(280, 87%, 65%)",
         active: "hsl(220, 98%, 61%)",
         light: {
+          background: "hsl(236, 33%, 92%)",
           0: "hsl(0, 0%, 98%)",
           1: "hsl(236, 33%, 92%)",
           2: "hsl(233, 11%, 84%)",
@@ -24,6 +25,7 @@ module.exports = {
           4: "hsl(235, 19%, 35%)",
         },
         dark: {
+          background: "hsl(235, 21%, 11%)",
           0: "hsl(235, 21%, 11%)",
           1: "hsl(235, 24%, 19%)",
           2: "hsl(234, 39%, 85%)",
