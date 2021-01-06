@@ -6,10 +6,10 @@ import tailwindConfig from '../tailwind.config'
 
 type Props = {
   children?: ReactNode
-  pageTitle?: string
+  pageTitle: string
 }
 
-export default function Layout({ children, pageTitle = 'Todo App' }: Props) {
+export default function Layout({ children, pageTitle }: Props) {
   const [mounted, setMounted] = useState(false)
   const { theme } = useTheme()
 
