@@ -24,6 +24,8 @@ export const appendIds = <T>(
   return result
 }
 
+export const serverValueTimestamp = firebase.database.ServerValue.TIMESTAMP
+
 export default !firebase.apps.length
   ? firebase.initializeApp(config).firestore()
   : firebase.app().firestore()

@@ -1,26 +1,35 @@
 import RoundCheckbox from './RoundCheckbox'
 import Textbox from './Textbox'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { ITodo } from '../interfaces/todos'
 import useTodos from '../hooks/useTodos'
 import Skeleton from 'react-loading-skeleton'
 import SkeletonThemeWrapper from '../utils/SkeletonThemeWrapper'
 import IconButton from './IconButton'
+import useSWR from 'swr'
+import { fetcher } from '../utils/fetcher'
 
 interface Props {
   placeholder?: string
-  todoData?: ITodo
+  id?: ITodo['id']
+  initialData?: ITodo
   createNewTodo?: boolean
   autoFocus?: boolean
 }
 
 export default function Todo({
-  todoData,
+  id,
+  initialData,
   placeholder,
   createNewTodo = false,
   autoFocus = false,
 }: Props) {
-  const [todo, setTodo] = useState<ITodo | undefined>(todoData)
+  const { data: todo, error } = useSWR(`/api/todos/${id}`, fetcher, {
+    initialData,
+  })
+
+  if (error) return error.message
+
   const { createTodo, updateTodo, deleteTodo } = useTodos()
   const [focus, setFocus] = useState<boolean>(false)
 
@@ -42,21 +51,11 @@ export default function Todo({
     if (id !== 'new-todo') {
       updateTodo(id, { ...todo, completed })
     }
-    setTodo((prevTodo) =>
-      prevTodo
-        ? ({ ...prevTodo, completed: !prevTodo.completed } as ITodo)
-        : undefined
-    )
   }
 
   const handleDelete = (id: ITodo['id']): void => {
     deleteTodo(id)
   }
-
-  // update local states
-  useEffect(() => {
-    setTodo(todoData)
-  }, [todoData])
 
   return (
     <div

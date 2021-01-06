@@ -47,7 +47,7 @@ export default function Home({ initialData }: InitialProps) {
           {!todos && <Todo />}
           {/* show todos */}
           {filteredTodos.map((todo, i) => (
-            <Todo key={i} todoData={todo} />
+            <Todo key={i} id={todo.id} initialData={todo} />
           ))}
           <Filterbar
             itemsLeft={itemsLeft}
