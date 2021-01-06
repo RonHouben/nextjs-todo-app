@@ -3,14 +3,30 @@ import Filterbar from '../components/Filterbar'
 import Layout from '../components/Layout'
 import Paper from '../components/Paper'
 import Todo from '../components/Todo'
-import useTodos, { TodoStatusEnum } from '../hooks/useTodos'
-import { ITodo } from '../interfaces/todos'
+import useTodos from '../hooks/useTodos'
+import { ITodo, ITodoStatusEnum } from '../interfaces/todos'
+import { GetServerSidePropsResult } from 'next'
+import { getTodos } from './api/todos'
 
-export default function Home() {
-  const [selectedFilter, setSelectedFilter] = useState<TodoStatusEnum>(
-    TodoStatusEnum.ALL
+interface InitialProps {
+  initialData: ITodo[]
+}
+
+export async function getServerSideProps(): Promise<
+  GetServerSidePropsResult<InitialProps>
+> {
+  const initialData = await getTodos()
+
+  return { props: { initialData } }
+}
+
+export default function Home({ initialData }: InitialProps) {
+  const [selectedFilter, setSelectedFilter] = useState<ITodoStatusEnum>(
+    ITodoStatusEnum.ALL
   )
-  const { todos, error, itemsLeft, filterByStatus, clearCompleted } = useTodos()
+  const { todos, error, itemsLeft, filterByStatus, clearCompleted } = useTodos({
+    initialData,
+  })
   const [filteredTodos, setFilteredTodos] = useState<ITodo[]>(todos || [])
 
   if (error) return <div>ERROR! {error.message}</div>
@@ -36,9 +52,9 @@ export default function Home() {
           <Filterbar
             itemsLeft={itemsLeft}
             filters={[
-              TodoStatusEnum.ALL,
-              TodoStatusEnum.ACTIVE,
-              TodoStatusEnum.COMPLETED,
+              ITodoStatusEnum.ALL,
+              ITodoStatusEnum.ACTIVE,
+              ITodoStatusEnum.COMPLETED,
             ]}
             selected={selectedFilter}
             onChangeFilter={setSelectedFilter}

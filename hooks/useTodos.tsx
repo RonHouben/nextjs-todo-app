@@ -1,16 +1,14 @@
 import _ from 'lodash'
 import useSWR, { mutate } from 'swr'
-import { ITodo } from '../interfaces/todos'
+import { ITodo, ITodoStatusEnum } from '../interfaces/todos'
 import { IDeleteTodosResult } from '../pages/api/todos'
 import { fetcher, FetchError } from '../utils/fetcher'
 
-export enum TodoStatusEnum {
-  ALL = 'All',
-  ACTIVE = 'Active',
-  COMPLETED = 'Completed',
+interface IUseTodoProps {
+  initialData?: ITodo[]
 }
 
-interface IUseTodos {
+interface IUseTodosResult {
   todos: ITodo[] | undefined
   itemsLeft: number
   error?: FetchError
@@ -18,15 +16,18 @@ interface IUseTodos {
   updateTodo: (id: ITodo['id'], update: Partial<ITodo>) => void
   deleteTodo: (id: ITodo['id']) => void
   clearCompleted: () => void
-  filterByStatus: (todoStatus: TodoStatusEnum) => ITodo[]
+  filterByStatus: (todoStatus: ITodoStatusEnum) => ITodo[]
 }
 
-export default function useTodos(): IUseTodos {
+export default function useTodos({
+  initialData,
+}: IUseTodoProps = {}): IUseTodosResult {
   const TODOS_URI = `/api/todos`
 
   const { data: todos, error: useSWRError } = useSWR<ITodo[], FetchError>(
     TODOS_URI,
-    fetcher
+    fetcher,
+    { initialData }
   )
 
   let ERROR: FetchError | undefined = useSWRError
@@ -121,9 +122,9 @@ export default function useTodos(): IUseTodos {
 
   async function clearCompleted(): Promise<void> {
     // optimistically update local state
-    mutate(TODOS_URI, filterByStatus(TodoStatusEnum.ACTIVE))
+    mutate(TODOS_URI, filterByStatus(ITodoStatusEnum.ACTIVE))
     // get id's from the completed todos
-    const completedTodosIds = filterByStatus(TodoStatusEnum.COMPLETED).map(
+    const completedTodosIds = filterByStatus(ITodoStatusEnum.COMPLETED).map(
       (a) => a.id
     )
     // remove all completed todos from the DB
@@ -153,13 +154,13 @@ export default function useTodos(): IUseTodos {
     mutate(TODOS_URI)
   }
 
-  function filterByStatus(status: TodoStatusEnum): ITodo[] {
+  function filterByStatus(status: ITodoStatusEnum): ITodo[] {
     switch (status) {
-      case TodoStatusEnum.ALL:
+      case ITodoStatusEnum.ALL:
         return todos || []
-      case TodoStatusEnum.ACTIVE:
+      case ITodoStatusEnum.ACTIVE:
         return todos?.filter((todo) => !todo.completed) || []
-      case TodoStatusEnum.COMPLETED:
+      case ITodoStatusEnum.COMPLETED:
         return todos?.filter((todo) => todo.completed) || []
     }
   }
