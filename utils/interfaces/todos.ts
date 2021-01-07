@@ -1,8 +1,9 @@
+import { IFirebarServerTimestamp } from '../../lib/firebaseClient'
 export interface ITodo {
   id?: string
   title: string
   completed: boolean
-  created?: Date
+  created?: IFirebarServerTimestamp
 }
 
 export enum ITodoStatusEnum {

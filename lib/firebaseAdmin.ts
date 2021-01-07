@@ -22,4 +22,6 @@ export const getDataWithId = <T>(doc: admin.firestore.DocumentSnapshot): T => {
   } as unknown) as T
 }
 
+export const firebaseAdminTimestamp = admin.firestore.Timestamp
+
 export default admin.firestore()

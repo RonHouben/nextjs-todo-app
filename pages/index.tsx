@@ -17,7 +17,9 @@ export async function getServerSideProps(): Promise<
 > {
   const initialData = await getTodos()
 
-  return { props: { initialData } }
+  return {
+    props: { initialData: (JSON.stringify(initialData) as unknown) as ITodo[] },
+  }
 }
 
 export default function Home({ initialData }: InitialProps) {
@@ -25,7 +27,7 @@ export default function Home({ initialData }: InitialProps) {
     ITodoStatusEnum.ALL
   )
   const { todos, error, itemsLeft, filterByStatus, clearCompleted } = useTodos({
-    initialData,
+    initialData: JSON.parse((initialData as unknown) as string),
   })
   const [filteredTodos, setFilteredTodos] = useState<ITodo[]>(todos || [])
 

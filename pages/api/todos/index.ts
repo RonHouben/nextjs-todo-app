@@ -1,8 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { ITodo } from '../../../utils/interfaces/todos'
 import HttpStatusCode from '../../../utils/interfaces/HttpStatusCodes.enum'
-import firebaseAdmin, { getDataWithId } from '../../../lib/firebaseAdmin'
-import { firebaseServerTimestamp } from '../../../lib/firebaseClient'
+import firebaseAdmin, {
+  getDataWithId,
+  firebaseAdminTimestamp,
+} from '../../../lib/firebaseAdmin'
 
 export default async function handler(
   req: NextApiRequest,
@@ -77,8 +79,10 @@ export default async function handler(
 }
 
 export async function getTodos(): Promise<ITodo[]> {
-  const collectionRef = await firebaseAdmin.collection('todos')
-  const snapshot = await collectionRef.get()
+  const snapshot = await firebaseAdmin
+    .collection('todos')
+    .orderBy('created')
+    .get()
 
   let todos: ITodo[] = []
 
@@ -91,7 +95,7 @@ async function createTodo(todo: ITodo): Promise<ITodo> {
   // append default data
   const newTodoWithDefaults = {
     ...todo,
-    created: firebaseServerTimestamp,
+    created: firebaseAdminTimestamp.now(),
     completed: false,
   } as ITodo
 
