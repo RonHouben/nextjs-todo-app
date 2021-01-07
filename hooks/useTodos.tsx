@@ -3,7 +3,7 @@ import useSWR, { mutate } from 'swr'
 import { ITodo, ITodoStatusEnum } from '../utils/interfaces/todos'
 import { IDeleteTodosResult } from '../pages/api/todos'
 import { fetcher, FetchError } from '../lib/fetcher'
-import { firebaseServerTimestamp } from '../utils/firebaseClient'
+import { firebaseServerTimestamp } from '../lib/firebaseClient'
 
 interface IUseTodoProps {
   initialData?: ITodo[]

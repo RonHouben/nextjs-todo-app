@@ -1,4 +1,4 @@
-import * as admin from 'firebase-admin'
+import admin from 'firebase-admin'
 
 // Initialize Firebase
 if (!admin.apps.length) {
@@ -13,6 +13,13 @@ if (!admin.apps.length) {
     }),
     databaseURL: process.env.FIREBASE_DB_URL,
   })
+}
+
+export const getDataWithId = <T>(doc: admin.firestore.DocumentSnapshot): T => {
+  return ({
+    ...doc.data(),
+    id: doc.id,
+  } as unknown) as T
 }
 
 export default admin.firestore()
