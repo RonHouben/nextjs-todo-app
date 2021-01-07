@@ -8,6 +8,8 @@
     "type-check": "tsc --watch"
   },
   "dependencies": {
+    "firebase": "^8.2.1",
+    "firebase-admin": "^9.4.2",
     "lodash": "^4.17.20",
     "next": "latest",
     "next-pwa": "^5.0.2",
@@ -24,7 +26,6 @@
     "@types/react": "^16.9.16",
     "@types/react-dom": "^16.9.4",
     "autoprefixer": "^10.1.0",
-    "firebase": "^8.2.1",
     "fork-ts-checker-webpack-plugin": "^6.0.8",
     "from-cwd": "^1.0.1",
     "pnp-webpack-plugin": "^1.6.4",

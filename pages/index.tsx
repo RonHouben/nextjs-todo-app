@@ -4,7 +4,7 @@ import Layout from '../components/Layout'
 import Paper from '../components/Paper'
 import Todo from '../components/Todo'
 import useTodos from '../hooks/useTodos'
-import { ITodo, ITodoStatusEnum } from '../interfaces/todos'
+import { ITodo, ITodoStatusEnum } from '../utils/interfaces/todos'
 import { GetServerSidePropsResult } from 'next'
 import { getTodos } from './api/todos'
 

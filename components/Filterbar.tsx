@@ -1,4 +1,4 @@
-import { ITodoStatusEnum } from '../interfaces/todos'
+import { ITodoStatusEnum } from '../utils/interfaces/todos'
 
 interface Props {
   itemsLeft: number

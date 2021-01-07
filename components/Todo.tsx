@@ -1,13 +1,13 @@
 import RoundCheckbox from './RoundCheckbox'
 import Textbox from './Textbox'
 import React, { useState } from 'react'
-import { ITodo } from '../interfaces/todos'
+import { ITodo } from '../utils/interfaces/todos'
 import useTodos from '../hooks/useTodos'
 import Skeleton from 'react-loading-skeleton'
-import SkeletonThemeWrapper from '../utils/SkeletonThemeWrapper'
+import SkeletonThemeWrapper from './SkeletonThemeWrapper'
 import IconButton from './IconButton'
 import useSWR from 'swr'
-import { fetcher } from '../utils/fetcher'
+import { fetcher } from '../lib/fetcher'
 
 interface Props {
   placeholder?: string

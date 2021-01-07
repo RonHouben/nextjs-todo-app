@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { Key } from '../interfaces/Key.enum'
+import { Key } from '../utils/interfaces/Key.enum'
 
 interface Props {
   id: string

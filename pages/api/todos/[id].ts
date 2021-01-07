@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { ITodo } from '../../../interfaces/todos'
-import HttpStatusCode from '../../../interfaces/HttpStatusCodes.enum'
-import firebase from '../../../utils/firebase'
-import HTTPMethod from '../../../interfaces/HttpMethods.enum'
+import { ITodo } from '../../../utils/interfaces/todos'
+import HttpStatusCode from '../../../utils/interfaces/HttpStatusCodes.enum'
+import firebase from '../../../lib/firebase'
+import HTTPMethod from '../../../utils/interfaces/HttpMethods.enum'
 
 export default async function handler(
   req: NextApiRequest,
@@ -15,6 +15,15 @@ export default async function handler(
   // Get data from your database
   switch (req.method) {
     case HTTPMethod.GET:
+      if (!id) {
+        res.status(HttpStatusCode.BAD_GATEWAY).json({
+          error: {
+            message: `Couldn't find Todo with id: ${id}`,
+          },
+        })
+        return
+      }
+
       try {
         const docRef = firebase.collection('todos').doc(id)
         const docSnapshot = await docRef.get()
@@ -26,7 +35,7 @@ export default async function handler(
         return
       } catch (err) {
         console.error(err)
-        res.status(HttpStatusCode.BAD_REQUEST).json({
+        res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
           error: {
             message: err.message,
           },
@@ -63,6 +72,15 @@ export default async function handler(
         return
       }
     case HTTPMethod.DELETE:
+      if (!id) {
+        res.status(HttpStatusCode.BAD_GATEWAY).json({
+          error: {
+            message: `Couldn't find Todo with id: ${id}`,
+          },
+        })
+        return
+      }
+
       try {
         const docRef = firebase.collection('todos').doc(id)
         await docRef.delete()

@@ -1,10 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { ITodo } from '../../../interfaces/todos'
-import HttpStatusCode from '../../../interfaces/HttpStatusCodes.enum'
-import firestore, {
-  appendIds,
-  serverValueTimestamp,
-} from '../../../utils/firebase'
+import { ITodo } from '../../../utils/interfaces/todos'
+import HttpStatusCode from '../../../utils/interfaces/HttpStatusCodes.enum'
+import firebase from '../../../lib/firebase'
+import { firebaseServerTimestamp } from '../../../utils/firebaseClient'
 
 export default async function handler(
   req: NextApiRequest,
@@ -86,19 +84,25 @@ export default async function handler(
 }
 
 export async function getTodos(): Promise<ITodo[]> {
-  const query = await firestore.collection('todos')
-  return appendIds(await query.get())
+  const collectionRef = await firebase.collection('todos')
+  const snapshot = await collectionRef.get()
+
+  let todos: ITodo[] = []
+
+  snapshot.forEach((doc) => todos.push({ ...doc.data(), id: doc.id } as ITodo))
+
+  return todos
 }
 
 export async function createTodo(todo: ITodo): Promise<ITodo> {
   // append default data
   const newTodoWithDefaults = {
     ...todo,
-    created: serverValueTimestamp,
+    created: firebaseServerTimestamp,
     completed: false,
   } as ITodo
 
-  const newTodoDoc = await firestore
+  const newTodoDoc = await firebase
     .collection('todos')
     .add({ ...newTodoWithDefaults })
   const snapshot = await newTodoDoc.get()
@@ -125,7 +129,7 @@ export async function deleteTodos(ids: string[]): Promise<IDeleteTodosResult> {
   for (const id of ids) {
     try {
       // delete from DB
-      const docRef = firestore.collection('todos').doc(id)
+      const docRef = firebase.collection('todos').doc(id)
       const todo = await docRef.get()
 
       if (todo.data()) {
