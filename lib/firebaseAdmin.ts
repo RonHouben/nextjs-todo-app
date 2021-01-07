@@ -6,6 +6,7 @@ if (!admin.apps.length) {
     credential: admin.credential.cert({
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      // replace is needed to parse the "\n" characters from the environment variable
       privateKey: process.env.FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY.replace(
         /\\n/g,
         '\n'
@@ -24,4 +25,4 @@ export const getDataWithId = <T>(doc: admin.firestore.DocumentSnapshot): T => {
 
 export const firebaseAdminTimestamp = admin.firestore.Timestamp
 
-export default admin.firestore()
+export const firestore = admin.firestore()

@@ -1,7 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { ITodo } from '../../../utils/interfaces/todos'
 import HttpStatusCode from '../../../utils/interfaces/HttpStatusCodes.enum'
-import firebaseAdmin, {
+import {
+  firestore,
   getDataWithId,
   firebaseAdminTimestamp,
 } from '../../../lib/firebaseAdmin'
@@ -79,10 +80,7 @@ export default async function handler(
 }
 
 export async function getTodos(): Promise<ITodo[]> {
-  const snapshot = await firebaseAdmin
-    .collection('todos')
-    .orderBy('created')
-    .get()
+  const snapshot = await firestore.collection('todos').orderBy('created').get()
 
   let todos: ITodo[] = []
 
@@ -99,7 +97,7 @@ async function createTodo(todo: ITodo): Promise<ITodo> {
     completed: false,
   } as ITodo
 
-  const newTodoDocRef = await firebaseAdmin
+  const newTodoDocRef = await firestore
     .collection('todos')
     .add({ ...newTodoWithDefaults })
   const newTodoDocSnapshot = await newTodoDocRef.get()
@@ -126,7 +124,7 @@ async function deleteTodos(ids: string[]): Promise<IDeleteTodosResult> {
   for (const id of ids) {
     try {
       // delete from DB
-      const docRef = firebaseAdmin.collection('todos').doc(id)
+      const docRef = firestore.collection('todos').doc(id)
       const docSnapshot = await docRef.get()
 
       if (docSnapshot.data()) {

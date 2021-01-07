@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { ITodo } from '../../../utils/interfaces/todos'
 import HttpStatusCode from '../../../utils/interfaces/HttpStatusCodes.enum'
-import firebase, { getDataWithId } from '../../../lib/firebaseAdmin'
+import { firestore, getDataWithId } from '../../../lib/firebaseAdmin'
 import HTTPMethod from '../../../utils/interfaces/HttpMethods.enum'
 
 export default async function handler(
@@ -24,7 +24,7 @@ export default async function handler(
       }
 
       try {
-        const docSnapshot = await firebase.collection('todos').doc(id).get()
+        const docSnapshot = await firestore.collection('todos').doc(id).get()
 
         return res
           .status(HttpStatusCode.OK)
@@ -50,7 +50,7 @@ export default async function handler(
 
       try {
         // get the firebase todos collection
-        const collection = firebase.collection('todos')
+        const collection = firestore.collection('todos')
         // update the document
         await collection.doc(id).update(body)
         // get the updated snapshot
@@ -77,7 +77,7 @@ export default async function handler(
       }
 
       try {
-        const docRef = firebase.collection('todos').doc(id)
+        const docRef = firestore.collection('todos').doc(id)
         await docRef.delete()
 
         return res.status(HttpStatusCode.NO_CONTENT).json({})
