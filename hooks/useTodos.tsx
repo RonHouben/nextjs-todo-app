@@ -47,23 +47,19 @@ export default function useTodos({
       false
     )
 
-    async function createTodo(newTodo: ITodo) {
-      // create new Todo in database
-      try {
-        await fetch('/api/todos', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(newTodo),
-        })
-      } catch (err) {
-        console.error(err)
-        ERROR = err as FetchError
-      }
+    // create new Todo in database
+    try {
+      await fetch('/api/todos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newTodo),
+      })
+    } catch (err) {
+      console.error(err)
+      ERROR = err as FetchError
     }
-    // revalidate after db call
-    mutate(TODOS_URI, createTodo(newTodoWithDefaults))
   }
 
   async function updateTodo(
@@ -88,9 +84,6 @@ export default function useTodos({
         },
         body: JSON.stringify(update),
       })
-      // revalidate after db call
-      mutate(`${TODOS_URI}/${id}`)
-      mutate(TODOS_URI)
     } catch (err) {
       console.error(err)
       ERROR = err as FetchError
@@ -116,8 +109,6 @@ export default function useTodos({
       console.error(err)
       ERROR = err as FetchError
     }
-    // revalidate after db call
-    mutate(TODOS_URI)
   }
 
   async function clearCompleted(): Promise<void> {
@@ -149,9 +140,6 @@ export default function useTodos({
         failed
       )
     }
-
-    // revalidate
-    mutate(TODOS_URI)
   }
 
   function filterByStatus(status: ITodoStatusEnum): ITodo[] {
