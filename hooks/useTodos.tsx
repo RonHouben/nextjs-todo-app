@@ -1,9 +1,9 @@
 import _ from 'lodash'
 import useSWR, { mutate } from 'swr'
-import { ITodo, ITodoStatusEnum } from '../interfaces/todos'
+import { ITodo, ITodoStatusEnum } from '../utils/interfaces/todos'
 import { IDeleteTodosResult } from '../pages/api/todos'
-import { fetcher, FetchError } from '../utils/fetcher'
-import { serverValueTimestamp } from '../utils/firebase'
+import { fetcher, FetchError } from '../lib/fetcher'
+import { firebaseServerTimestamp } from '../utils/firebaseClient'
 
 interface IUseTodoProps {
   initialData?: ITodo[]
@@ -37,7 +37,7 @@ export default function useTodos({
     // append default data
     const newTodoWithDefaults = {
       ...newTodo,
-      created: serverValueTimestamp,
+      created: firebaseServerTimestamp,
       completed: false,
     } as ITodo
     // optimistically update local state
