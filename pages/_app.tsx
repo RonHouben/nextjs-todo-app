@@ -70,10 +70,12 @@ function initializeFirebaseApp({
       app.firestore().enablePersistence()
     } catch (error) {
       console.error(error.message)
+      return app
     }
     // return app
     return app
   } else {
+    // initiator.firestore().enablePersistence()
     // return existing app
     return initiator.app(appName)
   }
