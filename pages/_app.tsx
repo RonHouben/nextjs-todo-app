@@ -19,10 +19,12 @@ const firebaseConfig = {
 
 const firebaseAppName: string = 'todo-app'
 
-// only initialize Firebase if it doesn't exist yet
-const firebaseApp = !firebase.apps.length
-  ? firebase.initializeApp(firebaseConfig, firebaseAppName)
-  : firebase.app(firebaseAppName)
+// initialize Firebase if it doesn't exist yet
+const firebaseApp = initializeFirebaseApp({
+  appName: firebaseAppName,
+  config: firebaseConfig,
+  initiator: firebase,
+})
 
 // changing firebaseApp settings to use the local DB when using development environment
 if (process.env.NODE_ENV === 'development' && !firebase.apps.length) {
@@ -47,3 +49,32 @@ function TodoApp({ Component, pageProps }: AppProps) {
 }
 
 export default TodoApp
+
+// helpers
+// TODO: abstract to library
+interface InitializeFirebaseProps {
+  appName: string
+  config: object
+  initiator: typeof firebase
+}
+function initializeFirebaseApp({
+  appName,
+  config,
+  initiator,
+}: InitializeFirebaseProps): firebase.app.App {
+  if (!firebase.apps.length) {
+    // initialize app
+    const app = initiator.initializeApp(config, appName)
+    // enable offline synchronizing of database
+    try {
+      app.firestore().enablePersistence()
+    } catch (error) {
+      console.error(error.message)
+    }
+    // return app
+    return app
+  } else {
+    // return existing app
+    return initiator.app(appName)
+  }
+}
