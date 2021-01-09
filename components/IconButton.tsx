@@ -10,6 +10,7 @@ interface Props {
   focusable?: boolean
   onClick?: () => void
   onKeyPress?: (e: React.KeyboardEvent<HTMLDivElement>) => void
+  className?: string
 }
 
 export default function IconButton({
@@ -20,6 +21,7 @@ export default function IconButton({
   focusable = true,
   onClick,
   onKeyPress,
+  className = '',
 }: Props) {
   const sizeClassName: string = getSizeClassName(size)
 
@@ -28,7 +30,7 @@ export default function IconButton({
       className={`p-3 m-0.5 select-none focus:animate-pulse hover:animate-pulse focus:bg-gray-300 hover:bg-gray-300 focus:bg-opacity-50 hover:bg-opacity-50 cursor-pointer
       ${sizeClassName} ${!square ? 'rounded-full' : ''} ${
         shadow ? 'shadow-md' : ''
-      }`}
+      } ${className}`}
       tabIndex={focusable ? 0 : undefined}
       onClick={onClick}
       onKeyPress={onKeyPress}

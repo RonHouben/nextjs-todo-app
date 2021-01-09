@@ -1,154 +1,120 @@
 import _ from 'lodash'
-import useSWR, { mutate } from 'swr'
 import { ITodo, ITodoStatusEnum } from '../utils/interfaces/todos'
-import { IDeleteTodosResult } from '../pages/api/todos'
-import { fetcher, FetchError } from '../lib/fetcher'
+import firebase from 'firebase/app'
+import { useFirestore, useFirestoreCollectionData } from 'reactfire'
 
-interface IUseTodoProps {
+interface Props {
   initialData?: ITodo[]
+  filter?: ITodoStatusEnum
 }
-
 interface IUseTodosResult {
-  todos: ITodo[] | undefined
-  itemsLeft: number
-  error?: FetchError
+  todos: ITodo[]
+  error?: Error
   createTodo: (newTodo: Partial<ITodo>) => void
   updateTodo: (id: ITodo['id'], update: Partial<ITodo>) => void
   deleteTodo: (id: ITodo['id']) => void
   clearCompleted: () => void
-  filterByStatus: (todoStatus: ITodoStatusEnum) => ITodo[]
+  todosLeft: number
 }
 
 export default function useTodos({
   initialData,
-}: IUseTodoProps = {}): IUseTodosResult {
-  const TODOS_URI = `/api/todos`
+  filter,
+}: Props = {}): IUseTodosResult {
+  // initiate Firebase
+  const FIRESTORE = useFirestore()
+  const firestoreServerTimeStamp = useFirestore.FieldValue.serverTimestamp()
 
-  const { data: todos, error: useSWRError } = useSWR<ITodo[], FetchError>(
-    TODOS_URI,
-    fetcher,
-    { initialData }
-  )
-
-  let ERROR: FetchError | undefined = useSWRError
-
-  async function createTodo(newTodo: Partial<ITodo>): Promise<void> {
-    // append default data
-    const newTodoWithDefaults = {
-      ...newTodo,
-      // created: firebaseAdminTimestamp.now(),
-      completed: false,
-    } as ITodo
-    // optimistically update local state
-    mutate(
-      TODOS_URI,
-      todos ? [...todos, newTodoWithDefaults] : [newTodoWithDefaults],
-      false
-    )
-
-    // create new Todo in database
-    try {
-      await fetch('/api/todos', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newTodo),
+  // get the query
+  const query = filter
+    ? getQuery({
+        firestore: FIRESTORE,
+        collectionPath: 'todos',
+        whereFilterOptions: getWHereFilterOptions(filter),
       })
-    } catch (err) {
-      console.error(err)
-      ERROR = err as FetchError
-    }
+    : getQuery({ firestore: FIRESTORE, collectionPath: 'todos' })
+
+  // get the data from the DB
+  const { data: todos, error } = useFirestoreCollectionData<ITodo>(query, {
+    initialData,
+    idField: 'id',
+  })
+
+  //
+  let ERROR: Error | undefined = error
+
+  // CRUD functions
+  async function createTodo(newTodo: Partial<ITodo>): Promise<void> {
+    await FIRESTORE.collection('todos').add({
+      ...newTodo,
+      created: firestoreServerTimeStamp,
+    })
   }
 
   async function updateTodo(
     id: ITodo['id'],
     update: Partial<ITodo>
   ): Promise<void> {
-    // optimistically update local state
-    mutate(
-      TODOS_URI,
-      todos
-        ? todos.map((todo) => (todo.id === id ? { ...todo, ...update } : todo))
-        : todos,
-      false
-    )
-
-    // call changeTodo api in backend
-    try {
-      await fetch(`${TODOS_URI}/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(update),
-      })
-    } catch (err) {
-      console.error(err)
-      ERROR = err as FetchError
-    }
+    console.log('useTodos - updateTodo', update)
+    await FIRESTORE.collection('todos').doc(id).update(update)
   }
 
   async function deleteTodo(id: ITodo['id']): Promise<void> {
-    // optimistically update local state
-    mutate(
-      TODOS_URI,
-      todos ? todos.filter((todo) => todo.id !== id) : todos,
-      false
-    )
-    // delete the todo in backend
-    try {
-      await fetch(`${TODOS_URI}/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-    } catch (err) {
-      console.error(err)
-      ERROR = err as FetchError
-    }
+    await FIRESTORE.collection('todos').doc(id).delete()
   }
 
   async function clearCompleted(): Promise<void> {
-    // optimistically update local state
-    mutate(TODOS_URI, filterByStatus(ITodoStatusEnum.ACTIVE))
-    // get id's from the completed todos
-    const completedTodosIds = filterByStatus(ITodoStatusEnum.COMPLETED).map(
-      (a) => a.id
+    // create the query
+    const query = await FIRESTORE.collection('todos').where(
+      'completed',
+      '==',
+      true
     )
-    // remove all completed todos from the DB
-    const response = await fetch(
-      `/api/todos?ids=${JSON.stringify(completedTodosIds)}`,
-      {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    )
+    // get the snapshot
+    const snapshot = await query.get()
+    // create a batch
+    const batch = FIRESTORE.batch()
+    // delete documents
+    snapshot.docs.forEach((doc) => batch.delete(doc.ref))
+    // commit the batch
+    await batch.commit()
+  }
 
-    // get result from the response
-    const { failed } = (await response.json()) as IDeleteTodosResult
+  // helper functions
+  type GetWhereFilterOptionsResult = [
+    string | firebase.firestore.FieldPath,
+    firebase.firestore.WhereFilterOp,
+    any
+  ]
 
-    // show notification for the failed todo's
-    if (failed.length > 0) {
-      // TODO: implement
-      console.error(
-        'Something went wrong with deleting the following todos:',
-        failed
-      )
+  function getWHereFilterOptions(
+    filter: ITodoStatusEnum
+  ): GetWhereFilterOptionsResult | undefined {
+    switch (filter) {
+      case ITodoStatusEnum.ACTIVE:
+        return ['completed', '!=', true]
+      case ITodoStatusEnum.COMPLETED:
+        return ['completed', '==', true]
+      default:
+        return undefined
     }
   }
 
-  function filterByStatus(status: ITodoStatusEnum): ITodo[] {
-    switch (status) {
-      case ITodoStatusEnum.ALL:
-        return todos || []
-      case ITodoStatusEnum.ACTIVE:
-        return todos?.filter((todo) => !todo.completed) || []
-      case ITodoStatusEnum.COMPLETED:
-        return todos?.filter((todo) => todo.completed) || []
+  interface GetQueryProps {
+    firestore: firebase.firestore.Firestore
+    whereFilterOptions?: GetWhereFilterOptionsResult
+    collectionPath: string
+  }
+
+  function getQuery({
+    firestore,
+    collectionPath,
+    whereFilterOptions,
+  }: GetQueryProps) {
+    if (whereFilterOptions) {
+      return firestore.collection(collectionPath).where(...whereFilterOptions)
+    } else {
+      return firestore.collection(collectionPath)
     }
   }
 
@@ -158,8 +124,10 @@ export default function useTodos({
     createTodo,
     updateTodo,
     deleteTodo,
-    itemsLeft: todos?.filter((todo) => !todo.completed).length || 0,
-    filterByStatus,
     clearCompleted,
+    todosLeft:
+      todos && todos.length > 0
+        ? todos.filter((todo) => !todo.completed).length
+        : 0,
   }
 }

@@ -11,21 +11,23 @@ import { Key } from '../utils/interfaces/Key.enum'
 
 interface Props {
   value?: string
-  onChange: (newTitle: string) => void
+  onChange?: (text: string) => void
+  onSubmit?: (text: string) => void
   placeholder?: string
   debounceDelay?: number
   autoSubmit?: boolean
   submitOnEnterKey: boolean
   submitOnBlur?: boolean
   autoFocus?: boolean
-  clearOnEnterKey: boolean
+  clearOnEnterKey?: boolean
 }
 
 export default function Textbox({
   value: initialValue = '',
   placeholder,
-  onChange,
-  debounceDelay = 3000,
+  onChange = () => {},
+  onSubmit = () => {},
+  debounceDelay = 0,
   autoSubmit = false,
   submitOnBlur = false,
   submitOnEnterKey = false,
@@ -44,44 +46,48 @@ export default function Textbox({
     wait: debounceDelay,
   })
 
-  // only call onChange when the debouncedValue is changed && autoSubmit === true
+  // only call onSubmit when the debouncedValue is changed && autoSubmit === true
   useEffect(() => {
+    // call external onChange
     if (autoSubmit && debouncedValue && textChanged) {
-      onChange(debouncedValue)
+      // call external onSubmit
+      onSubmit(debouncedValue)
     }
-  }, [onChange, debouncedValue])
+  }, [debouncedValue, autoSubmit, debouncedValue, textChanged])
 
   // update local states
   useEffect(() => {
     setTextValue(initialValue)
+    setDebouncedValue(initialValue)
   }, [initialValue])
 
   // handlers
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    // update local state
-    setTextValue(e.target.value)
-
-    if (autoSubmit && textChanged) {
-      // set the debounced state
+    onChange(e.target.value)
+    if (textChanged) {
+      // update local state
       setDebouncedValue(e.target.value)
+      // call external onChange
+      onChange(textValue)
     }
   }
 
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (submitOnEnterKey && e.key === Key.Enter && textChanged) {
-      // call external onChange
-      onChange(textValue)
+    if (submitOnEnterKey && e.key === Key.Enter && textValue) {
+      // call external onSubmit
+      onSubmit(textValue)
 
       if (clearOnEnterKey) {
         setTextValue('')
+        setDebouncedValue('')
       }
     }
   }
 
   const handleOnBlur = (_e: FocusEvent<HTMLInputElement>) => {
     if (submitOnBlur && textChanged) {
-      // call external onChange
-      onChange(textValue)
+      // call external onSubmit
+      onSubmit(textValue)
     }
   }
 

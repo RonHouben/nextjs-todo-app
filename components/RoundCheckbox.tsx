@@ -4,12 +4,12 @@ import { Key } from '../utils/interfaces/Key.enum'
 interface Props {
   id: string
   checked: boolean
-  onChange: (id: string, checked: boolean) => void
+  onToggle: (checked: boolean) => void
 }
 
-export default function RoundCheckbox({ id, checked, onChange }: Props) {
+export default function RoundCheckbox({ id, checked, onToggle }: Props) {
   const handleChange = () => {
-    onChange(id, !checked)
+    onToggle(!checked)
   }
 
   return (

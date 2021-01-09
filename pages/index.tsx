@@ -1,58 +1,40 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import Filterbar from '../components/Filterbar'
 import Layout from '../components/Layout'
 import Paper from '../components/Paper'
-import Todo from '../components/Todo'
 import useTodos from '../hooks/useTodos'
 import { ITodo, ITodoStatusEnum } from '../utils/interfaces/todos'
-import { GetServerSidePropsResult } from 'next'
+import { GetServerSideProps, NextPage } from 'next'
 import { getTodos } from './api/todos'
+
+import TodosList from '../components/TodosList'
+import CreateTodoField from '../components/CreateTodoField'
 
 interface InitialProps {
   initialData: ITodo[]
 }
 
-export async function getServerSideProps(): Promise<
-  GetServerSidePropsResult<InitialProps>
-> {
-  const initialData = await getTodos()
-
-  return {
-    props: { initialData: (JSON.stringify(initialData) as unknown) as ITodo[] },
-  }
-}
-
-export default function Home({ initialData }: InitialProps) {
+// export default function Home({}: NextPage<InitialProps>) {
+const Home: NextPage<InitialProps> = ({ initialData }) => {
   const [selectedFilter, setSelectedFilter] = useState<ITodoStatusEnum>(
     ITodoStatusEnum.ALL
   )
-  const { todos, error, itemsLeft, filterByStatus, clearCompleted } = useTodos({
-    initialData: JSON.parse((initialData as unknown) as string),
-  })
-  const [filteredTodos, setFilteredTodos] = useState<ITodo[]>(todos || [])
+
+  // const { error, clearCompleted } = useTodos({ initialData })
+  const { error, clearCompleted, todosLeft } = useTodos()
 
   if (error) return <div>ERROR! {error.message}</div>
-
-  // apply filter when selectedFilter or todos change
-  useEffect(() => {
-    setFilteredTodos(filterByStatus(selectedFilter))
-  }, [selectedFilter, todos])
 
   return (
     <Layout pageTitle='TODO'>
       <div className='flex flex-col justify-start items-center space-y-7 w-full'>
         <Paper rounded shadow>
-          <Todo placeholder='Create a new todo...' createNewTodo autoFocus />
+          <CreateTodoField autoFocus />
         </Paper>
         <Paper rounded shadow verticalDivider>
-          {/* show loading skeleton Todo */}
-          {!todos && <Todo />}
-          {/* show todos */}
-          {filteredTodos.map((todo, i) => (
-            <Todo key={i} id={todo.id} initialData={todo} />
-          ))}
+          <TodosList initialData={initialData} filter={selectedFilter} />
           <Filterbar
-            itemsLeft={itemsLeft}
+            itemsLeft={todosLeft}
             filters={[
               ITodoStatusEnum.ALL,
               ITodoStatusEnum.ACTIVE,
@@ -66,4 +48,17 @@ export default function Home({ initialData }: InitialProps) {
       </div>
     </Layout>
   )
+}
+
+export default Home
+
+export const getServerSideProps: GetServerSideProps<InitialProps> = async () => {
+  // get initial todos from the backend
+  const initialData = await getTodos()
+
+  return {
+    props: {
+      initialData: JSON.parse(JSON.stringify(initialData)),
+    },
+  }
 }
