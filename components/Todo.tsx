@@ -30,7 +30,6 @@ export default function Todo({ id, initialData, placeholder }: Props) {
     if (!title) {
       deleteTodo(id)
     } else {
-      console.log('handleChangeTitle')
       updateTodo(id, { ...todo, title })
     }
   }
