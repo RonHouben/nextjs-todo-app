@@ -1,8 +1,11 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { ITodo } from '../../../utils/interfaces/todos'
 import HttpStatusCode from '../../../utils/interfaces/HttpStatusCodes.enum'
-import { firestore, getDataWithId } from '../../../lib/firebaseAdmin'
+import firebaseAdmin from '../../../lib/firebaseAdmin'
 import HTTPMethod from '../../../utils/interfaces/HttpMethods.enum'
+
+// get firebaseAdmin helper function
+const { firestore, getDataWithId } = firebaseAdmin()
 
 export default async function handler(
   req: NextApiRequest,

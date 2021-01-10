@@ -1,11 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { ITodo } from '../../../utils/interfaces/todos'
 import HttpStatusCode from '../../../utils/interfaces/HttpStatusCodes.enum'
-import {
-  firestore,
-  getDataWithId,
-  firebaseAdminTimestamp,
-} from '../../../lib/firebaseAdmin'
+import firebaseAdmin from '../../../lib/firebaseAdmin'
+
+// get firebaseAdmin helpers
+const { firestore, getDataWithId, serverTimestamp } = firebaseAdmin()
 
 export default async function handler(
   req: NextApiRequest,
@@ -93,7 +92,7 @@ async function createTodo(todo: ITodo): Promise<ITodo> {
   // append default data
   const newTodoWithDefaults = {
     ...todo,
-    created: firebaseAdminTimestamp.now(),
+    created: serverTimestamp,
     completed: false,
   } as ITodo
 
