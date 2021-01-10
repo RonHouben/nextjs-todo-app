@@ -1,6 +1,6 @@
 import React from 'react'
 import { useTheme } from 'next-themes'
-import { Key } from '../interfaces/Key.enum'
+import { Key } from '../utils/interfaces/Key.enum'
 import IconButton from './IconButton'
 
 export default function ThemeSwitcherButton() {
