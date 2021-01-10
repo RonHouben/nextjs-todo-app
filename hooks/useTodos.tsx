@@ -1,20 +1,20 @@
 import _ from 'lodash'
 import { ITodo, ITodoStatusEnum } from '../utils/interfaces/todos'
 import firebase from 'firebase/app'
-import { useFirestore, useFirestoreCollectionData } from 'reactfire'
+import { ObservableStatus, useFirestoreCollectionData } from 'reactfire'
+import { firebaseApp, firestoreServerTimestamp } from '../lib/firebaseClient'
 
 interface Props {
   initialData?: ITodo[]
   filter?: ITodoStatusEnum
 }
 interface IUseTodosResult {
-  todos: ITodo[]
-  error?: Error
+  getTodos: () => ObservableStatus<ITodo[]>
   createTodo: (newTodo: Partial<ITodo>) => void
   updateTodo: (id: ITodo['id'], update: Partial<ITodo>) => void
   deleteTodo: (id: ITodo['id']) => void
   clearCompleted: () => void
-  todosLeft: number
+  activeTodosLeft: () => number
 }
 
 export default function useTodos({
@@ -22,32 +22,34 @@ export default function useTodos({
   filter,
 }: Props = {}): IUseTodosResult {
   // initiate Firebase
-  const FIRESTORE = useFirestore()
-  const firestoreServerTimeStamp = useFirestore.FieldValue.serverTimestamp()
+  const FIRESTORE = firebaseApp.firestore()
+  interface GetTodosProps {
+    firestore: firebase.firestore.Firestore
+    initialData?: ITodo[]
+    filter?: ITodoStatusEnum
+  }
 
-  // get the query
-  const query = filter
-    ? getQuery({
-        firestore: FIRESTORE,
-        collectionPath: 'todos',
-        whereFilterOptions: getWHereFilterOptions(filter),
-      })
-    : getQuery({ firestore: FIRESTORE, collectionPath: 'todos' })
+  function getTodos({ firestore, initialData, filter }: GetTodosProps) {
+    // get the query
+    const query = filter
+      ? getQuery({
+          firestore,
+          collectionPath: 'todos',
+          whereFilterOptions: getWhereFilterOptions(filter),
+        })
+      : getQuery({ firestore, collectionPath: 'todos' })
 
-  // get the data from the DB
-  const { data: todos, error } = useFirestoreCollectionData<ITodo>(query, {
-    initialData,
-    idField: 'id',
-  })
+    // get the data from the DB
+    return useFirestoreCollectionData<ITodo>(query, {
+      initialData,
+      idField: 'id',
+    })
+  }
 
-  //
-  let ERROR: Error | undefined = error
-
-  // CRUD functions
   async function createTodo(newTodo: Partial<ITodo>): Promise<void> {
     await FIRESTORE.collection('todos').add({
       ...newTodo,
-      created: firestoreServerTimeStamp,
+      created: firestoreServerTimestamp,
     })
   }
 
@@ -55,7 +57,6 @@ export default function useTodos({
     id: ITodo['id'],
     update: Partial<ITodo>
   ): Promise<void> {
-    console.log('useTodos - updateTodo', update)
     await FIRESTORE.collection('todos').doc(id).update(update)
   }
 
@@ -65,11 +66,11 @@ export default function useTodos({
 
   async function clearCompleted(): Promise<void> {
     // create the query
-    const query = await FIRESTORE.collection('todos').where(
-      'completed',
-      '==',
-      true
-    )
+    const query = getQuery({
+      firestore: FIRESTORE,
+      collectionPath: 'todos',
+      whereFilterOptions: getWhereFilterOptions(ITodoStatusEnum.COMPLETED),
+    })
     // get the snapshot
     const snapshot = await query.get()
     // create a batch
@@ -87,7 +88,7 @@ export default function useTodos({
     any
   ]
 
-  function getWHereFilterOptions(
+  function getWhereFilterOptions(
     filter: ITodoStatusEnum
   ): GetWhereFilterOptionsResult | undefined {
     switch (filter) {
@@ -119,15 +120,18 @@ export default function useTodos({
   }
 
   return {
-    todos,
-    error: ERROR,
+    getTodos: () => getTodos({ firestore: FIRESTORE, initialData, filter }),
     createTodo,
     updateTodo,
     deleteTodo,
     clearCompleted,
-    todosLeft:
-      todos && todos.length > 0
-        ? todos.filter((todo) => !todo.completed).length
-        : 0,
+    activeTodosLeft: () => {
+      const { data } = getTodos({
+        firestore: FIRESTORE,
+        filter: ITodoStatusEnum.ACTIVE,
+      })
+
+      return data?.length || 0
+    },
   }
 }

@@ -8,7 +8,8 @@ interface Props {
   filter?: ITodoStatusEnum
 }
 export default function TodosList({ initialData, filter }: Props) {
-  const { todos, error } = useTodos({ initialData, filter })
+  const { getTodos } = useTodos({ initialData, filter })
+  const { data: todos, error } = getTodos()
 
   return (
     <Fragment>
