@@ -64,7 +64,9 @@ export default function Layout({ children, pageTitle }: Props) {
         <div className='relative container mx-auto w-screen md:w-1/2 bg-transparent'>
           <div className='absolute top-16 w-full bg-transparent space-y-10'>
             <Navbar pageTitle={pageTitle} />
-            {children}
+            <div className='flex flex-col justify-start items-center space-y-7 w-full'>
+              {children}
+            </div>
           </div>
         </div>
       </div>
