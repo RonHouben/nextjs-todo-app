@@ -23,14 +23,6 @@ export const firebaseApp = initializeFirebaseApp({
 
 export const firestoreServerTimestamp = firebase.firestore.FieldValue.serverTimestamp()
 
-// changing firebaseApp settings to use the local DB when using development environment
-if (process.env.NODE_ENV === 'development' && !firebase.apps.length) {
-  firebaseApp.firestore().settings({
-    host: process.env.NEXT_PUBLIC_FIRESTORE_EMULATOR_HOST,
-    ssl: false,
-  })
-}
-
 interface InitializeFirebaseProps {
   appName: string
   config: object
@@ -45,6 +37,13 @@ function initializeFirebaseApp({
   if (!firebase.apps.length) {
     // initialize app
     const app = initiator.initializeApp(config, appName)
+    // changing firebaseApp settings to use the local DB when using development environment
+    if (process.env.NODE_ENV === 'development') {
+      app.firestore().settings({
+        host: process.env.NEXT_PUBLIC_FIRESTORE_EMULATOR_HOST,
+        ssl: false,
+      })
+    }
     // enable offline synchronizing of database only when the app is client side rendered
     if (process.browser) {
       try {
