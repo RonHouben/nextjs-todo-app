@@ -15,6 +15,10 @@ declare global {
       FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY: string
       FIREBASE_CLIENT_EMAIL: string
       NEXT_PUBLIC_FIRESTORE_EMULATOR_HOST?: string
+
+      // Github signin provider variables
+      GITHUB_CLIENT_ID: string
+      GITHUB_CLIENT_SECRET: string
     }
   }
 }

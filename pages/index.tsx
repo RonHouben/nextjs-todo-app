@@ -1,24 +1,20 @@
 import { GetServerSideProps } from 'next'
-import { ThemeProvider } from 'next-themes'
-// import { FirebaseAppProvider } from 'reactfire'
-import React, { useState } from 'react'
+import React, { Fragment, useState } from 'react'
+import { getSession, Session } from 'next-auth/client'
 import Layout from '../components/Layout'
 import Filterbar from '../components/Filterbar'
 import Paper from '../components/Paper'
 import useTodos from '../hooks/useTodos'
 import { ITodo, ITodoStatusEnum } from '../utils/interfaces/todos'
-import { getTodos } from './api/todos'
-
 import TodosList from '../components/TodosList'
 import CreateTodoField from '../components/CreateTodoField'
-import { FirebaseAppProvider } from 'reactfire'
-import { firebaseApp } from '../lib/firebaseClient'
-
+import LoginPage from './login'
 interface InitialProps {
   initialData: ITodo[]
+  session: Session | null
 }
 
-export default function TodoApp({ initialData }: InitialProps) {
+export default function TodoApp({ initialData, session }: InitialProps) {
   const [selectedFilter, setSelectedFilter] = useState<ITodoStatusEnum>(
     ITodoStatusEnum.ALL
   )
@@ -26,15 +22,13 @@ export default function TodoApp({ initialData }: InitialProps) {
   const { clearCompleted, activeTodosLeft } = useTodos({ initialData })
 
   return (
-    <ThemeProvider
-      attribute='class'
-      themes={['light', 'dark']}
-      defaultTheme='light'
-    >
-      <FirebaseAppProvider firebaseApp={firebaseApp}>
+    <Fragment>
+      {!session && <LoginPage />}
+      {session && (
         <Layout pageTitle='TODO'>
           <Paper rounded shadow>
-            <CreateTodoField autoFocus />
+            {!session && <div>Not signed in</div>}
+            {session && <CreateTodoField autoFocus />}
           </Paper>
           <Paper rounded shadow verticalDivider>
             <TodosList initialData={initialData} filter={selectedFilter} />
@@ -51,18 +45,43 @@ export default function TodoApp({ initialData }: InitialProps) {
             />
           </Paper>
         </Layout>
-      </FirebaseAppProvider>
-    </ThemeProvider>
+      )}
+    </Fragment>
   )
 }
 
-export const getServerSideProps: GetServerSideProps<InitialProps> = async () => {
+export const getServerSideProps: GetServerSideProps<InitialProps> = async ({
+  req,
+}) => {
+  const session = await getSession({ req })
+
+  console.log('sessions', session)
+
   // get initial todos from the backend
-  const initialData = await getTodos()
+  // const { firestore, getDataWithId } = firebaseAdmin()
+
+  let todos: ITodo[] = []
+
+  // get todos from DB
+  // const snapshot = await firestore.collection('todos').orderBy('created').get()
+  // add the data to the todos result array
+  // snapshot.forEach((doc) => (todos = [...todos, getDataWithId(doc)]))
+
+  // console.log('TODOS', todos)
+
+  if (!session) {
+    return {
+      redirect: {
+        permanent: false,
+        destination: '/login',
+      },
+    }
+  }
 
   return {
     props: {
-      initialData: JSON.parse(JSON.stringify(initialData)),
+      session,
+      initialData: JSON.parse(JSON.stringify(todos)),
     },
   }
 }

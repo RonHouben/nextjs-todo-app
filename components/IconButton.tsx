@@ -9,7 +9,7 @@ interface Props {
   shadow?: boolean
   focusable?: boolean
   onClick?: () => void
-  onKeyPress?: (e: React.KeyboardEvent<HTMLDivElement>) => void
+  onKeyPress?: (e: React.KeyboardEvent<HTMLButtonElement>) => void
   className?: string
 }
 
@@ -26,7 +26,7 @@ export default function IconButton({
   const sizeClassName: string = getSizeClassName(size)
 
   return (
-    <div
+    <button
       className={`p-3 m-0.5 select-none focus:animate-pulse hover:animate-pulse focus:bg-gray-300 hover:bg-gray-300 focus:bg-opacity-50 hover:bg-opacity-50 cursor-pointer
       ${sizeClassName} ${!square ? 'rounded-full' : ''} ${
         shadow ? 'shadow-md' : ''
@@ -38,7 +38,7 @@ export default function IconButton({
       <div className='relative h-full w-full '>
         <Image priority layout='fill' src={src} />
       </div>
-    </div>
+    </button>
   )
 }
 
