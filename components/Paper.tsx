@@ -17,6 +17,7 @@ export default function Paper({
   return (
     <div
       className={`flex flex-col w-full h-full bg-light-0 dark:bg-dark-1 p-1 space-y-2
+  ${className}
       ${
         verticalDivider
           ? 'divide-y divide-light-2 dark:divide-dark-6 divide-opacity-50 divide-y-2'
@@ -24,7 +25,7 @@ export default function Paper({
       }
       ${shadow ? 'shadow-md' : ''}
       ${rounded ? 'rounded-md' : ''}
-      ${className}`}
+      `}
     >
       {children}
     </div>

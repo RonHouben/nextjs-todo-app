@@ -6,7 +6,7 @@ import tailwindConfig from '../tailwind.config'
 
 type Props = {
   children?: ReactNode
-  pageTitle: string
+  pageTitle?: string
 }
 
 export default function Layout({ children, pageTitle }: Props) {
@@ -18,7 +18,7 @@ export default function Layout({ children, pageTitle }: Props) {
   if (!mounted) return null
 
   return (
-    <div className={`h-screen w-screen text-body font-josefin-sans`}>
+    <div className={`h-screen w-screen font-josefin-sans`}>
       <Head>
         <meta charSet='utf-8' />
         <meta name='viewport' content='initial-scale=1.0, width=device-width' />
@@ -47,21 +47,21 @@ export default function Layout({ children, pageTitle }: Props) {
           name='theme-color'
           content={
             theme === 'light'
-              ? tailwindConfig.theme.extend.colors.light.background
-              : tailwindConfig.theme.extend.colors.dark.background
+              ? tailwindConfig.theme.colors.light.background
+              : tailwindConfig.theme.colors.dark.background
           }
         />
       </Head>
       {/* TOP BACKGROUND */}
       <div
-        className={`h-2/3 bg-no-repeat bg-contain ${
+        className={`h-1/3 bg-no-repeat bg-contain ${
           theme === 'dark'
             ? 'bg-mobile-dark sm:bg-desktop-dark'
             : 'bg-mobile-light sm:bg-desktop-light'
         }`}
       >
         {/* CONTENT */}
-        <div className='relative container mx-auto w-screen md:w-1/2 bg-transparent'>
+        <div className='relative container mx-auto w-screen h-screen md:w-1/2 bg-transparent'>
           <div className='absolute top-16 w-full bg-transparent space-y-10'>
             <Navbar pageTitle={pageTitle} />
             <div className='flex flex-col justify-start items-center space-y-7 w-full'>

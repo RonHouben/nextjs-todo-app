@@ -22,10 +22,10 @@ export default function TodoApp({ initialData, session }: InitialProps) {
   const { clearCompleted, activeTodosLeft } = useTodos({ initialData })
 
   return (
-    <Fragment>
+    <div className=''>
       {!session && <LoginPage />}
       {session && (
-        <Layout pageTitle='TODO'>
+        <Layout pageTitle='todo'>
           <Paper rounded shadow>
             {!session && <div>Not signed in</div>}
             {session && <CreateTodoField autoFocus />}
@@ -46,7 +46,7 @@ export default function TodoApp({ initialData, session }: InitialProps) {
           </Paper>
         </Layout>
       )}
-    </Fragment>
+    </div>
   )
 }
 

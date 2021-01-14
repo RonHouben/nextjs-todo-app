@@ -9,31 +9,21 @@ interface InitialProps {
 
 export default function LoginPage({ session }: InitialProps = {}) {
   return (
-    <Layout pageTitle='Login'>
-      <Paper shadow rounded>
-        {!session && (
-          <div>
-            <h1>Not signed in!</h1>
-            <button
-              onClick={() => signIn('github', { callbackUrl: '/' })}
-              className='bg-purple-300'
-            >
-              sign in with Github
-            </button>
-          </div>
-        )}
-        {session && (
-          <div>
-            <h1>Hi {session.user.name}</h1>
-            <pre>{JSON.stringify(session.user, null, '  ')}</pre>
-            <button
-              onClick={() => signOut({ callbackUrl: '/' })}
-              className='bg-purple-300'
-            >
-              sign Out
-            </button>
-          </div>
-        )}
+    <Layout>
+      <Paper shadow rounded className='p-4'>
+        <article className='prose prose-green'>
+          <h1>Garlic bread with cheese: What the science tells us</h1>
+          <p>
+            For years parents have espoused the health benefits of eating garlic
+            bread with cheese to their children, with the food earning such an
+            iconic status in our culture that kids will often dress up as warm,
+            cheesy loaf for Halloween.
+          </p>
+          <p>
+            But a recent study shows that the celebrated appetizer may be linked
+            to a series of rabies cases
+          </p>
+        </article>
       </Paper>
     </Layout>
   )

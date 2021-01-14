@@ -8,6 +8,7 @@
     "type-check": "tsc --watch"
   },
   "dependencies": {
+    "@tailwindcss/typography": "^0.3.1",
     "firebase": "^8.2.1",
     "firebase-admin": "^9.4.2",
     "lodash": "^4.17.20",
