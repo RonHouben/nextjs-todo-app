@@ -19,12 +19,10 @@
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "react-loading-skeleton": "^2.1.1",
-    "reactfire": "^3.0.0-rc.0",
     "swr": "^0.3.11"
   },
   "devDependencies": {
     "@types/lodash.debounce": "^4.0.6",
-    "@types/mongodb": "^3.6.3",
     "@types/next-auth": "^3.1.20",
     "@types/node": "^12.12.21",
     "@types/react": "^16.9.16",
