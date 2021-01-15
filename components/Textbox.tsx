@@ -5,25 +5,25 @@ import {
   useEffect,
   useState,
   useMemo,
-} from 'react'
-import { useDebounce } from '../hooks/useDebounce'
-import { Key } from '../utils/interfaces/Key.enum'
+} from "react";
+import { useDebounce } from "../hooks/useDebounce";
+import { Key } from "../utils/interfaces/Key.enum";
 
 interface Props {
-  value?: string
-  onChange?: (text: string) => void
-  onSubmit?: (text: string) => void
-  placeholder?: string
-  debounceDelay?: number
-  autoSubmit?: boolean
-  submitOnEnterKey: boolean
-  submitOnBlur?: boolean
-  autoFocus?: boolean
-  clearOnEnterKey?: boolean
+  value?: string;
+  onChange?: (text: string) => void;
+  onSubmit?: (text: string) => void;
+  placeholder?: string;
+  debounceDelay?: number;
+  autoSubmit?: boolean;
+  submitOnEnterKey?: boolean;
+  submitOnBlur?: boolean;
+  autoFocus?: boolean;
+  clearOnEnterKey?: boolean;
 }
 
 export default function Textbox({
-  value: initialValue = '',
+  value: initialValue = "",
   placeholder,
   onChange = () => {},
   onSubmit = () => {},
@@ -35,72 +35,72 @@ export default function Textbox({
   clearOnEnterKey = false,
 }: Props) {
   // set textValue state
-  const [textValue, setTextValue] = useState<string>(initialValue)
+  const [textValue, setTextValue] = useState<string>(initialValue);
   const textChanged: boolean = useMemo(() => initialValue !== textValue, [
     textValue,
-  ])
+  ]);
 
   // hooks
   const [debouncedValue, setDebouncedValue] = useDebounce<string>({
     initialState: textValue,
     wait: debounceDelay,
-  })
+  });
 
   // only call onSubmit when the debouncedValue is changed && autoSubmit === true
   useEffect(() => {
     // call external onChange
     if (autoSubmit && debouncedValue && textChanged) {
       // call external onSubmit
-      onSubmit(debouncedValue)
+      onSubmit(debouncedValue);
     }
-  }, [debouncedValue, autoSubmit, debouncedValue, textChanged])
+  }, [debouncedValue, autoSubmit, debouncedValue, textChanged]);
 
   // update local states
   useEffect(() => {
-    setTextValue(initialValue)
-    setDebouncedValue(initialValue)
-  }, [initialValue])
+    setTextValue(initialValue);
+    setDebouncedValue(initialValue);
+  }, [initialValue]);
 
   // handlers
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value)
+    onChange(e.target.value);
     if (textChanged) {
       // update local state
-      setDebouncedValue(e.target.value)
+      setDebouncedValue(e.target.value);
       // call external onChange
-      onChange(textValue)
+      onChange(textValue);
     }
-  }
+  };
 
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
     if (submitOnEnterKey && e.key === Key.Enter && textValue) {
       // call external onSubmit
-      onSubmit(textValue)
+      onSubmit(textValue);
 
       if (clearOnEnterKey) {
-        setTextValue('')
-        setDebouncedValue('')
+        setTextValue("");
+        setDebouncedValue("");
       }
     }
-  }
+  };
 
   const handleOnBlur = (_e: FocusEvent<HTMLInputElement>) => {
     if (submitOnBlur && textChanged) {
       // call external onSubmit
-      onSubmit(textValue)
+      onSubmit(textValue);
     }
-  }
+  };
 
   return (
     <input
       className={`w-full bg-transparent p-2 focus-within:text-light-4 text-light-3 dark:text-dark-2`}
       placeholder={placeholder}
       value={textValue}
-      type='text'
+      type="text"
       onChange={handleChange}
       onKeyDown={handleKeyPress}
       onBlur={handleOnBlur}
       autoFocus={autoFocus}
     />
-  )
+  );
 }

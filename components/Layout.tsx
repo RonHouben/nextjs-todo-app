@@ -18,7 +18,9 @@ export default function Layout({ children, pageTitle }: Props) {
   if (!mounted) return null;
 
   return (
-    <div className={`h-screen w-screen font-josefin-sans`}>
+    <div
+      className={`h-screen w-screen font-josefin-sans prose-lg sm:prose-sm md:prose-md lg:prose-lg`}
+    >
       <Head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />
@@ -54,15 +56,15 @@ export default function Layout({ children, pageTitle }: Props) {
       </Head>
       {/* TOP BACKGROUND */}
       <div
-        className={`h-1/3 bg-no-repeat bg-contain ${
+        className={`h-1/3 bg-no-repeat bg-cover ${
           theme === "dark"
             ? "bg-mobile-dark sm:bg-desktop-dark"
             : "bg-mobile-light sm:bg-desktop-light"
         }`}
       >
         {/* CONTENT */}
-        <div className="relative container mx-auto w-screen h-screen md:w-1/2 bg-transparent">
-          <div className="absolute top-16 w-full bg-transparent space-y-10">
+        <div className="relative container mx-auto w-screen h-2/3 md:w-1/2 bg-transparent">
+          <div className="absolute top-10 w-full bg-transparent">
             <Navbar pageTitle={pageTitle} />
             <div className="flex flex-col justify-start items-center space-y-7 w-full">
               {children}
