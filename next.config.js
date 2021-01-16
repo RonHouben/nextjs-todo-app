@@ -10,4 +10,7 @@ module.exports = withPWA({
     dest: 'public',
     runtimeCaching,
   },
+  images: {
+    domains: ['avatars3.githubusercontent.com'],
+  },
 })

@@ -43,7 +43,7 @@ export default function CreateTodoField({ autoFocus = false }: Props) {
   return (
     <div
       id={'create-todo'}
-      className={`flex w-full h-full justify-center items-center p-2 bg-light-0 dark:bg-dark-1`}
+      className={`flex w-full h-full justify-center items-center bg-light-0 dark:bg-dark-1`}
       tabIndex={0}
     >
       <CompleteTodoRoundCheckbox

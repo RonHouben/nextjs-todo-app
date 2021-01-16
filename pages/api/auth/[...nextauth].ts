@@ -9,6 +9,9 @@ const options = {
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
     }),
   ],
+  pages: {
+    signIn: '/',
+  },
   // database: process.env.NEXT_PUBLIC_FIREBASE_DB_URL,
 } as InitOptions
 

@@ -1,6 +1,6 @@
 import Image, { ImageProps } from 'next/image'
 
-type Size = 'small' | 'medium' | 'large'
+type Size = 'sm' | 'md' | 'lg' | 'xl' | '2xl'
 
 interface Props {
   src: ImageProps['src']
@@ -9,18 +9,16 @@ interface Props {
   shadow?: boolean
   focusable?: boolean
   onClick?: () => void
-  onKeyPress?: (e: React.KeyboardEvent<HTMLButtonElement>) => void
   className?: string
 }
 
 export default function IconButton({
   src,
-  size = 'medium',
+  size = 'md',
   square = false,
   shadow = false,
   focusable = true,
   onClick,
-  onKeyPress,
   className = '',
 }: Props) {
   const sizeClassName: string = getSizeClassName(size)
@@ -33,10 +31,14 @@ export default function IconButton({
       } ${className}`}
       tabIndex={focusable ? 0 : undefined}
       onClick={onClick}
-      onKeyPress={onKeyPress}
     >
       <div className='relative h-full w-full '>
-        <Image priority layout='fill' src={src} />
+        <Image
+          priority
+          layout='fill'
+          src={src}
+          className={!square ? 'rounded-full' : ''}
+        />
       </div>
     </button>
   )
@@ -44,11 +46,15 @@ export default function IconButton({
 
 function getSizeClassName(size: Size): string {
   switch (size) {
-    case 'small':
+    case 'sm':
       return 'h-10 w-10'
-    case 'medium':
+    case 'md':
       return 'h-11 w-11'
-    case 'large':
+    case 'lg':
       return 'h-12 w-12'
+    case 'xl':
+      return 'h-16 w-16'
+    case '2xl':
+      return 'h-20 w-20'
   }
 }
