@@ -1,59 +1,59 @@
-import React, { useState } from 'react'
-import useTodos from '../hooks/useTodos'
-import { ITodo } from '../utils/interfaces/todos'
-import ClearTextIconButton from './IconButton'
-import CompleteTodoRoundCheckbox from './RoundCheckbox'
-import Textbox from './Textbox'
+import React, { useState } from "react";
+import useTodos from "../hooks/useTodos";
+import { ITodo } from "../utils/interfaces/todos";
+import ClearTextIconButton from "./IconButton";
+import CompleteTodoRoundCheckbox from "./RoundCheckbox";
+import Textbox from "./Textbox";
 
 interface Props {
-  autoFocus?: boolean
+  autoFocus?: boolean;
 }
 
 export default function CreateTodoField({ autoFocus = false }: Props) {
   // set local completed state
-  const [completed, setCompleted] = useState<boolean>(false)
+  const [completed, setCompleted] = useState<boolean>(false);
   // set local title state
-  const [title, setTitle] = useState<ITodo['title']>()
+  const [title, setTitle] = useState<ITodo["title"]>();
 
   // hooks
-  const { createTodo } = useTodos()
+  const { createTodo } = useTodos();
 
   // handlers
   const handleToggleCompleted = (checked: boolean) => {
-    setCompleted(checked)
-  }
+    setCompleted(checked);
+  };
 
-  const handleChangeTitle = (newTitle: ITodo['title']) => {
-    setTitle(newTitle)
-  }
+  const handleChangeTitle = (newTitle: ITodo["title"]) => {
+    setTitle(newTitle);
+  };
 
-  const handleSubmitTodo = (title: ITodo['title']) => {
+  const handleSubmitTodo = (title: ITodo["title"]) => {
     // add to db
-    createTodo({ title, completed })
+    createTodo({ title, completed });
     // update local states
-    setTitle('')
-    setCompleted(false)
-  }
+    setTitle("");
+    setCompleted(false);
+  };
 
   const handleClearTodo = () => {
-    setTitle('')
-    setCompleted(false)
-  }
+    setTitle("");
+    setCompleted(false);
+  };
 
   return (
     <div
-      id={'create-todo'}
+      id={"create-todo"}
       className={`flex w-full h-full justify-center items-center bg-light-0 dark:bg-dark-1`}
       tabIndex={0}
     >
       <CompleteTodoRoundCheckbox
-        id={'create-todo-checkbox'}
+        id={"create-todo-checkbox"}
         checked={completed}
         onToggle={handleToggleCompleted}
       />
       <Textbox
-        value={title}
-        placeholder='Create a new todo...'
+        value={title || ""}
+        placeholder="Create a new todo..."
         onChange={handleChangeTitle}
         onSubmit={handleSubmitTodo}
         debounceDelay={0}
@@ -63,11 +63,11 @@ export default function CreateTodoField({ autoFocus = false }: Props) {
       />
 
       <ClearTextIconButton
-        src='/icons/icon-cross.svg'
-        size='small'
+        alt="Clear Text"
+        src="/icons/icon-cross.svg"
+        size="md"
         onClick={handleClearTodo}
-        onKeyPress={handleClearTodo}
       />
     </div>
-  )
+  );
 }
