@@ -23,6 +23,9 @@ const options = {
     sessionsCollection: "sessions",
     verificationRequestsCollection: "verificationRequests",
   }),
+  events: {
+    error: (msg: any) => console.log("error", msg),
+  },
   callbacks: {
     session: async (session: SessionBase, user: IUser) => {
       const updatedSession = {

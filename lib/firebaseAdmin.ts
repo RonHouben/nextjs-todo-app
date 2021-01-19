@@ -22,10 +22,7 @@ export default function firebaseAdmin(): FirebaseAdminResult {
           "\n"
         ),
       }),
-      databaseURL:
-        process.env.NODE_ENV === "development"
-          ? process.env.NEXT_PUBLIC_FIRESTORE_EMULATOR_HOST
-          : process.env.NEXT_PUBLIC_FIREBASE_DB_URL,
+      databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DB_URL,
     });
   }
 
