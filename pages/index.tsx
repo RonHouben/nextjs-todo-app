@@ -1,33 +1,33 @@
-import { GetServerSideProps } from 'next'
-import React, { useState } from 'react'
-import { getSession, Session } from 'next-auth/client'
-import Layout from '../components/Layout'
-import Filterbar from '../components/Filterbar'
-import Paper from '../components/Paper'
-import useTodos from '../hooks/useTodos'
-import { ITodo, ITodoStatusEnum } from '../utils/interfaces/todos'
-import TodosList from '../components/TodosList'
-import CreateTodoField from '../components/CreateTodoField'
+import { GetServerSideProps } from "next";
+import React, { useState } from "react";
+import Layout from "../components/Layout";
+import Filterbar from "../components/Filterbar";
+import Paper from "../components/Paper";
+import useTodos from "../hooks/useTodos";
+import { ITodo, ITodoStatusEnum } from "../utils/interfaces/todos";
+import TodosList from "../components/TodosList";
+import CreateTodoField from "../components/CreateTodoField";
+import { getSession } from "next-auth/client";
+import firebaseAdmin from "../lib/firebaseAdmin";
+import { ISession } from "../lib/firebaseAdapter";
 interface InitialProps {
-  initialData: ITodo[]
-  session: Session | null
+  initialData: ITodo[];
 }
 
-export default function TodoApp({ initialData, session }: InitialProps) {
+export default function TodoApp({ initialData }: InitialProps) {
   const [selectedFilter, setSelectedFilter] = useState<ITodoStatusEnum>(
     ITodoStatusEnum.ALL
-  )
+  );
 
-  const { clearCompleted, activeTodosLeft } = useTodos({ initialData })
+  const { clearCompleted, activeTodosLeft } = useTodos({ initialData });
 
   return (
-    <div className=''>
+    <div className="">
       <Layout>
-        <Paper rounded shadow className='w-full'>
-          {!session && <div>Not signed in</div>}
-          {session && <CreateTodoField autoFocus />}
+        <Paper rounded shadow className="w-full">
+          <CreateTodoField autoFocus />
         </Paper>
-        <Paper rounded shadow verticalDivider className='w-full'>
+        <Paper rounded shadow verticalDivider className="w-full">
           <TodosList initialData={initialData} filter={selectedFilter} />
           <Filterbar
             itemsLeft={activeTodosLeft()}
@@ -43,41 +43,42 @@ export default function TodoApp({ initialData, session }: InitialProps) {
         </Paper>
       </Layout>
     </div>
-  )
+  );
 }
 
 export const getServerSideProps: GetServerSideProps<InitialProps> = async ({
   req,
 }) => {
-  const session = await getSession({ req })
-
-  console.log('sessions', session)
-
-  // get initial todos from the backend
-  // const { firestore, getDataWithId } = firebaseAdmin()
-
-  let todos: ITodo[] = []
-
-  // get todos from DB
-  // const snapshot = await firestore.collection('todos').orderBy('created').get()
-  // add the data to the todos result array
-  // snapshot.forEach((doc) => (todos = [...todos, getDataWithId(doc)]))
-
-  // console.log('TODOS', todos)
+  const session = ((await getSession({ req })) as unknown) as ISession;
 
   if (!session) {
     return {
       redirect: {
         permanent: false,
-        destination: '/login',
+        destination: "/login",
       },
-    }
+    };
   }
+
+  // get initial todos from the backend
+  const { firestore, getDataWithId } = firebaseAdmin();
+
+  // initalize empty todos array
+  let todos: ITodo[] = [];
+
+  // get todos from DB
+  const snapshot = await firestore
+    .collection("todos")
+    .where("userId", "==", session.userId)
+    .orderBy("created")
+    .get();
+
+  // add the data to the todos result array
+  snapshot.forEach((doc) => (todos = [...todos, getDataWithId(doc)]));
 
   return {
     props: {
-      session,
       initialData: JSON.parse(JSON.stringify(todos)),
     },
-  }
-}
+  };
+};

@@ -4,7 +4,7 @@ type Size = "sm" | "md" | "lg" | "xl" | "2xl";
 
 interface Props {
   alt: string;
-  src: ImageProps["src"];
+  src: ImageProps["src"] | undefined | null;
   size?: Size;
   square?: boolean;
   shadow?: boolean;
@@ -38,7 +38,7 @@ export default function IconButton({
         <Image
           priority
           layout="fill"
-          src={src}
+          src={src || ""}
           className={!square ? "rounded-full" : ""}
           alt={alt}
           title={alt}

@@ -7,21 +7,19 @@ interface Props {
 }
 
 export default function Navbar({ pageTitle }: Props) {
-  const session = useSession();
-  const user = session[0]?.user;
-
-  console.log("session", session);
+  const [session, loading] = useSession();
+  const user = session?.user;
 
   return (
     <div className="flex justify-between items-center pb-10">
       {user && (
         <ProfileIconButton
           alt="Go to Profile"
-          src={user?.image || "/icons/unknown-user-icon.png"}
+          src={user?.image}
           size="2xl"
           onClick={signout}
           focusable
-          className={!user?.image ? "bg-purple-200 " : ""}
+          className={loading ? "animate-pulse" : ""}
         />
       )}
       <h1 className="uppercase">{pageTitle || null}</h1>

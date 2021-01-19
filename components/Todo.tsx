@@ -88,10 +88,10 @@ export default function Todo({ id, initialData, placeholder }: Props) {
       )}
       {/* delete Todo button */}
       <DeleteTodoIconButton
+        alt="Delete Todo"
         src="/icons/icon-cross.svg"
-        size="small"
+        size="md"
         onClick={() => handleDelete(todo.id)}
-        onKeyPress={() => handleDelete(todo.id)}
         className={focused ? "visible" : "hidden"}
       />
     </div>

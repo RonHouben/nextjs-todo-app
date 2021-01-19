@@ -1,32 +1,36 @@
-import _ from 'lodash'
-import { ITodo, ITodoStatusEnum } from '../utils/interfaces/todos'
-import firebase from 'firebase/app'
-import { ObservableStatus, useFirestoreCollectionData } from 'reactfire'
-import { firebaseApp, firestoreServerTimestamp } from '../lib/firebaseClient'
+import _ from "lodash";
+import { ITodo, ITodoStatusEnum } from "../utils/interfaces/todos";
+import firebase from "firebase/app";
+import { ObservableStatus, useFirestoreCollectionData } from "reactfire";
+import { firebaseApp, firestoreServerTimestamp } from "../lib/firebaseClient";
+import { useSession } from "next-auth/client";
 
 interface Props {
-  initialData?: ITodo[]
-  filter?: ITodoStatusEnum
+  initialData?: ITodo[];
+  filter?: ITodoStatusEnum;
 }
 interface IUseTodosResult {
-  getTodos: () => ObservableStatus<ITodo[]>
-  createTodo: (newTodo: Partial<ITodo>) => void
-  updateTodo: (id: ITodo['id'], update: Partial<ITodo>) => void
-  deleteTodo: (id: ITodo['id']) => void
-  clearCompleted: () => void
-  activeTodosLeft: () => number
+  getTodos: () => ObservableStatus<ITodo[]>;
+  createTodo: (newTodo: Partial<ITodo>) => void;
+  updateTodo: (id: ITodo["id"], update: Partial<ITodo>) => void;
+  deleteTodo: (id: ITodo["id"]) => void;
+  clearCompleted: () => void;
+  activeTodosLeft: () => number;
 }
 
 export default function useTodos({
   initialData,
   filter,
 }: Props = {}): IUseTodosResult {
+  // get userID from session
+  const [session] = useSession();
+  const userId = session?.userId;
   // initiate Firebase
-  const FIRESTORE = firebaseApp.firestore()
+  const FIRESTORE = firebaseApp.firestore();
   interface GetTodosProps {
-    firestore: firebase.firestore.Firestore
-    initialData?: ITodo[]
-    filter?: ITodoStatusEnum
+    firestore: firebase.firestore.Firestore;
+    initialData?: ITodo[];
+    filter?: ITodoStatusEnum;
   }
 
   function getTodos({ firestore, initialData, filter }: GetTodosProps) {
@@ -34,51 +38,61 @@ export default function useTodos({
     const query = filter
       ? getQuery({
           firestore,
-          collectionPath: 'todos',
+          collectionPath: "todos",
           whereFilterOptions: getWhereFilterOptions(filter),
         })
-      : getQuery({ firestore, collectionPath: 'todos' })
+      : getQuery({ firestore, collectionPath: "todos" });
 
     // get the data from the DB
     return useFirestoreCollectionData<ITodo>(query, {
       initialData,
-      idField: 'id',
-    })
+      idField: "id",
+    });
   }
 
   async function createTodo(newTodo: Partial<ITodo>): Promise<void> {
-    await FIRESTORE.collection('todos').add({
-      ...newTodo,
-      created: firestoreServerTimestamp,
-    })
+    try {
+      if (!userId)
+        throw new Error(
+          "please specify a userId when initializing the useTodos hook"
+        );
+
+      await FIRESTORE.collection("todos").add({
+        ...newTodo,
+        created: firestoreServerTimestamp,
+        userId,
+      });
+    } catch (error) {
+      console.error("[useTodos][createTodo]", error.message);
+    }
   }
 
   async function updateTodo(
-    id: ITodo['id'],
+    id: ITodo["id"],
     update: Partial<ITodo>
   ): Promise<void> {
-    await FIRESTORE.collection('todos').doc(id).update(update)
+    await FIRESTORE.collection("todos").doc(id).update(update);
   }
 
-  async function deleteTodo(id: ITodo['id']): Promise<void> {
-    await FIRESTORE.collection('todos').doc(id).delete()
+  async function deleteTodo(id: ITodo["id"]): Promise<void> {
+    await FIRESTORE.collection("todos").doc(id).delete();
   }
 
   async function clearCompleted(): Promise<void> {
     // create the query
     const query = getQuery({
       firestore: FIRESTORE,
-      collectionPath: 'todos',
+      collectionPath: "todos",
       whereFilterOptions: getWhereFilterOptions(ITodoStatusEnum.COMPLETED),
-    })
+    });
     // get the snapshot
-    const snapshot = await query.get()
+    const snapshot = await query.get();
     // create a batch
-    const batch = FIRESTORE.batch()
+    const batch = FIRESTORE.batch();
     // delete documents
-    snapshot.docs.forEach((doc) => batch.delete(doc.ref))
+    snapshot.docs.forEach((doc) => batch.delete(doc.ref));
     // commit the batch
-    await batch.commit()
+    await batch.commit();
   }
 
   // helper functions
@@ -86,25 +100,25 @@ export default function useTodos({
     string | firebase.firestore.FieldPath,
     firebase.firestore.WhereFilterOp,
     any
-  ]
+  ];
 
   function getWhereFilterOptions(
     filter: ITodoStatusEnum
   ): GetWhereFilterOptionsResult | undefined {
     switch (filter) {
       case ITodoStatusEnum.ACTIVE:
-        return ['completed', '!=', true]
+        return ["completed", "!=", true];
       case ITodoStatusEnum.COMPLETED:
-        return ['completed', '==', true]
+        return ["completed", "==", true];
       default:
-        return undefined
+        return undefined;
     }
   }
 
   interface GetQueryProps {
-    firestore: firebase.firestore.Firestore
-    whereFilterOptions?: GetWhereFilterOptionsResult
-    collectionPath: string
+    firestore: firebase.firestore.Firestore;
+    whereFilterOptions?: GetWhereFilterOptionsResult;
+    collectionPath: string;
   }
 
   function getQuery({
@@ -113,9 +127,9 @@ export default function useTodos({
     whereFilterOptions,
   }: GetQueryProps) {
     if (whereFilterOptions) {
-      return firestore.collection(collectionPath).where(...whereFilterOptions)
+      return firestore.collection(collectionPath).where(...whereFilterOptions);
     } else {
-      return firestore.collection(collectionPath)
+      return firestore.collection(collectionPath);
     }
   }
 
@@ -129,9 +143,9 @@ export default function useTodos({
       const { data } = getTodos({
         firestore: FIRESTORE,
         filter: ITodoStatusEnum.ACTIVE,
-      })
+      });
 
-      return data?.length || 0
+      return data?.length || 0;
     },
-  }
+  };
 }

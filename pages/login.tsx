@@ -1,10 +1,29 @@
-import { signIn } from "next-auth/client";
 import GithubIconButton from "../components/IconButton";
 import Layout from "../components/Layout";
 import Paper from "../components/Paper";
 import Textbox from "../components/Textbox";
+import { getSession, signIn } from "next-auth/client";
+import { GetServerSideProps } from "next";
 
 export default function LoginPage() {
+  // handlers
+  const handleSignIn = async (provider: string) => {
+    try {
+      // signIn with Github
+      switch (provider) {
+        case "github":
+          signIn("github");
+          return;
+        default:
+          return;
+      }
+    } catch (error) {
+      console.error("[/login:handleSignIn()]", error);
+      return;
+    }
+  };
+
+  // render component
   return (
     <Layout>
       <Paper
@@ -33,9 +52,24 @@ export default function LoginPage() {
           alt="Sign In with GitHub"
           src="/icons/GitHub-Mark-Light-120px-plus.png"
           className="bg-blue-400 hover:bg-green-300"
-          onClick={() => signIn("github", { callbackUrl: "/" })}
+          onClick={() => handleSignIn("github")}
         ></GithubIconButton>
       </Paper>
     </Layout>
   );
 }
+
+export const getServerSideProps: GetServerSideProps = async ({ req }) => {
+  const session = await getSession({ req });
+
+  if (session?.user) {
+    return {
+      redirect: {
+        destination: "/",
+      },
+      props: {},
+    };
+  }
+
+  return { props: {} };
+};

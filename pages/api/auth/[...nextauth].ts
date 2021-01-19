@@ -1,7 +1,12 @@
-import { NextApiRequest, NextApiResponse } from 'next'
-import NextAuth, { InitOptions } from 'next-auth'
-import Providers from 'next-auth/providers'
+import { NextApiRequest, NextApiResponse } from "next";
+import NextAuth, { InitOptions } from "next-auth";
+import Providers from "next-auth/providers";
+import { SessionBase } from "next-auth/_utils";
+import FirebaseAdapter, { IUser } from "../../../lib/firebaseAdapter";
+import firebaseAdmin from "../../../lib/firebaseAdmin";
+import { firebaseApp } from "../../../lib/firebaseClient";
 
+//@ts-ignore
 const options = {
   providers: [
     Providers.GitHub({
@@ -9,11 +14,26 @@ const options = {
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
     }),
   ],
-  pages: {
-    signIn: '/',
+  debug: false,
+  adapter: FirebaseAdapter.Adapter({
+    firestoreAdmin: firebaseAdmin().firestore,
+    firestoreClient: firebaseApp.firestore(),
+    usersCollection: "users",
+    accountsCollection: "accounts",
+    sessionsCollection: "sessions",
+    verificationRequestsCollection: "verificationRequests",
+  }),
+  callbacks: {
+    session: async (session: SessionBase, user: IUser) => {
+      const updatedSession = {
+        ...session,
+        userId: user.id,
+      };
+
+      return Promise.resolve(updatedSession);
+    },
   },
-  // database: process.env.NEXT_PUBLIC_FIREBASE_DB_URL,
-} as InitOptions
+} as InitOptions;
 
 export default (req: NextApiRequest, res: NextApiResponse) =>
-  NextAuth(req, res, options)
+  NextAuth(req, res, options);
