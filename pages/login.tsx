@@ -7,7 +7,7 @@ import { GetServerSideProps } from "next";
 import firebaseAdmin from "../lib/firebaseAdmin";
 import { ITodo } from "../utils/interfaces/todos";
 
-export default function LoginPage({ todos }) {
+export default function LoginPage({ todos }: { todos: ITodo[] }) {
   console.log("todos", todos);
   // handlers
   const handleSignIn = async (provider: string) => {

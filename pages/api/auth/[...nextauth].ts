@@ -13,6 +13,7 @@ const options: InitOptions = {
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
     }),
   ],
+  //@ts-ignore
   adapter: FirebaseAdapter.Adapter({
     firestoreAdmin: firebaseAdmin().firestore,
     firestoreClient: firebaseApp.firestore(),
