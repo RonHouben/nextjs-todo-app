@@ -177,6 +177,7 @@ const Adapter = (config: IAdapterConfig, _options?: {}) => {
       const { firestoreAdmin, accountsCollection, usersCollection } = config;
 
       try {
+        console.log("before db call");
         const accountSnapshot = await firestoreAdmin
           .collection(accountsCollection)
           .where("providerId", "==", providerId)
@@ -184,6 +185,7 @@ const Adapter = (config: IAdapterConfig, _options?: {}) => {
           .limit(1)
           .get();
 
+        console.log("after db call");
         if (accountSnapshot.empty) return null;
 
         const userId = accountSnapshot.docs[0].data().userId;
