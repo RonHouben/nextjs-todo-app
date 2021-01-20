@@ -1,6 +1,7 @@
 import admin from "firebase-admin";
 import client from "firebase/app";
 import { createHash, randomBytes } from "crypto";
+import { AppOptions } from "next-auth";
 
 interface IAdapterConfig {
   firestoreAdmin: admin.firestore.Firestore;
@@ -11,14 +12,6 @@ interface IAdapterConfig {
   verificationRequestsCollection: "verificationRequests" | string;
 }
 
-interface IGetAdapterAppOptions {
-  debug: boolean;
-  session: {
-    maxAge: number;
-    updateAge: number;
-  };
-  baseUrl: string;
-}
 export interface IProfile {
   name: string;
   email: string | null;
@@ -63,8 +56,8 @@ interface IVerificationRequest {
   updatedAt: admin.firestore.FieldValue;
 }
 
-const Adapter = (config: IAdapterConfig, _options?: {}) => {
-  async function getAdapter(appOptions: IGetAdapterAppOptions) {
+const Adapter = (config: IAdapterConfig, _options = {}) => {
+  async function getAdapter(appOptions: AppOptions) {
     // Display debug output if debug option enabled
     function _debug(...args: any[]) {
       if (appOptions.debug) {
@@ -177,7 +170,6 @@ const Adapter = (config: IAdapterConfig, _options?: {}) => {
       const { firestoreAdmin, accountsCollection, usersCollection } = config;
 
       try {
-        console.log("before db call");
         const accountSnapshot = await firestoreAdmin
           .collection(accountsCollection)
           .where("providerId", "==", providerId)
@@ -185,7 +177,6 @@ const Adapter = (config: IAdapterConfig, _options?: {}) => {
           .limit(1)
           .get();
 
-        console.log("after db call");
         if (accountSnapshot.empty) return null;
 
         const userId = accountSnapshot.docs[0].data().userId;

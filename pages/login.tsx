@@ -4,10 +4,11 @@ import Paper from "../components/Paper";
 import Textbox from "../components/Textbox";
 import { getSession, signIn } from "next-auth/client";
 import { GetServerSideProps } from "next";
+import firebaseAdmin from "../lib/firebaseAdmin";
+import { ITodo } from "../utils/interfaces/todos";
 
-export default function LoginPage() {
-  console.log("NEXTAUTH_URL", process.env.NEXTAUTH_URL);
-  console.log("VERCEL_URL", process.env.VERCEL_URL);
+export default function LoginPage({ todos }) {
+  console.log("todos", todos);
   // handlers
   const handleSignIn = async (provider: string) => {
     try {
@@ -64,6 +65,21 @@ export default function LoginPage() {
 export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   const session = await getSession({ req });
 
+  const { firestore, getDataWithId } = firebaseAdmin();
+
+  // initalize empty todos array
+  let todos: ITodo[] = [];
+
+  // get todos from DB
+  const snapshot = await firestore
+    .collection("todos")
+    // .where("userId", "==", session.userId)
+    .orderBy("created")
+    .get();
+
+  // add the data to the todos result array
+  snapshot.forEach((doc) => (todos = [...todos, getDataWithId(doc)]));
+
   if (session?.user) {
     return {
       redirect: {
@@ -73,5 +89,9 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
     };
   }
 
-  return { props: {} };
+  return {
+    props: {
+      todos: JSON.parse(JSON.stringify(todos)),
+    },
+  };
 };
