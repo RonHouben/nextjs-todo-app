@@ -6,6 +6,8 @@ import { getSession, signIn } from "next-auth/client";
 import { GetServerSideProps } from "next";
 
 export default function LoginPage() {
+  console.log("NEXTAUTH_URL", process.env.NEXTAUTH_URL);
+  console.log("VERCEL_URL", process.env.VERCEL_URL);
   // handlers
   const handleSignIn = async (provider: string) => {
     try {
