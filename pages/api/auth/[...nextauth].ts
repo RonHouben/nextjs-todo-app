@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import NextAuth, { InitOptions, AppOptions } from "next-auth";
+import NextAuth, { InitOptions } from "next-auth";
 import Providers from "next-auth/providers";
 import { SessionBase } from "next-auth/_utils";
 import FirebaseAdapter, { IUser } from "../../../lib/firebaseAdapter";
