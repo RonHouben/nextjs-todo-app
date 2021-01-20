@@ -21,6 +21,9 @@ export default function TodoApp({ initialData }: InitialProps) {
 
   const { clearCompleted, activeTodosLeft } = useTodos({ initialData });
 
+  console.log("NEXTAUTH_URL", process.env.NEXTAUTH_URL);
+  console.log("VERCEL_URL", process.env.VERCEL_URL);
+
   return (
     <div className="">
       <Layout>
