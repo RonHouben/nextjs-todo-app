@@ -65,20 +65,20 @@ export default function LoginPage({ todos }: { todos: ITodo[] }) {
 export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   const session = await getSession({ req });
 
-  const { firestore, getDataWithId } = firebaseAdmin();
+  // const { firestore, getDataWithId } = firebaseAdmin();
 
   // initalize empty todos array
   let todos: ITodo[] = [];
 
   // get todos from DB
-  const snapshot = await firestore
-    .collection("todos")
-    // .where("userId", "==", session.userId)
-    .orderBy("created")
-    .get();
+  // const snapshot = await firestore
+  //   .collection("todos")
+  //   // .where("userId", "==", session.userId)
+  //   .orderBy("created")
+  //   .get();
 
   // add the data to the todos result array
-  snapshot.forEach((doc) => (todos = [...todos, getDataWithId(doc)]));
+  // snapshot.forEach((doc) => (todos = [...todos, getDataWithId(doc)]));
 
   if (session?.user) {
     return {

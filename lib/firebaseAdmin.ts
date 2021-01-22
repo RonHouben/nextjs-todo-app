@@ -1,5 +1,4 @@
 import admin from "firebase-admin";
-
 interface FirebaseAdminResult {
   app: admin.app.App;
   firestore: admin.firestore.Firestore;
@@ -12,6 +11,7 @@ export default function firebaseAdmin(): FirebaseAdminResult {
   // Initialize Firebase if not yet initialized
   if (!admin.apps.length) {
     admin.initializeApp({
+      databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DB_URL,
       projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
       credential: admin.credential.cert({
         projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
@@ -22,7 +22,6 @@ export default function firebaseAdmin(): FirebaseAdminResult {
           "\n"
         ),
       }),
-      databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DB_URL,
     });
   }
 

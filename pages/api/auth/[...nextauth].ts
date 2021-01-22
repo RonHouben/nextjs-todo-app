@@ -4,7 +4,6 @@ import Providers from "next-auth/providers";
 import { SessionBase } from "next-auth/_utils";
 import FirebaseAdapter, { IUser } from "../../../lib/firebaseAdapter";
 import firebaseAdmin from "../../../lib/firebaseAdmin";
-import { firebaseApp } from "../../../lib/firebaseClient";
 
 const options: InitOptions = {
   providers: [
@@ -16,7 +15,6 @@ const options: InitOptions = {
   //@ts-ignore
   adapter: FirebaseAdapter.Adapter({
     firestoreAdmin: firebaseAdmin().firestore,
-    firestoreClient: firebaseApp.firestore(),
     usersCollection: "users",
     accountsCollection: "accounts",
     sessionsCollection: "sessions",

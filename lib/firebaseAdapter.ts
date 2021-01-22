@@ -1,11 +1,9 @@
 import admin from "firebase-admin";
-import client from "firebase/app";
 import { createHash, randomBytes } from "crypto";
 import { AppOptions } from "next-auth";
 
 interface IAdapterConfig {
   firestoreAdmin: admin.firestore.Firestore;
-  firestoreClient: client.firestore.Firestore;
   usersCollection: "users" | string;
   accountsCollection: "accounts" | string;
   sessionsCollection: "sessions" | string;

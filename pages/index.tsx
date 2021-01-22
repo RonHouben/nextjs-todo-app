@@ -50,6 +50,7 @@ export const getServerSideProps: GetServerSideProps<InitialProps> = async ({
   req,
 }) => {
   const session = ((await getSession({ req })) as unknown) as ISession;
+  console.log("session", session);
 
   if (!session) {
     return {
@@ -75,6 +76,7 @@ export const getServerSideProps: GetServerSideProps<InitialProps> = async ({
 
   // add the data to the todos result array
   snapshot.forEach((doc) => (todos = [...todos, getDataWithId(doc)]));
+  console.log("todos", todos);
 
   return {
     props: {
