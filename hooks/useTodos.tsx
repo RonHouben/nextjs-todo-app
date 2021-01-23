@@ -49,7 +49,10 @@ export default function useTodos({
     });
   }
 
-  async function createTodo(newTodo: Partial<ITodo>): Promise<void> {
+  async function createTodo(
+    userId: string = "",
+    newTodo: Partial<ITodo>
+  ): Promise<void> {
     try {
       if (!userId)
         throw new Error(
@@ -144,7 +147,7 @@ export default function useTodos({
   return {
     getTodos: () =>
       getTodos({ firestore: FIRESTORE, initialData, filter, userId }),
-    createTodo,
+    createTodo: (newTodo) => createTodo(userId, newTodo),
     updateTodo,
     deleteTodo,
     clearCompleted,

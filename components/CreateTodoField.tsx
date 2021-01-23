@@ -4,19 +4,23 @@ import { ITodo } from "../utils/interfaces/todos";
 import ClearTextIconButton from "./IconButton";
 import CompleteTodoRoundCheckbox from "./RoundCheckbox";
 import Textbox from "./Textbox";
+import { useSession } from "next-auth/client";
 
 interface Props {
   autoFocus?: boolean;
 }
 
 export default function CreateTodoField({ autoFocus = false }: Props) {
+  // get user from session
+  const session = useSession();
+  const userId = session[0]?.userId || undefined;
   // set local completed state
   const [completed, setCompleted] = useState<boolean>(false);
   // set local title state
   const [title, setTitle] = useState<ITodo["title"]>();
 
   // hooks
-  const { createTodo } = useTodos();
+  const { createTodo } = useTodos({ userId });
 
   // handlers
   const handleToggleCompleted = (checked: boolean) => {
