@@ -59,7 +59,7 @@ export default function useTodos({
 
       await FIRESTORE.collection("todos").add({
         ...newTodo,
-        created: firestoreServerTimestamp,
+        created: firestoreServerTimestamp(),
         userId,
       });
     } catch (error) {
