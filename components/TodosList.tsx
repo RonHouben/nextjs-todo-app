@@ -15,7 +15,8 @@ export default function TodosList({ initialData, filter }: Props) {
     <Fragment>
       {status === "error" && <div>ERROR {error?.message}</div>}
 
-      {todos.length > 0 &&
+      {todos &&
+        todos.length > 0 &&
         todos.map((todo) => (
           <Todo key={todo.id} id={todo.id} initialData={todo} />
         ))}

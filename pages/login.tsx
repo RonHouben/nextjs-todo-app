@@ -4,7 +4,7 @@ import Paper from "../components/Paper";
 import Textbox from "../components/Textbox";
 import { getSession, signIn } from "next-auth/client";
 import { GetServerSideProps } from "next";
-import firebaseAdmin from "../lib/firebaseAdmin";
+// import firebaseAdmin from "../lib/firebaseAdmin";
 import { ITodo } from "../utils/interfaces/todos";
 
 export default function LoginPage({ todos }: { todos: ITodo[] }) {

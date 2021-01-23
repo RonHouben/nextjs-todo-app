@@ -4,22 +4,18 @@ import Layout from "../components/Layout";
 import Filterbar from "../components/Filterbar";
 import Paper from "../components/Paper";
 import useTodos from "../hooks/useTodos";
-import { ITodo, ITodoStatusEnum } from "../utils/interfaces/todos";
+import { ITodoStatusEnum } from "../utils/interfaces/todos";
 import TodosList from "../components/TodosList";
 import CreateTodoField from "../components/CreateTodoField";
 import { getSession } from "next-auth/client";
-import firebaseAdmin from "../lib/firebaseAdmin";
 import { ISession } from "../lib/firebaseAdapter";
-interface InitialProps {
-  initialData: ITodo[];
-}
 
-export default function TodoApp({ initialData }: InitialProps) {
+export default function TodoApp() {
   const [selectedFilter, setSelectedFilter] = useState<ITodoStatusEnum>(
     ITodoStatusEnum.ALL
   );
 
-  const { clearCompleted, activeTodosLeft } = useTodos({ initialData });
+  const { clearCompleted, activeTodosLeft } = useTodos();
 
   return (
     <div className="">
@@ -28,7 +24,7 @@ export default function TodoApp({ initialData }: InitialProps) {
           <CreateTodoField autoFocus />
         </Paper>
         <Paper rounded shadow verticalDivider className="w-full">
-          <TodosList initialData={initialData} filter={selectedFilter} />
+          <TodosList filter={selectedFilter} />
           <Filterbar
             itemsLeft={activeTodosLeft()}
             filters={[
@@ -46,11 +42,8 @@ export default function TodoApp({ initialData }: InitialProps) {
   );
 }
 
-export const getServerSideProps: GetServerSideProps<InitialProps> = async ({
-  req,
-}) => {
+export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   const session = ((await getSession({ req })) as unknown) as ISession;
-  console.log("session", session);
 
   if (!session) {
     return {
@@ -61,26 +54,7 @@ export const getServerSideProps: GetServerSideProps<InitialProps> = async ({
     };
   }
 
-  // get initial todos from the backend
-  const { firestore, getDataWithId } = firebaseAdmin();
-
-  // initalize empty todos array
-  let todos: ITodo[] = [];
-
-  // get todos from DB
-  const snapshot = await firestore
-    .collection("todos")
-    .where("userId", "==", session.userId)
-    .orderBy("created")
-    .get();
-
-  // add the data to the todos result array
-  snapshot.forEach((doc) => (todos = [...todos, getDataWithId(doc)]));
-  console.log("todos", todos);
-
   return {
-    props: {
-      initialData: JSON.parse(JSON.stringify(todos)),
-    },
+    props: {},
   };
 };
