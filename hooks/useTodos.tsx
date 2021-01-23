@@ -3,11 +3,10 @@ import { ITodo, ITodoStatusEnum } from "../utils/interfaces/todos";
 import firebase from "firebase/app";
 import { ObservableStatus, useFirestoreCollectionData } from "reactfire";
 import { firebaseApp, firestoreServerTimestamp } from "../lib/firebaseClient";
-import { useSession } from "next-auth/client";
-
 interface Props {
   initialData?: ITodo[];
   filter?: ITodoStatusEnum;
+  userId?: string;
 }
 interface IUseTodosResult {
   getTodos: () => ObservableStatus<ITodo[]>;
@@ -21,27 +20,27 @@ interface IUseTodosResult {
 export default function useTodos({
   initialData,
   filter,
+  userId,
 }: Props = {}): IUseTodosResult {
-  // get userID from session
-  const [session] = useSession();
-  const userId = session?.userId;
   // initiate Firebase
   const FIRESTORE = firebaseApp.firestore();
   interface GetTodosProps {
     firestore: firebase.firestore.Firestore;
     initialData?: ITodo[];
     filter?: ITodoStatusEnum;
+    userId?: string;
   }
 
-  function getTodos({ firestore, initialData, filter }: GetTodosProps) {
+  function getTodos({ firestore, initialData, filter, userId }: GetTodosProps) {
     // get the query
     const query = filter
       ? getQuery({
           firestore,
           collectionPath: "todos",
           whereFilterOptions: getWhereFilterOptions(filter),
+          userId,
         })
-      : getQuery({ firestore, collectionPath: "todos" });
+      : getQuery({ firestore, collectionPath: "todos", userId });
 
     // get the data from the DB
     return useFirestoreCollectionData<ITodo>(query, {
@@ -119,22 +118,32 @@ export default function useTodos({
     firestore: firebase.firestore.Firestore;
     whereFilterOptions?: GetWhereFilterOptionsResult;
     collectionPath: string;
+    userId?: string;
   }
 
   function getQuery({
     firestore,
     collectionPath,
     whereFilterOptions,
+    userId,
   }: GetQueryProps) {
-    if (whereFilterOptions) {
+    if (userId && whereFilterOptions) {
+      return firestore
+        .collection(collectionPath)
+        .where(...whereFilterOptions)
+        .where("userId", "==", userId);
+    } else if (!userId && whereFilterOptions) {
       return firestore.collection(collectionPath).where(...whereFilterOptions);
+    } else if (userId && !whereFilterOptions) {
+      return firestore.collection(collectionPath).where("userId", "==", userId);
     } else {
       return firestore.collection(collectionPath);
     }
   }
 
   return {
-    getTodos: () => getTodos({ firestore: FIRESTORE, initialData, filter }),
+    getTodos: () =>
+      getTodos({ firestore: FIRESTORE, initialData, filter, userId }),
     createTodo,
     updateTodo,
     deleteTodo,
@@ -143,6 +152,7 @@ export default function useTodos({
       const { data } = getTodos({
         firestore: FIRESTORE,
         filter: ITodoStatusEnum.ACTIVE,
+        userId,
       });
 
       return data?.length || 0;

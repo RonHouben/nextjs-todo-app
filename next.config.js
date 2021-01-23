@@ -16,6 +16,7 @@ module.exports = withPWA({
       "avatars1.githubusercontent.com",
       "avatars2.githubusercontent.com",
       "avatars3.githubusercontent.com",
+      "lh3.googleusercontent.com",
     ],
   },
 });

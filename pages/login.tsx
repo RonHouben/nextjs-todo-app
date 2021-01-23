@@ -1,14 +1,12 @@
-import GithubIconButton from "../components/IconButton";
 import Layout from "../components/Layout";
 import Paper from "../components/Paper";
 import Textbox from "../components/Textbox";
 import { getSession, signIn } from "next-auth/client";
 import { GetServerSideProps } from "next";
-// import firebaseAdmin from "../lib/firebaseAdmin";
-import { ITodo } from "../utils/interfaces/todos";
+import GithubIconButton from "../components/IconButton";
+import GoogleIconButton from "../components/IconButton";
 
-export default function LoginPage({ todos }: { todos: ITodo[] }) {
-  console.log("todos", todos);
+export default function LoginPage() {
   // handlers
   const handleSignIn = async (provider: string) => {
     try {
@@ -16,6 +14,9 @@ export default function LoginPage({ todos }: { todos: ITodo[] }) {
       switch (provider) {
         case "github":
           signIn("github");
+          return;
+        case "google":
+          signIn("google");
           return;
         default:
           return;
@@ -56,7 +57,12 @@ export default function LoginPage({ todos }: { todos: ITodo[] }) {
           src="/icons/GitHub-Mark-Light-120px-plus.png"
           className="bg-blue-400 hover:bg-green-300"
           onClick={() => handleSignIn("github")}
-        ></GithubIconButton>
+        />
+        <GoogleIconButton
+          alt="Sign in with Google"
+          src="/icons/google-icon.png"
+          onClick={() => handleSignIn("google")}
+        />
       </Paper>
     </Layout>
   );
@@ -64,21 +70,6 @@ export default function LoginPage({ todos }: { todos: ITodo[] }) {
 
 export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   const session = await getSession({ req });
-
-  // const { firestore, getDataWithId } = firebaseAdmin();
-
-  // initalize empty todos array
-  let todos: ITodo[] = [];
-
-  // get todos from DB
-  // const snapshot = await firestore
-  //   .collection("todos")
-  //   // .where("userId", "==", session.userId)
-  //   .orderBy("created")
-  //   .get();
-
-  // add the data to the todos result array
-  // snapshot.forEach((doc) => (todos = [...todos, getDataWithId(doc)]));
 
   if (session?.user) {
     return {
@@ -90,8 +81,6 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   }
 
   return {
-    props: {
-      todos: JSON.parse(JSON.stringify(todos)),
-    },
+    props: {},
   };
 };
