@@ -3,6 +3,8 @@ import { ITodo, ITodoStatusEnum } from "../utils/interfaces/todos";
 import firebase from "firebase/app";
 import { ObservableStatus, useFirestoreCollectionData } from "reactfire";
 import { firebaseApp, firestoreServerTimestamp } from "../lib/firebaseClient";
+import { toast } from "react-toastify";
+
 interface IUseTodosResult {
   getTodos: (props: GetTodosProps) => ObservableStatus<ITodo[]>;
   createTodo: (userId: string, newTodo: Partial<ITodo>) => void;
@@ -67,8 +69,10 @@ export default function useTodos(): IUseTodosResult {
         created: firestoreServerTimestamp(),
         userId,
       });
+      toast(`Created "${newTodo.title}"`, { type: "success" });
     } catch (error) {
       console.error("[useTodos][createTodo]", error.message);
+      toast(error.message, { type: "error" });
     }
   }
 
@@ -80,7 +84,16 @@ export default function useTodos(): IUseTodosResult {
   }
 
   async function deleteTodo(id: ITodo["id"]): Promise<void> {
-    await FIRESTORE.collection("todos").doc(id).delete();
+    try {
+      const snapshot = await FIRESTORE.collection("todos").doc(id).get();
+      const data = (await snapshot.data()) as ITodo;
+
+      snapshot.ref.delete();
+
+      toast(`Deleted "${data.title}`, { type: "success" });
+    } catch (error) {
+      console.error("[userTodos][deleteTod]", error.message);
+    }
   }
 
   // helper functions
