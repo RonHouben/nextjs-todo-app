@@ -6,36 +6,27 @@ import useTodos from "../hooks/useTodos";
 import Skeleton from "react-loading-skeleton";
 import SkeletonThemeWrapper from "./SkeletonThemeWrapper";
 import DeleteTodoIconButton from "./IconButton";
-import { useFirebaseApp, useFirestoreDocData } from "reactfire";
 
 interface Props {
   placeholder?: string;
-  id: ITodo["id"];
-  initialData?: ITodo;
+  todo: ITodo;
 }
 
-export default function Todo({ id, initialData, placeholder }: Props) {
+export default function Todo({ todo, placeholder }: Props) {
   const { updateTodo, deleteTodo } = useTodos();
   const [focused, setFocused] = useState<boolean>(false);
-
-  // get todo from DB
-  const todoRef = useFirebaseApp().firestore().collection("todos").doc(id);
-  const { data: todo } = useFirestoreDocData<ITodo>(todoRef, {
-    initialData,
-    idField: "id",
-  });
 
   // handlers
   const handleChangeTitle = (title: string): void => {
     if (!title) {
-      deleteTodo(id);
+      deleteTodo(todo.id);
     } else {
-      updateTodo(id, { ...todo, title });
+      updateTodo(todo.id, { ...todo, title });
     }
   };
 
   const handleToggleCompleted = (completed: boolean): void => {
-    updateTodo(id, { completed });
+    updateTodo(todo.id, { completed });
   };
 
   const handleDelete = (id: ITodo["id"]): void => {
@@ -44,7 +35,7 @@ export default function Todo({ id, initialData, placeholder }: Props) {
 
   return (
     <div
-      id={id}
+      id={todo.id}
       className={`flex w-full h-full justify-center items-center p-2 bg-light-0 dark:bg-dark-1`}
       tabIndex={0}
       onMouseEnter={() => setFocused(true)}
@@ -65,7 +56,7 @@ export default function Todo({ id, initialData, placeholder }: Props) {
       )}
       {todo && (
         <CompleteTodoRoundCheckbox
-          id={id}
+          id={todo.id}
           checked={todo.completed || false}
           onToggle={handleToggleCompleted}
         />

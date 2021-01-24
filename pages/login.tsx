@@ -2,9 +2,9 @@ import Layout from "../components/Layout";
 import Paper from "../components/Paper";
 import Textbox from "../components/Textbox";
 import { getSession, signIn } from "next-auth/client";
-import { GetServerSideProps } from "next";
 import GithubIconButton from "../components/IconButton";
 import GoogleIconButton from "../components/IconButton";
+import { GetServerSideProps } from "next";
 
 export default function LoginPage() {
   // handlers
@@ -13,10 +13,10 @@ export default function LoginPage() {
       // signIn with Github
       switch (provider) {
         case "github":
-          signIn("github");
+          signIn("github", { callbackUrl: "/" });
           return;
         case "google":
-          signIn("google");
+          signIn("google", { callbackUrl: "/" });
           return;
         default:
           return;
@@ -71,16 +71,14 @@ export default function LoginPage() {
 export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   const session = await getSession({ req });
 
-  if (session?.user) {
+  if (session) {
     return {
       redirect: {
         destination: "/",
+        permanent: false,
       },
       props: {},
     };
   }
-
-  return {
-    props: {},
-  };
+  return { props: {} };
 };

@@ -36,7 +36,6 @@ export default function IconButton({
     >
       <div className="relative h-full w-full ">
         <Image
-          priority
           layout="fill"
           src={src || ""}
           className={!square ? "rounded-full" : ""}

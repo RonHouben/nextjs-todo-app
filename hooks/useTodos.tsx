@@ -3,44 +3,47 @@ import { ITodo, ITodoStatusEnum } from "../utils/interfaces/todos";
 import firebase from "firebase/app";
 import { ObservableStatus, useFirestoreCollectionData } from "reactfire";
 import { firebaseApp, firestoreServerTimestamp } from "../lib/firebaseClient";
-interface Props {
-  initialData?: ITodo[];
-  filter?: ITodoStatusEnum;
-  userId?: string;
-}
 interface IUseTodosResult {
-  getTodos: () => ObservableStatus<ITodo[]>;
-  createTodo: (newTodo: Partial<ITodo>) => void;
+  getTodos: (props: GetTodosProps) => ObservableStatus<ITodo[]>;
+  createTodo: (userId: string, newTodo: Partial<ITodo>) => void;
   updateTodo: (id: ITodo["id"], update: Partial<ITodo>) => void;
   deleteTodo: (id: ITodo["id"]) => void;
-  clearCompleted: () => void;
-  activeTodosLeft: () => number;
+  getWhereFilterOptions: (
+    filter: ITodoStatusEnum
+  ) => GetWhereFilterOptionsResult | undefined;
+  getQuery: (props: GetQueryProps) => firebase.firestore.Query;
 }
 
-export default function useTodos({
-  initialData,
-  filter,
-  userId,
-}: Props = {}): IUseTodosResult {
+type GetWhereFilterOptionsResult = [
+  string | firebase.firestore.FieldPath,
+  firebase.firestore.WhereFilterOp,
+  any
+];
+interface GetTodosProps {
+  initialData?: ITodo[];
+  filter?: ITodoStatusEnum;
+  userId: string;
+}
+
+interface GetQueryProps {
+  whereFilterOptions?: GetWhereFilterOptionsResult;
+  collectionPath: string;
+  userId?: string;
+}
+
+export default function useTodos(): IUseTodosResult {
   // initiate Firebase
   const FIRESTORE = firebaseApp.firestore();
-  interface GetTodosProps {
-    firestore: firebase.firestore.Firestore;
-    initialData?: ITodo[];
-    filter?: ITodoStatusEnum;
-    userId?: string;
-  }
 
-  function getTodos({ firestore, initialData, filter, userId }: GetTodosProps) {
+  function getTodos({ initialData, filter, userId }: GetTodosProps) {
     // get the query
     const query = filter
       ? getQuery({
-          firestore,
           collectionPath: "todos",
           whereFilterOptions: getWhereFilterOptions(filter),
           userId,
         })
-      : getQuery({ firestore, collectionPath: "todos", userId });
+      : getQuery({ collectionPath: "todos", userId });
 
     // get the data from the DB
     return useFirestoreCollectionData<ITodo>(query, {
@@ -80,30 +83,7 @@ export default function useTodos({
     await FIRESTORE.collection("todos").doc(id).delete();
   }
 
-  async function clearCompleted(): Promise<void> {
-    // create the query
-    const query = getQuery({
-      firestore: FIRESTORE,
-      collectionPath: "todos",
-      whereFilterOptions: getWhereFilterOptions(ITodoStatusEnum.COMPLETED),
-    });
-    // get the snapshot
-    const snapshot = await query.get();
-    // create a batch
-    const batch = FIRESTORE.batch();
-    // delete documents
-    snapshot.docs.forEach((doc) => batch.delete(doc.ref));
-    // commit the batch
-    await batch.commit();
-  }
-
   // helper functions
-  type GetWhereFilterOptionsResult = [
-    string | firebase.firestore.FieldPath,
-    firebase.firestore.WhereFilterOp,
-    any
-  ];
-
   function getWhereFilterOptions(
     filter: ITodoStatusEnum
   ): GetWhereFilterOptionsResult | undefined {
@@ -117,48 +97,30 @@ export default function useTodos({
     }
   }
 
-  interface GetQueryProps {
-    firestore: firebase.firestore.Firestore;
-    whereFilterOptions?: GetWhereFilterOptionsResult;
-    collectionPath: string;
-    userId?: string;
-  }
-
   function getQuery({
-    firestore,
     collectionPath,
     whereFilterOptions,
     userId,
   }: GetQueryProps) {
     if (userId && whereFilterOptions) {
-      return firestore
-        .collection(collectionPath)
+      return FIRESTORE.collection(collectionPath)
         .where(...whereFilterOptions)
         .where("userId", "==", userId);
     } else if (!userId && whereFilterOptions) {
-      return firestore.collection(collectionPath).where(...whereFilterOptions);
+      return FIRESTORE.collection(collectionPath).where(...whereFilterOptions);
     } else if (userId && !whereFilterOptions) {
-      return firestore.collection(collectionPath).where("userId", "==", userId);
+      return FIRESTORE.collection(collectionPath).where("userId", "==", userId);
     } else {
-      return firestore.collection(collectionPath);
+      return FIRESTORE.collection(collectionPath);
     }
   }
 
   return {
-    getTodos: () =>
-      getTodos({ firestore: FIRESTORE, initialData, filter, userId }),
-    createTodo: (newTodo) => createTodo(userId, newTodo),
+    getTodos,
+    createTodo,
     updateTodo,
     deleteTodo,
-    clearCompleted,
-    activeTodosLeft: () => {
-      const { data } = getTodos({
-        firestore: FIRESTORE,
-        filter: ITodoStatusEnum.ACTIVE,
-        userId,
-      });
-
-      return data?.length || 0;
-    },
+    getWhereFilterOptions,
+    getQuery,
   };
 }

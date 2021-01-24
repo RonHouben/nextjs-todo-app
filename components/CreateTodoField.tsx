@@ -1,26 +1,25 @@
+import { useSession } from "next-auth/client";
 import React, { useState } from "react";
 import useTodos from "../hooks/useTodos";
 import { ITodo } from "../utils/interfaces/todos";
 import ClearTextIconButton from "./IconButton";
 import CompleteTodoRoundCheckbox from "./RoundCheckbox";
 import Textbox from "./Textbox";
-import { useSession } from "next-auth/client";
-
 interface Props {
   autoFocus?: boolean;
 }
 
 export default function CreateTodoField({ autoFocus = false }: Props) {
-  // get user from session
+  // getUser from session
   const session = useSession();
-  const userId = session[0]?.userId || undefined;
+  const userId = session[0]?.userId;
   // set local completed state
   const [completed, setCompleted] = useState<boolean>(false);
   // set local title state
   const [title, setTitle] = useState<ITodo["title"]>();
 
   // hooks
-  const { createTodo } = useTodos({ userId });
+  const { createTodo } = useTodos();
 
   // handlers
   const handleToggleCompleted = (checked: boolean) => {
@@ -33,7 +32,7 @@ export default function CreateTodoField({ autoFocus = false }: Props) {
 
   const handleSubmitTodo = (title: ITodo["title"]) => {
     // add to db
-    createTodo({ title, completed });
+    createTodo(userId, { title, completed });
     // update local states
     setTitle("");
     setCompleted(false);
