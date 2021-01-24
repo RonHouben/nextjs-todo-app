@@ -3,8 +3,31 @@ module.exports = {
   darkMode: "class", // or 'media' or 'class'
   theme: {
     extend: {
+      typography: (theme) => ({
+        DEFAULT: {
+          css: {
+            h1: {
+              color: theme("colors.light.4"),
+            },
+            h2: {
+              color: theme("colors.light.4"),
+            },
+          },
+        },
+        dark: {
+          css: {
+            color: theme("colors.dark.3"),
+            h1: {
+              color: theme("colors.dark.3"),
+            },
+            h2: {
+              color: theme("colors.dark.3"),
+            },
+          },
+        },
+      }),
       screens: {
-        xs: { max: "375px" }
+        xs: { max: "375px" },
       },
       backgroundImage: (theme) => ({
         "mobile-light": "url('/images/bg-mobile-light.jpg')",
@@ -49,8 +72,9 @@ module.exports = {
   variants: {
     extend: {
       gradientColorStops: "hover",
-      animation: ['hover', 'focus']
+      animation: ["hover", "focus"],
+      typography: ["dark"],
     },
   },
-  plugins: [],
+  plugins: [require("@tailwindcss/typography")],
 };

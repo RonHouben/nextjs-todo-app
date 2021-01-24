@@ -5,21 +5,26 @@ import {
   useEffect,
   useState,
   useMemo,
+  InputHTMLAttributes,
 } from 'react'
 import { useDebounce } from '../hooks/useDebounce'
 import { Key } from '../utils/interfaces/Key.enum'
 
 interface Props {
-  value?: string
+  value: string
   onChange?: (text: string) => void
   onSubmit?: (text: string) => void
   placeholder?: string
   debounceDelay?: number
   autoSubmit?: boolean
-  submitOnEnterKey: boolean
+  submitOnEnterKey?: boolean
   submitOnBlur?: boolean
   autoFocus?: boolean
   clearOnEnterKey?: boolean
+  border?: boolean
+  className?: string
+  type?: InputHTMLAttributes<HTMLInputElement>['type']
+  disabled?: boolean
 }
 
 export default function Textbox({
@@ -33,6 +38,10 @@ export default function Textbox({
   submitOnEnterKey = false,
   autoFocus = false,
   clearOnEnterKey = false,
+  border,
+  className,
+  type,
+  disabled,
 }: Props) {
   // set textValue state
   const [textValue, setTextValue] = useState<string>(initialValue)
@@ -93,14 +102,18 @@ export default function Textbox({
 
   return (
     <input
-      className={`w-full bg-transparent p-2 focus-within:text-light-4 text-light-3 dark:text-dark-2`}
+      className={`w-full bg-transparent p-2 focus-within:text-light-4 text-light-3 dark:text-dark-2
+      ${border ? 'border-2 rounded-lg light:border-light-1' : ''}
+      ${disabled ? 'bg-light-1' : ''}
+        ${className}`}
       placeholder={placeholder}
       value={textValue}
-      type='text'
+      type={type}
       onChange={handleChange}
       onKeyDown={handleKeyPress}
       onBlur={handleOnBlur}
       autoFocus={autoFocus}
+      disabled={disabled}
     />
   )
 }

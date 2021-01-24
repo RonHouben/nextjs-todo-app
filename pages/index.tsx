@@ -1,70 +1,107 @@
-import { GetServerSideProps } from 'next'
-import { ThemeProvider } from 'next-themes'
-// import { FirebaseAppProvider } from 'reactfire'
-import React, { useState } from 'react'
-import Layout from '../components/Layout'
-import Filterbar from '../components/Filterbar'
-import Paper from '../components/Paper'
-import useTodos from '../hooks/useTodos'
-import { ITodo, ITodoStatusEnum } from '../utils/interfaces/todos'
-import { getTodos } from './api/todos'
+import { GetServerSideProps } from "next";
+import React, { useState } from "react";
+import Layout from "../components/Layout";
+import Filterbar from "../components/Filterbar";
+import Paper from "../components/Paper";
+import { ITodo, ITodoStatusEnum } from "../utils/interfaces/todos";
+import TodosList from "../components/TodosList";
+import CreateTodoField from "../components/CreateTodoField";
+import { getSession } from "next-auth/client";
+import { ISession } from "../lib/firebaseAdapter";
+import { useFirestore, useFirestoreCollectionData } from "reactfire";
+import useTodos from "../hooks/useTodos";
+import firebaseAdmin from "../lib/firebaseAdmin";
 
-import TodosList from '../components/TodosList'
-import CreateTodoField from '../components/CreateTodoField'
-import { FirebaseAppProvider } from 'reactfire'
-import { firebaseApp } from '../lib/firebaseClient'
-
-interface InitialProps {
-  initialData: ITodo[]
+interface Props {
+  userId: string;
+  initialData: Stringified<ITodo[]>;
 }
 
-export default function TodoApp({ initialData }: InitialProps) {
+export default function TodoApp({ userId, initialData }: Props) {
+  // local state
   const [selectedFilter, setSelectedFilter] = useState<ITodoStatusEnum>(
     ITodoStatusEnum.ALL
-  )
+  );
+  const { getWhereFilterOptions, getQuery } = useTodos();
+  // get firestore client and get todos
+  const firestore = useFirestore();
 
-  const { clearCompleted, activeTodosLeft } = useTodos({ initialData })
+  // create query
+  const queryFilter = getWhereFilterOptions(selectedFilter);
+  const query = getQuery({
+    collectionPath: "todos",
+    userId,
+    whereFilterOptions: queryFilter,
+  });
+  // get data
+  const { data: todos, status } = useFirestoreCollectionData<ITodo>(query, {
+    idField: "id",
+    initialData: JSON.parse(initialData),
+  });
+
+  // handlers
+  const handleClearCompleted = () => {
+    const completedTodos = todos.filter((todo) => todo.completed);
+    // remove each complete todo
+    completedTodos.forEach(async ({ id }) =>
+      firestore.collection("todos").doc(id).delete()
+    );
+  };
 
   return (
-    <ThemeProvider
-      attribute='class'
-      themes={['light', 'dark']}
-      defaultTheme='light'
-    >
-      <FirebaseAppProvider firebaseApp={firebaseApp}>
-        <Layout pageTitle='TODO'>
-          <div className='flex flex-col justify-start items-center space-y-7 w-full'>
-            <Paper rounded shadow>
-              <CreateTodoField autoFocus />
-            </Paper>
-            <Paper rounded shadow verticalDivider>
-              <TodosList initialData={initialData} filter={selectedFilter} />
-              <Filterbar
-                itemsLeft={activeTodosLeft()}
-                filters={[
-                  ITodoStatusEnum.ALL,
-                  ITodoStatusEnum.ACTIVE,
-                  ITodoStatusEnum.COMPLETED,
-                ]}
-                selected={selectedFilter}
-                onChangeFilter={setSelectedFilter}
-                onClearCompleted={clearCompleted}
-              />
-            </Paper>
-          </div>
-        </Layout>
-      </FirebaseAppProvider>
-    </ThemeProvider>
-  )
+    <Layout>
+      <Paper rounded shadow className="w-full">
+        <CreateTodoField autoFocus />
+      </Paper>
+      <Paper rounded shadow verticalDivider className="w-full">
+        <TodosList todos={todos} />
+        <Filterbar
+          itemsLeft={status === "success" ? todos.length : 0}
+          filters={[
+            ITodoStatusEnum.ALL,
+            ITodoStatusEnum.ACTIVE,
+            ITodoStatusEnum.COMPLETED,
+          ]}
+          selected={selectedFilter}
+          onChangeFilter={setSelectedFilter}
+          onClearCompleted={handleClearCompleted}
+        />
+      </Paper>
+    </Layout>
+  );
 }
 
-export const getServerSideProps: GetServerSideProps<InitialProps> = async () => {
-  // get initial todos from the backend
-  const initialData = await getTodos()
+export const getServerSideProps: GetServerSideProps<Props> = async ({
+  req,
+}) => {
+  const session = ((await getSession({ req })) as unknown) as ISession;
+
+  if (!session) {
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/login",
+      },
+    };
+  }
+
+  // get initialData
+  const snapshot = await firebaseAdmin()
+    .firestore.collection("todos")
+    .where("userId", "==", session.userId)
+    .get();
+
+  const initialData: ITodo[] = snapshot.docs.map((todo) => {
+    return {
+      ...todo.data(),
+      id: todo.id,
+    } as ITodo;
+  });
 
   return {
     props: {
-      initialData: JSON.parse(JSON.stringify(initialData)),
+      userId: session.userId,
+      initialData: JSON.stringify(initialData),
     },
-  }
-}
+  };
+};

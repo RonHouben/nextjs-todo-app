@@ -1,34 +1,57 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { ITodo } from '../../../utils/interfaces/todos'
 import HttpStatusCode from '../../../utils/interfaces/HttpStatusCodes.enum'
-import {
-  firestore,
-  getDataWithId,
-  firebaseAdminTimestamp,
-} from '../../../lib/firebaseAdmin'
+import firebaseAdmin from '../../../lib/firebaseAdmin'
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   // get update from the request body
-  const body: ITodo = req.body
+  const todo: ITodo = req.body
   const query = req.query
+
+  const { firestore, getDataWithId, serverTimestamp } = firebaseAdmin()
 
   // Get data from your database
   switch (req.method) {
     case 'GET':
       // get all Todo's from the database
       try {
-        const todos: ITodo[] = await getTodos()
+        // get the snapshot
+        const query = await firestore.collection('todos').orderBy('created')
 
+        const snapshot = await query.get()
+
+        // create todos result array
+        let todos: ITodo[] = []
+
+        // append each doc from snapshot to the todos result array
+        snapshot.forEach((doc) => (todos = [...todos, getDataWithId(doc)]))
+
+        // return the result
         return res.status(HttpStatusCode.OK).json(todos)
       } catch (err) {
         return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR)
       }
+
     case 'POST':
       try {
-        const createdTodo = await createTodo(body)
+        // append default data
+        const newTodoWithDefaults = {
+          ...todo,
+          created: serverTimestamp,
+          completed: false,
+        } as ITodo
+
+        const newTodoDocRef = await firestore
+          .collection('todos')
+          .add({ ...newTodoWithDefaults })
+
+        const newTodoDocSnapshot = await newTodoDocRef.get()
+
+        const createdTodo = getDataWithId<ITodo>(newTodoDocSnapshot)
+
         return res.status(HttpStatusCode.CREATED).json(createdTodo)
       } catch (e) {
         return res.status(HttpStatusCode.BAD_REQUEST).json({
@@ -37,6 +60,7 @@ export default async function handler(
           },
         })
       }
+
     case 'DELETE':
       // get id's from query string
       try {
@@ -52,15 +76,32 @@ export default async function handler(
         // create an array out of the query.ids
         const ids = JSON.parse(query.ids as string)
 
-        // delete the ids from the DB
-        const result = await deleteTodos(ids)
-        const isBadRequest: boolean = result.failed.length > 0
+        // set variables for the result
+        let successfull = [] as IDeleteTodosResult['successfull']
+        let failed = [] as IDeleteTodosResult['failed']
+
+        // delete Todo for each ids
+        for (const id of ids) {
+          try {
+            // delete from DB
+            await firestore.collection('todos').doc(id).delete()
+
+            // add to successful array
+            successfull = [...successfull, id]
+          } catch (err) {
+            console.error('ERROR', err)
+            // add to failed array
+            failed = [...failed, { id, reason: err.message }]
+          }
+        }
+
+        const isBadRequest: boolean = failed.length > 0
 
         return res
           .status(
             isBadRequest ? HttpStatusCode.MULTI_STATUS : HttpStatusCode.OK
           )
-          .json(result)
+          .json({ successfull, failed } as IDeleteTodosResult)
       } catch (err) {
         console.error(err)
 
@@ -79,71 +120,11 @@ export default async function handler(
   }
 }
 
-export async function getTodos(): Promise<ITodo[]> {
-  const snapshot = await firestore.collection('todos').orderBy('created').get()
-
-  let todos: ITodo[] = []
-
-  snapshot.forEach((doc) => (todos = [...todos, getDataWithId(doc)]))
-
-  return todos
-}
-
-async function createTodo(todo: ITodo): Promise<ITodo> {
-  // append default data
-  const newTodoWithDefaults = {
-    ...todo,
-    created: firebaseAdminTimestamp.now(),
-    completed: false,
-  } as ITodo
-
-  const newTodoDocRef = await firestore
-    .collection('todos')
-    .add({ ...newTodoWithDefaults })
-  const newTodoDocSnapshot = await newTodoDocRef.get()
-
-  return getDataWithId<ITodo>(newTodoDocSnapshot)
-}
-
-interface IFailedTodo {
-  id: ITodo['id']
-  reason: string
-}
-
 export interface IDeleteTodosResult {
   successfull: ITodo['id'][]
   failed: IFailedTodo[]
 }
-
-async function deleteTodos(ids: string[]): Promise<IDeleteTodosResult> {
-  // set variables for the result
-  let successfull = [] as IDeleteTodosResult['successfull']
-  let failed = [] as IDeleteTodosResult['failed']
-
-  // delete Todo for each ids
-  for (const id of ids) {
-    try {
-      // delete from DB
-      const docRef = firestore.collection('todos').doc(id)
-      const docSnapshot = await docRef.get()
-
-      if (docSnapshot.data()) {
-        await docRef.delete()
-        // add to successful array
-        successfull = [...successfull, id]
-      } else {
-        throw new Error("couldn't find the todo in the database")
-      }
-    } catch (err) {
-      console.error('ERROR', err)
-      // add to failed array
-      failed = [...failed, { id, reason: err.message }]
-    }
-  }
-
-  // return result
-  return {
-    successfull,
-    failed,
-  }
+interface IFailedTodo {
+  id: ITodo['id']
+  reason: string
 }

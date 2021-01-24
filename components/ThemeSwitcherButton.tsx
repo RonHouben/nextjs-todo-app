@@ -1,31 +1,28 @@
-import React from 'react'
-import { useTheme } from 'next-themes'
-import { Key } from '../utils/interfaces/Key.enum'
-import IconButton from './IconButton'
+import React from "react";
+import { useTheme } from "next-themes";
+import IconButton from "./IconButton";
 
 export default function ThemeSwitcherButton() {
-  const { theme, setTheme } = useTheme()
+  const { theme, setTheme } = useTheme();
 
   return (
     <React.Fragment>
-      {theme === 'light' && (
+      {theme === "light" && (
         <IconButton
-          src='/icons/icon-moon.svg'
-          size='medium'
-          onClick={() => setTheme('dark')}
-          onKeyPress={(e) => (e.key === Key.Spacebar ? setTheme('dark') : null)}
+          alt="Switch to Dark Mode"
+          src="/icons/icon-moon.svg"
+          size="lg"
+          onClick={() => setTheme("dark")}
         />
       )}
-      {theme === 'dark' && (
+      {theme === "dark" && (
         <IconButton
-          src='/icons/icon-sun.svg'
-          size='large'
-          onClick={() => setTheme('light')}
-          onKeyPress={(e) =>
-            e.key === Key.Spacebar ? setTheme('light') : null
-          }
+          alt="Switch to Light Mode"
+          src="/icons/icon-sun.svg"
+          size="lg"
+          onClick={() => setTheme("light")}
         />
       )}
     </React.Fragment>
-  )
+  );
 }

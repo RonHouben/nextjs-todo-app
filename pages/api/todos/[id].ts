@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { ITodo } from '../../../utils/interfaces/todos'
 import HttpStatusCode from '../../../utils/interfaces/HttpStatusCodes.enum'
-import { firestore, getDataWithId } from '../../../lib/firebaseAdmin'
+import firebaseAdmin from '../../../lib/firebaseAdmin'
 import HTTPMethod from '../../../utils/interfaces/HttpMethods.enum'
 
 export default async function handler(
@@ -11,6 +11,8 @@ export default async function handler(
   // get update from the request body
   const id = req.query.id as ITodo['id']
   const body: Partial<ITodo> = req.body
+
+  const { firestore, getDataWithId } = firebaseAdmin()
 
   // Get data from your database
   switch (req.method) {
