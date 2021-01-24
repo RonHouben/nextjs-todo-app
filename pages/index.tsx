@@ -10,7 +10,7 @@ import { getSession } from "next-auth/client";
 import { ISession } from "../lib/firebaseAdapter";
 import { useFirestore, useFirestoreCollectionData } from "reactfire";
 import useTodos from "../hooks/useTodos";
-import { firestore } from "firebase-admin";
+import firebaseAdmin from "../lib/firebaseAdmin";
 
 interface Props {
   userId: string;
@@ -86,8 +86,8 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({
   }
 
   // get initialData
-  const snapshot = await firestore()
-    .collection("todos")
+  const snapshot = await firebaseAdmin()
+    .firestore.collection("todos")
     .where("userId", "==", session.userId)
     .get();
 
