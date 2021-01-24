@@ -1,9 +1,11 @@
 import { AppProps } from "next/app";
 import "../styles/global.css";
+import "react-toastify/dist/ReactToastify.css";
 import { ThemeProvider } from "next-themes";
 import { FirebaseAppProvider } from "reactfire";
 import { firebaseApp } from "../lib/firebaseClient";
 import { Provider as AuthProvider } from "next-auth/client";
+import { Flip, ToastContainer } from "react-toastify";
 
 function App({ Component, pageProps }: AppProps) {
   return (
@@ -14,6 +16,7 @@ function App({ Component, pageProps }: AppProps) {
     >
       <AuthProvider session={pageProps.sessions}>
         <FirebaseAppProvider firebaseApp={firebaseApp}>
+          <ToastContainer transition={Flip} />
           <Component {...pageProps} />
         </FirebaseAppProvider>
       </AuthProvider>
