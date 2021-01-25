@@ -3,6 +3,7 @@ interface FirebaseAdminResult {
   app: admin.app.App;
   firestore: admin.firestore.Firestore;
   auth: admin.auth.Auth;
+  messaging: admin.messaging.Messaging;
   serverTimestamp: admin.firestore.FieldValue;
   getDataWithId: <T>(doc: admin.firestore.DocumentSnapshot) => T;
 }
@@ -35,6 +36,7 @@ export default function firebaseAdmin(): FirebaseAdminResult {
   return {
     app: admin.app(),
     auth: admin.auth(),
+    messaging: admin.messaging(),
     firestore: admin.firestore(),
     serverTimestamp: admin.firestore.FieldValue.serverTimestamp(),
     getDataWithId,
