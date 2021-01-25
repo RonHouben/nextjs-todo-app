@@ -26,6 +26,9 @@ const options: InitOptions = {
     sessionsCollection: "sessions",
     verificationRequestsCollection: "verificationRequests",
   }),
+  pages: {
+    signIn: "/login",
+  },
   callbacks: {
     session: async (session: SessionBase, user: IUser) => {
       const updatedSession = {

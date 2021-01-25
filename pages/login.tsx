@@ -5,28 +5,10 @@ import { getSession, signIn } from "next-auth/client";
 import GithubIconButton from "../components/IconButton";
 import GoogleIconButton from "../components/IconButton";
 import { GetServerSideProps } from "next";
+import { useTheme } from "next-themes";
 
 export default function LoginPage() {
-  // handlers
-  const handleSignIn = async (provider: string) => {
-    try {
-      // signIn with Github
-      switch (provider) {
-        case "github":
-          signIn("github", { callbackUrl: "/" });
-          return;
-        case "google":
-          signIn("google", { callbackUrl: "/" });
-          return;
-        default:
-          return;
-      }
-    } catch (error) {
-      console.error("[/login:handleSignIn()]", error);
-      return;
-    }
-  };
-
+  const { theme } = useTheme();
   // render component
   return (
     <Layout>
@@ -52,17 +34,26 @@ export default function LoginPage() {
           border
         />
         <button className="w-full p-2 border-2 rounded-lg">Log in</button>
-        <GithubIconButton
-          alt="Sign In with GitHub"
-          src="/icons/GitHub-Mark-Light-120px-plus.png"
-          className="bg-blue-400 hover:bg-green-300"
-          onClick={() => handleSignIn("github")}
-        />
-        <GoogleIconButton
-          alt="Sign in with Google"
-          src="/icons/google-icon.png"
-          onClick={() => handleSignIn("google")}
-        />
+        <div className="flex">
+          <GithubIconButton
+            alt="Sign In with GitHub"
+            src={
+              theme === "light"
+                ? "/icons/github-icon-dark.png"
+                : "/icons/github-icon-light.png"
+            }
+            size="lg"
+            // className="bg-light-background"
+            onClick={() => signIn("github", { callbackUrl: "/" })}
+          />
+          <GoogleIconButton
+            alt="Sign in with Google"
+            src="/icons/google-icon.png"
+            size="lg"
+            // className="bg-light-background"
+            onClick={() => signIn("google", { callbackUrl: "/" })}
+          />
+        </div>
       </Paper>
     </Layout>
   );

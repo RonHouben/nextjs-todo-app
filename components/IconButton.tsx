@@ -5,7 +5,7 @@ type Size = "sm" | "md" | "lg" | "xl" | "2xl";
 interface Props {
   alt: string;
   src: ImageProps["src"] | undefined | null;
-  size?: Size;
+  size: Size;
   square?: boolean;
   shadow?: boolean;
   focusable?: boolean;
@@ -34,7 +34,7 @@ export default function IconButton({
       tabIndex={focusable ? 0 : undefined}
       onClick={onClick}
     >
-      <div className="relative h-full w-full ">
+      <div className="relative h-full w-full select-none">
         <Image
           layout="fill"
           src={src || ""}
