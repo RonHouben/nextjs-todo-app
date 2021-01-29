@@ -1,6 +1,9 @@
 import firebase from "firebase/app";
 import "firebase/firestore";
 import "firebase/auth";
+import "firebase/messaging";
+import { toast } from "react-toastify";
+import { getSession } from "next-auth/client";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -50,10 +53,59 @@ function initializeFirebaseApp({
       //   ssl: false,
       // });
     }
-    // enable offline synchronizing of database only when the app is client side rendered
+    // enable services only when the code is running in the browser (on the client)
     if (process.browser) {
       try {
+        // enable offline synchronizing
         app.firestore().enablePersistence();
+
+        // app.messaging();
+        const permission = getNotificationPermissions();
+
+        permission.then((permission) => {
+          switch (permission) {
+            case "granted":
+              console.info("notification permissions granted");
+              toast("Thanks for enabling notification!", { type: "success" });
+
+              // get FCM token
+              const messaging = app.messaging();
+              messaging
+                .getToken({
+                  vapidKey:
+                    process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_VAPID_KEY,
+                })
+                .then(async (token) => {
+                  const session = await getSession();
+
+                  if (session && session.userId) {
+                    console.log("userid", session.userId);
+                    console.log("FCM Token", token);
+                    app
+                      .firestore()
+                      .collection("users")
+                      .doc(session.userId)
+                      .update({
+                        FCMToken: token,
+                        updatedAt: firestoreServerTimestamp(),
+                      });
+                  }
+                });
+              break;
+            case "denied":
+              console.warn("user denied notification permissions");
+              toast("Please make sure to accept the notifications", {
+                type: "warning",
+              });
+              break;
+            case "default":
+              console.warn(
+                "[firebaseClient][notificatioonPermisssions] reached default case"
+              );
+              toast("Something  went wrong", { type: "warning" });
+              break;
+          }
+        });
       } catch (error) {
         console.error(error.message);
         return app;
@@ -64,5 +116,19 @@ function initializeFirebaseApp({
   } else {
     // return existing app
     return initiator.app(appName);
+  }
+}
+
+async function getNotificationPermissions() {
+  try {
+    return Notification.requestPermission();
+  } catch (error) {
+    if (error instanceof TypeError) {
+      Notification.requestPermission((token) => {
+        console.log("token safari", token);
+      });
+    } else {
+      throw error;
+    }
   }
 }

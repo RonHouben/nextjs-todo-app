@@ -69,7 +69,9 @@ export default function useTodos(): IUseTodosResult {
         created: firestoreServerTimestamp(),
         userId,
       });
-      toast(`Created "${newTodo.title}"`, { type: "success" });
+      toast(`Created "${newTodo.title}"`, {
+        type: "success",
+      });
     } catch (error) {
       console.error("[useTodos][createTodo]", error.message);
       toast(error.message, { type: "error" });
