@@ -1,20 +1,11 @@
-import _ from "lodash";
 import { ITodo, ITodoStatusEnum } from "../utils/interfaces/todos";
 import firebase from "firebase/app";
-import { ObservableStatus, useFirestoreCollectionData } from "reactfire";
-import { firebaseApp, firestoreServerTimestamp } from "../lib/firebaseClient";
+import {
+  firebaseClient,
+  firestoreServerTimestamp,
+} from "../lib/firebaseClient";
 import { toast } from "react-toastify";
-
-interface IUseTodosResult {
-  getTodos: (props: GetTodosProps) => ObservableStatus<ITodo[]>;
-  createTodo: (userId: string, newTodo: Partial<ITodo>) => void;
-  updateTodo: (id: ITodo["id"], update: Partial<ITodo>) => void;
-  deleteTodo: (id: ITodo["id"]) => void;
-  getWhereFilterOptions: (
-    filter: ITodoStatusEnum
-  ) => GetWhereFilterOptionsResult | undefined;
-  getQuery: (props: GetQueryProps) => firebase.firestore.Query;
-}
+import { useCollectionData } from "react-firebase-hooks/firestore";
 
 type GetWhereFilterOptionsResult = [
   string | firebase.firestore.FieldPath,
@@ -22,7 +13,6 @@ type GetWhereFilterOptionsResult = [
   any
 ];
 interface GetTodosProps {
-  initialData?: ITodo[];
   filter?: ITodoStatusEnum;
   userId: string;
 }
@@ -33,11 +23,11 @@ interface GetQueryProps {
   userId?: string;
 }
 
-export default function useTodos(): IUseTodosResult {
+export default function useTodos() {
   // initiate Firebase
-  const FIRESTORE = firebaseApp.firestore();
+  const FIRESTORE = firebaseClient.firestore();
 
-  function getTodos({ initialData, filter, userId }: GetTodosProps) {
+  function getTodos({ filter, userId }: GetTodosProps) {
     // get the query
     const query = filter
       ? getQuery({
@@ -47,11 +37,15 @@ export default function useTodos(): IUseTodosResult {
         })
       : getQuery({ collectionPath: "todos", userId });
 
-    // get the data from the DB
-    return useFirestoreCollectionData<ITodo>(query, {
-      initialData,
+    const [todos, loading, error] = useCollectionData<ITodo>(query, {
       idField: "id",
     });
+
+    if (error) {
+      toast.error(error.message);
+    }
+
+    return { todos, loading, error };
   }
 
   async function createTodo(

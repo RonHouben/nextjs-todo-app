@@ -9,7 +9,7 @@ import DeleteTodoIconButton from "./IconButton";
 
 interface Props {
   placeholder?: string;
-  todo: ITodo;
+  todo?: ITodo;
 }
 
 export default function Todo({ todo, placeholder }: Props) {
@@ -19,14 +19,14 @@ export default function Todo({ todo, placeholder }: Props) {
   // handlers
   const handleChangeTitle = (title: string): void => {
     if (!title) {
-      deleteTodo(todo.id);
+      deleteTodo(todo!.id);
     } else {
-      updateTodo(todo.id, { ...todo, title });
+      updateTodo(todo!.id, { ...todo, title });
     }
   };
 
   const handleToggleCompleted = (completed: boolean): void => {
-    updateTodo(todo.id, { completed });
+    updateTodo(todo!.id, { completed });
   };
 
   const handleDelete = (id: ITodo["id"]): void => {
@@ -35,7 +35,7 @@ export default function Todo({ todo, placeholder }: Props) {
 
   return (
     <div
-      id={todo.id}
+      id={todo?.id || "loadig-todo"}
       className={`flex w-full h-full justify-center items-center p-2 bg-light-0 dark:bg-dark-1`}
       tabIndex={0}
       onMouseEnter={() => setFocused(true)}
@@ -78,13 +78,15 @@ export default function Todo({ todo, placeholder }: Props) {
         />
       )}
       {/* delete Todo button */}
-      <DeleteTodoIconButton
-        alt="Delete Todo"
-        src="/icons/icon-cross.svg"
-        size="md"
-        onClick={() => handleDelete(todo.id)}
-        className={focused ? "visible" : "hidden"}
-      />
+      {todo && (
+        <DeleteTodoIconButton
+          alt="Delete Todo"
+          src="/icons/icon-cross.svg"
+          size="md"
+          onClick={() => handleDelete(todo.id)}
+          className={focused ? "visible" : "hidden"}
+        />
+      )}
     </div>
   );
 }
