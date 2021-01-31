@@ -3,49 +3,44 @@ import React, { useState } from "react";
 import Layout from "../components/Layout";
 import Filterbar from "../components/Filterbar";
 import Paper from "../components/Paper";
-import { ITodo, ITodoStatusEnum } from "../utils/interfaces/todos";
+import { ITodoStatusEnum } from "../utils/interfaces/todos";
 import TodosList from "../components/TodosList";
 import CreateTodoField from "../components/CreateTodoField";
 import { getSession } from "next-auth/client";
 import { ISession } from "../lib/firebaseAdapter";
-import { useFirestore, useFirestoreCollectionData } from "reactfire";
 import useTodos from "../hooks/useTodos";
-import firebaseAdmin from "../lib/firebaseAdmin";
-
+import { toast } from "react-toastify";
+import registerToastServiceWorker from "../utils/registerToastServiceWorker";
+import useFirebaseCloudMessaging from "../hooks/useFirebaseCloudMessaging";
+import Todo from "../components/Todo";
 interface Props {
   userId: string;
-  initialData: Stringified<ITodo[]>;
 }
 
-export default function TodoApp({ userId, initialData }: Props) {
+// This shows a toast on service worker lifecycle changes
+registerToastServiceWorker(toast);
+
+export default function TodoApp({ userId }: Props) {
   // local state
   const [selectedFilter, setSelectedFilter] = useState<ITodoStatusEnum>(
     ITodoStatusEnum.ALL
   );
-  const { getWhereFilterOptions, getQuery } = useTodos();
-  // get firestore client and get todos
-  const firestore = useFirestore();
 
-  // create query
-  const queryFilter = getWhereFilterOptions(selectedFilter);
-  const query = getQuery({
-    collectionPath: "todos",
+  // this shows a toast when a foreground message arrives from Firebase Cloud Messsaging
+  useFirebaseCloudMessaging();
+
+  const { getTodos, deleteTodo } = useTodos();
+
+  const { todos, loading } = getTodos({
     userId,
-    whereFilterOptions: queryFilter,
-  });
-  // get data
-  const { data: todos, status } = useFirestoreCollectionData<ITodo>(query, {
-    idField: "id",
-    initialData: JSON.parse(initialData),
+    filter: selectedFilter,
   });
 
   // handlers
   const handleClearCompleted = () => {
-    const completedTodos = todos.filter((todo) => todo.completed);
+    const completedTodos = todos?.filter((todo) => todo.completed) || [];
     // remove each complete todo
-    completedTodos.forEach(async ({ id }) =>
-      firestore.collection("todos").doc(id).delete()
-    );
+    completedTodos.forEach(async ({ id }) => deleteTodo(id));
   };
 
   return (
@@ -54,9 +49,10 @@ export default function TodoApp({ userId, initialData }: Props) {
         <CreateTodoField autoFocus />
       </Paper>
       <Paper rounded shadow verticalDivider className="w-full">
-        <TodosList todos={todos} />
+        {loading && <Todo />}
+        {!loading && todos && <TodosList todos={todos || []} />}
         <Filterbar
-          itemsLeft={status === "success" ? todos.length : 0}
+          itemsLeft={todos?.length || 0}
           filters={[
             ITodoStatusEnum.ALL,
             ITodoStatusEnum.ACTIVE,
@@ -85,23 +81,9 @@ export const getServerSideProps: GetServerSideProps<Props> = async ({
     };
   }
 
-  // get initialData
-  const snapshot = await firebaseAdmin()
-    .firestore.collection("todos")
-    .where("userId", "==", session.userId)
-    .get();
-
-  const initialData: ITodo[] = snapshot.docs.map((todo) => {
-    return {
-      ...todo.data(),
-      id: todo.id,
-    } as ITodo;
-  });
-
   return {
     props: {
       userId: session.userId,
-      initialData: JSON.stringify(initialData),
     },
   };
 };

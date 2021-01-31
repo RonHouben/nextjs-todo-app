@@ -1,8 +1,9 @@
 import firebase from "firebase/app";
 import "firebase/firestore";
 import "firebase/auth";
+// import "firebase/messaging";
 
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
   databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DB_URL,
@@ -16,7 +17,7 @@ const firebaseConfig = {
 const firebaseAppName: string = "todo-app";
 
 // initialize Firebase if it doesn't exist yet
-export const firebaseApp = initializeFirebaseApp({
+export const firebaseClient = initializeFirebaseApp({
   appName: firebaseAppName,
   config: firebaseConfig,
   initiator: firebase,
@@ -50,9 +51,10 @@ function initializeFirebaseApp({
       //   ssl: false,
       // });
     }
-    // enable offline synchronizing of database only when the app is client side rendered
+    // enable services only when the code is running in the browser (on the client)
     if (process.browser) {
       try {
+        // enable offline synchronizing
         app.firestore().enablePersistence();
       } catch (error) {
         console.error(error.message);

@@ -1,18 +1,11 @@
-import _ from "lodash";
 import { ITodo, ITodoStatusEnum } from "../utils/interfaces/todos";
 import firebase from "firebase/app";
-import { ObservableStatus, useFirestoreCollectionData } from "reactfire";
-import { firebaseApp, firestoreServerTimestamp } from "../lib/firebaseClient";
-interface IUseTodosResult {
-  getTodos: (props: GetTodosProps) => ObservableStatus<ITodo[]>;
-  createTodo: (userId: string, newTodo: Partial<ITodo>) => void;
-  updateTodo: (id: ITodo["id"], update: Partial<ITodo>) => void;
-  deleteTodo: (id: ITodo["id"]) => void;
-  getWhereFilterOptions: (
-    filter: ITodoStatusEnum
-  ) => GetWhereFilterOptionsResult | undefined;
-  getQuery: (props: GetQueryProps) => firebase.firestore.Query;
-}
+import {
+  firebaseClient,
+  firestoreServerTimestamp,
+} from "../lib/firebaseClient";
+import { toast } from "react-toastify";
+import { useCollectionData } from "react-firebase-hooks/firestore";
 
 type GetWhereFilterOptionsResult = [
   string | firebase.firestore.FieldPath,
@@ -20,7 +13,6 @@ type GetWhereFilterOptionsResult = [
   any
 ];
 interface GetTodosProps {
-  initialData?: ITodo[];
   filter?: ITodoStatusEnum;
   userId: string;
 }
@@ -31,11 +23,11 @@ interface GetQueryProps {
   userId?: string;
 }
 
-export default function useTodos(): IUseTodosResult {
+export default function useTodos() {
   // initiate Firebase
-  const FIRESTORE = firebaseApp.firestore();
+  const FIRESTORE = firebaseClient.firestore();
 
-  function getTodos({ initialData, filter, userId }: GetTodosProps) {
+  function getTodos({ filter, userId }: GetTodosProps) {
     // get the query
     const query = filter
       ? getQuery({
@@ -45,11 +37,15 @@ export default function useTodos(): IUseTodosResult {
         })
       : getQuery({ collectionPath: "todos", userId });
 
-    // get the data from the DB
-    return useFirestoreCollectionData<ITodo>(query, {
-      initialData,
+    const [todos, loading, error] = useCollectionData<ITodo>(query, {
       idField: "id",
     });
+
+    if (error) {
+      toast.error(error.message);
+    }
+
+    return { todos, loading, error };
   }
 
   async function createTodo(
@@ -67,8 +63,12 @@ export default function useTodos(): IUseTodosResult {
         created: firestoreServerTimestamp(),
         userId,
       });
+      toast(`Created "${newTodo.title}"`, {
+        type: "success",
+      });
     } catch (error) {
       console.error("[useTodos][createTodo]", error.message);
+      toast(error.message, { type: "error" });
     }
   }
 
@@ -80,7 +80,16 @@ export default function useTodos(): IUseTodosResult {
   }
 
   async function deleteTodo(id: ITodo["id"]): Promise<void> {
-    await FIRESTORE.collection("todos").doc(id).delete();
+    try {
+      const snapshot = await FIRESTORE.collection("todos").doc(id).get();
+      const data = (await snapshot.data()) as ITodo;
+
+      snapshot.ref.delete();
+
+      toast(`Deleted "${data.title}`, { type: "success" });
+    } catch (error) {
+      console.error("[userTodos][deleteTod]", error.message);
+    }
   }
 
   // helper functions

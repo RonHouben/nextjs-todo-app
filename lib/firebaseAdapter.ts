@@ -148,8 +148,8 @@ const Adapter = (config: IAdapterConfig, _options = {}) => {
         if (snapshot.empty) return Promise.resolve(null);
 
         const user = {
-          ...snapshot.docs[0].data(),
-          id: snapshot.docs[0].id,
+          ...snapshot.docs[0]!.data(),
+          id: snapshot.docs[0]!.id,
         } as IUser;
 
         return user;
@@ -177,7 +177,7 @@ const Adapter = (config: IAdapterConfig, _options = {}) => {
 
         if (accountSnapshot.empty) return null;
 
-        const userId = accountSnapshot.docs[0].data().userId;
+        const userId = accountSnapshot.docs[0]!.data().userId;
 
         const userSnapshot = await firestoreAdmin
           .collection(usersCollection)
@@ -296,7 +296,7 @@ const Adapter = (config: IAdapterConfig, _options = {}) => {
           .limit(1)
           .get();
 
-        const accountId = snapshot.docs[0].id;
+        const accountId = snapshot.docs[0]!.id;
 
         await firestoreAdmin
           .collection(accountsCollection)
@@ -360,8 +360,8 @@ const Adapter = (config: IAdapterConfig, _options = {}) => {
         if (snapshot.empty) return null;
 
         const session = {
-          ...snapshot.docs[0].data(),
-          id: snapshot.docs[0].id,
+          ...snapshot.docs[0]!.data(),
+          id: snapshot.docs[0]!.id,
         } as ISession;
 
         // if the session has expired
@@ -373,7 +373,7 @@ const Adapter = (config: IAdapterConfig, _options = {}) => {
           // delete the session
           await firestoreAdmin
             .collection(sessionsCollection)
-            .doc(snapshot.docs[0].id)
+            .doc(snapshot.docs[0]!.id)
             .delete();
         }
         // return already existing session
@@ -456,7 +456,7 @@ const Adapter = (config: IAdapterConfig, _options = {}) => {
 
         if (snapshot.empty) return;
 
-        const sessionId = snapshot.docs[0].id;
+        const sessionId = snapshot.docs[0]!.id;
 
         await firestoreAdmin
           .collection(sessionsCollection)
@@ -554,8 +554,8 @@ const Adapter = (config: IAdapterConfig, _options = {}) => {
           .get();
 
         const verificationRequest = {
-          ...snapshot.docs[0].data(),
-          id: snapshot.docs[0].id,
+          ...snapshot.docs[0]!.data(),
+          id: snapshot.docs[0]!.id,
         } as IVerificationRequest;
 
         if (
@@ -598,7 +598,7 @@ const Adapter = (config: IAdapterConfig, _options = {}) => {
           .limit(1)
           .get();
 
-        const verificationRequestId = snapshot.docs[0].id;
+        const verificationRequestId = snapshot.docs[0]!.id;
 
         await firestoreAdmin
           .collection(verificationRequestsCollection)

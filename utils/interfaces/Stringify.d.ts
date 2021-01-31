@@ -11,4 +11,3 @@ interface JSON {
   parse<T>(text: Stringified<T>, reviver?: (key: any, value: any) => any): T;
   parse(text: string, reviver?: (key: any, value: any) => any): any;
 }
-a;

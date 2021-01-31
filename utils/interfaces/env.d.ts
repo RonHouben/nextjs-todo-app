@@ -12,9 +12,11 @@ declare global {
       NEXT_PUBLICFIREBASE_MESSAGING_SENDER_ID: string;
       NEXT_PUBLIC_FIREBASE_APP_ID: string;
       NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: string;
+      NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: string;
       FIREBASE_SERVICE_ACCOUNT_PRIVATE_KEY: string;
       FIREBASE_CLIENT_EMAIL: string;
       NEXT_PUBLIC_FIRESTORE_EMULATOR_HOST?: string;
+      NEXTAUTH_URL: string;
 
       // Github signin provider variables
       GITHUB_CLIENT_ID: string;
