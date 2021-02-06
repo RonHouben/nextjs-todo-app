@@ -1,6 +1,7 @@
 import { useSession } from "next-auth/client";
 import React, { useState } from "react";
 import useTodos from "../hooks/useTodos";
+import { firebaseClient } from "../lib/firebaseClient";
 import { ITodo } from "../utils/interfaces/todos";
 import ClearTextIconButton from "./IconButton";
 import CompleteTodoRoundCheckbox from "./RoundCheckbox";
@@ -23,14 +24,31 @@ export default function CreateTodoField({ autoFocus = false }: Props) {
 
   // handlers
   const handleToggleCompleted = (checked: boolean) => {
+    // log analytics event
+    firebaseClient.analytics().logEvent("toggled_new_todo_completed", {
+      todoCompleted: checked,
+      todoTitle: title,
+    });
+    // set local state
     setCompleted(checked);
   };
 
   const handleChangeTitle = (newTitle: ITodo["title"]) => {
+    // log analytics event
+    firebaseClient.analytics().logEvent("changed_new_todo_title", {
+      todoTitle: title,
+    });
+    // set local state
     setTitle(newTitle);
   };
 
   const handleSubmitTodo = (title: ITodo["title"]) => {
+    // log analytics event
+    firebaseClient.analytics().logEvent("submitted_new_todo", {
+      todoUserId: userId,
+      todoTitle: title,
+      todoCompleted: completed,
+    });
     // add to db
     createTodo(userId, { title, completed });
     // update local states
@@ -39,6 +57,11 @@ export default function CreateTodoField({ autoFocus = false }: Props) {
   };
 
   const handleClearTodo = () => {
+    // log analytics event
+    firebaseClient.analytics().logEvent("cleared_new_todo_title", {
+      todoTitle: title,
+    });
+    // set local states
     setTitle("");
     setCompleted(false);
   };

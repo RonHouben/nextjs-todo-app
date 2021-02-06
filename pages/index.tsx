@@ -1,5 +1,5 @@
 import { GetServerSideProps } from "next";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import Filterbar from "../components/Filterbar";
 import Paper from "../components/Paper";
@@ -13,6 +13,7 @@ import { toast } from "react-toastify";
 import registerToastServiceWorker from "../utils/registerToastServiceWorker";
 import useFirebaseCloudMessaging from "../hooks/useFirebaseCloudMessaging";
 import Todo from "../components/Todo";
+import { firebaseClient } from "../lib/firebaseClient";
 interface Props {
   userId: string;
 }
@@ -21,10 +22,14 @@ interface Props {
 registerToastServiceWorker(toast);
 
 export default function TodoApp({ userId }: Props) {
-  // local state
   const [selectedFilter, setSelectedFilter] = useState<ITodoStatusEnum>(
     ITodoStatusEnum.ALL
   );
+  // set the userId for Firebase Analytics
+  useEffect(() => {
+    firebaseClient.analytics().setUserId(userId);
+    firebaseClient.analytics().setCurrentScreen("home_screen");
+  }, [userId, selectedFilter]);
 
   // this shows a toast when a foreground message arrives from Firebase Cloud Messsaging
   useFirebaseCloudMessaging();
@@ -38,9 +43,24 @@ export default function TodoApp({ userId }: Props) {
 
   // handlers
   const handleClearCompleted = () => {
+    // get all completed todos
     const completedTodos = todos?.filter((todo) => todo.completed) || [];
     // remove each complete todo
     completedTodos.forEach(async ({ id }) => deleteTodo(id));
+    // log analytics event
+    firebaseClient.analytics().logEvent("cleared_completed", {
+      todos: completedTodos.map((todo) => todo.id),
+    });
+  };
+
+  const handleChangeFilter = (newFilter: ITodoStatusEnum) => {
+    // log analytics event
+    firebaseClient.analytics().logEvent("changed_todos_filter", {
+      before: selectedFilter,
+      after: newFilter,
+    });
+    // setSelectedFilter local state
+    setSelectedFilter(newFilter);
   };
 
   return (
@@ -59,7 +79,7 @@ export default function TodoApp({ userId }: Props) {
             ITodoStatusEnum.COMPLETED,
           ]}
           selected={selectedFilter}
-          onChangeFilter={setSelectedFilter}
+          onChangeFilter={handleChangeFilter}
           onClearCompleted={handleClearCompleted}
         />
       </Paper>
