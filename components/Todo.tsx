@@ -6,6 +6,7 @@ import useTodos from "../hooks/useTodos";
 import Skeleton from "react-loading-skeleton";
 import SkeletonThemeWrapper from "./SkeletonThemeWrapper";
 import DeleteTodoIconButton from "./IconButton";
+import { firebaseClient } from "../lib/firebaseClient";
 
 interface Props {
   placeholder?: string;
@@ -19,17 +20,45 @@ export default function Todo({ todo, placeholder }: Props) {
   // handlers
   const handleChangeTitle = (title: string): void => {
     if (!title) {
+      // log analytics event
+      firebaseClient
+        .analytics()
+        .logEvent("deleted_todo_by_changing_title_to_empty_string", {
+          todoId: todo!.id,
+          todoTitleBefore: todo!.title,
+          todoTitleAfter: title,
+        });
+      // delete the todo
       deleteTodo(todo!.id);
     } else {
+      // log analytics event
+      firebaseClient.analytics().logEvent("changed_todo_title", {
+        todoId: todo!.id,
+        todoTitleBefore: todo!.title,
+        todoTitleAfter: title,
+      });
+      // update the todo
       updateTodo(todo!.id, { ...todo, title });
     }
   };
 
   const handleToggleCompleted = (completed: boolean): void => {
+    // log analytics event
+    firebaseClient.analytics().logEvent("toggled_todo_completed", {
+      todoId: todo!.id,
+      todoCompletedBefore: todo!.completed,
+      todoCompletedAfter: completed,
+    });
+    // update the todo
     updateTodo(todo!.id, { completed });
   };
 
   const handleDelete = (id: ITodo["id"]): void => {
+    // log analytics event
+    firebaseClient.analytics().logEvent("deleted_todo", {
+      todoId: id,
+    });
+    // delete the todo
     deleteTodo(id);
   };
 

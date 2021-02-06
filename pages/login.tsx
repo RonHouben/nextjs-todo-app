@@ -6,9 +6,24 @@ import GithubIconButton from "../components/IconButton";
 import GoogleIconButton from "../components/IconButton";
 import { GetServerSideProps } from "next";
 import { useTheme } from "next-themes";
+import { useEffect } from "react";
+import { firebaseClient } from "../lib/firebaseClient";
 
 export default function LoginPage() {
   const { theme } = useTheme();
+
+  useEffect(() => {
+    firebaseClient.analytics().setCurrentScreen("login_screen");
+  }, []);
+
+  // handlers
+  const handleLogin = (provider: "github" | "google") => {
+    // log analytics event
+    firebaseClient.analytics().logEvent("login", { provider });
+    // call signIn function
+    signIn(provider, { callbackUrl: "/" });
+  };
+
   // render component
   return (
     <Layout>
@@ -44,14 +59,14 @@ export default function LoginPage() {
             }
             size="lg"
             // className="bg-light-background"
-            onClick={() => signIn("github", { callbackUrl: "/" })}
+            onClick={() => handleLogin("github")}
           />
           <GoogleIconButton
             alt="Sign in with Google"
             src="/icons/google-icon.png"
             size="lg"
             // className="bg-light-background"
-            onClick={() => signIn("google", { callbackUrl: "/" })}
+            onClick={() => handleLogin("google")}
           />
         </div>
       </Paper>

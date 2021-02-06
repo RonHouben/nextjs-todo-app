@@ -1,7 +1,7 @@
 import firebase from "firebase/app";
 import "firebase/firestore";
 import "firebase/auth";
-// import "firebase/messaging";
+import "firebase/analytics";
 
 export const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -56,6 +56,8 @@ function initializeFirebaseApp({
       try {
         // enable offline synchronizing
         app.firestore().enablePersistence();
+        // Initialize Google Analytics and get a reference to the service
+        app.analytics().logEvent("[Firebase Analytics] initialized");
       } catch (error) {
         console.error(error.message);
         return app;
