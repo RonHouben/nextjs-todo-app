@@ -67,6 +67,9 @@ module.exports = {
       letterSpacing: {
         navigation: ".55em",
       },
+      cursor: {
+        grab: "grab",
+      },
     },
   },
   variants: {

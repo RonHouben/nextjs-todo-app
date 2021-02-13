@@ -1,12 +1,13 @@
 import CompleteTodoRoundCheckbox from "./RoundCheckbox";
 import Textbox from "./Textbox";
-import React, { useState } from "react";
+import React, { Fragment } from "react";
 import { ITodo } from "../utils/interfaces/todos";
 import useTodos from "../hooks/useTodos";
 import Skeleton from "react-loading-skeleton";
 import SkeletonThemeWrapper from "./SkeletonThemeWrapper";
 import DeleteTodoIconButton from "./IconButton";
 import { firebaseClient } from "../lib/firebaseClient";
+import ThreeDots from "./ThreeDots";
 
 interface Props {
   placeholder?: string;
@@ -15,7 +16,6 @@ interface Props {
 
 export default function Todo({ todo, placeholder }: Props) {
   const { updateTodo, deleteTodo } = useTodos();
-  const [focused, setFocused] = useState<boolean>(false);
 
   // handlers
   const handleChangeTitle = (title: string): void => {
@@ -65,12 +65,8 @@ export default function Todo({ todo, placeholder }: Props) {
   return (
     <div
       id={todo?.id || "loadig-todo"}
-      className={`flex w-full h-full justify-center items-center p-2 bg-light-0 dark:bg-dark-1`}
+      className={`flex w-full h-full justify-center items-center p-2 bg-light-0 dark:bg-dark-1 rounded-md`}
       tabIndex={0}
-      onMouseEnter={() => setFocused(true)}
-      onMouseLeave={() => setFocused(false)}
-      onFocus={() => setFocused(true)}
-      onBlur={() => setFocused(false)}
     >
       {/* loading completed checkbox state*/}
       {!todo && (
@@ -84,11 +80,14 @@ export default function Todo({ todo, placeholder }: Props) {
         </div>
       )}
       {todo && (
-        <CompleteTodoRoundCheckbox
-          id={todo.id}
-          checked={todo.completed || false}
-          onToggle={handleToggleCompleted}
-        />
+        <Fragment>
+          <ThreeDots orientation="vertical" />
+          <CompleteTodoRoundCheckbox
+            id={todo.id}
+            checked={todo.completed || false}
+            onToggle={handleToggleCompleted}
+          />
+        </Fragment>
       )}
       {!todo && (
         <div className="h-full w-full pl-4">
@@ -113,7 +112,7 @@ export default function Todo({ todo, placeholder }: Props) {
           src="/icons/icon-cross.svg"
           size="md"
           onClick={() => handleDelete(todo.id)}
-          className={focused ? "visible" : "hidden"}
+          focusable
         />
       )}
     </div>

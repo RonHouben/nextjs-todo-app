@@ -1,9 +1,6 @@
 import { ITodo, ITodoStatusEnum } from "../utils/interfaces/todos";
 import firebase from "firebase/app";
-import {
-  firebaseClient,
-  firestoreServerTimestamp,
-} from "../lib/firebaseClient";
+import { firebaseClient, firestoreTimestamp } from "../lib/firebaseClient";
 import { toast } from "react-toastify";
 import { useCollectionData } from "react-firebase-hooks/firestore";
 
@@ -35,13 +32,16 @@ export default function useTodos() {
           whereFilterOptions: getWhereFilterOptions(filter),
           userId,
         })
-      : getQuery({ collectionPath: "todos", userId });
+      : // .orderBy("completed")
+        // .orderBy("order")
+        getQuery({ collectionPath: "todos", userId }).orderBy("order");
 
     const [todos, loading, error] = useCollectionData<ITodo>(query, {
       idField: "id",
     });
 
     if (error) {
+      console.error("[useTodos][getTodos]", error.message);
       toast.error(error.message);
     }
 
@@ -60,9 +60,11 @@ export default function useTodos() {
 
       await FIRESTORE.collection("todos").add({
         ...newTodo,
-        created: firestoreServerTimestamp(),
         userId,
-      });
+        createdAt: firestoreTimestamp.now(),
+        updatedAt: firestoreTimestamp.now(),
+        order: 0,
+      } as ITodo);
       toast(`Created "${newTodo.title}"`, {
         type: "success",
       });
@@ -76,7 +78,12 @@ export default function useTodos() {
     id: ITodo["id"],
     update: Partial<ITodo>
   ): Promise<void> {
-    await FIRESTORE.collection("todos").doc(id).update(update);
+    await FIRESTORE.collection("todos")
+      .doc(id)
+      .update({
+        ...update,
+        updatedAt: firestoreTimestamp.now(),
+      });
   }
 
   async function deleteTodo(id: ITodo["id"]): Promise<void> {
@@ -88,7 +95,18 @@ export default function useTodos() {
 
       toast(`Deleted "${data.title}`, { type: "success" });
     } catch (error) {
-      console.error("[userTodos][deleteTod]", error.message);
+      console.error("[useTodos][deleteTod]", error.message);
+    }
+  }
+
+  // TODO: implement more efficient ordering
+  async function reorderTodos(ids: ITodo["id"][]) {
+    try {
+      ids.forEach(async (id, i) => {
+        await FIRESTORE.collection("todos").doc(id).update({ order: i });
+      });
+    } catch (error) {
+      console.error("[useTodos][reorderTodos]", error.message);
     }
   }
 
@@ -129,6 +147,7 @@ export default function useTodos() {
     createTodo,
     updateTodo,
     deleteTodo,
+    reorderTodos,
     getWhereFilterOptions,
     getQuery,
   };

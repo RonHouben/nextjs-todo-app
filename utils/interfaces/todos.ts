@@ -3,7 +3,8 @@ export interface ITodo {
   userId: string;
   title: string;
   completed: boolean;
-  created?: FirebaseFirestore.Timestamp;
+  createdAt?: FirebaseFirestore.Timestamp;
+  updatedAt?: FirebaseFirestore.Timestamp;
 }
 
 export enum ITodoStatusEnum {
