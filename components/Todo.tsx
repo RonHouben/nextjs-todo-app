@@ -1,6 +1,6 @@
 import CompleteTodoRoundCheckbox from "./RoundCheckbox";
 import Textbox from "./Textbox";
-import React, { Fragment, useState } from "react";
+import React, { Fragment } from "react";
 import { ITodo } from "../utils/interfaces/todos";
 import useTodos from "../hooks/useTodos";
 import Skeleton from "react-loading-skeleton";
@@ -16,7 +16,6 @@ interface Props {
 
 export default function Todo({ todo, placeholder }: Props) {
   const { updateTodo, deleteTodo } = useTodos();
-  const [focused, setFocused] = useState<boolean>(false);
 
   // handlers
   const handleChangeTitle = (title: string): void => {
@@ -68,10 +67,6 @@ export default function Todo({ todo, placeholder }: Props) {
       id={todo?.id || "loadig-todo"}
       className={`flex w-full h-full justify-center items-center p-2 bg-light-0 dark:bg-dark-1 rounded-md`}
       tabIndex={0}
-      onMouseEnter={() => setFocused(true)}
-      onMouseLeave={() => setFocused(false)}
-      onFocus={() => setFocused(true)}
-      onBlur={() => setFocused(false)}
     >
       {/* loading completed checkbox state*/}
       {!todo && (
@@ -117,7 +112,6 @@ export default function Todo({ todo, placeholder }: Props) {
           src="/icons/icon-cross.svg"
           size="md"
           onClick={() => handleDelete(todo.id)}
-          // className={focused ? "visible" : "hidden"}
           focusable
         />
       )}

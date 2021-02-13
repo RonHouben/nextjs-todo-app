@@ -58,7 +58,7 @@ export default function TodoApp({ userId }: Props) {
   }, [firebaseClient, userId, selectedFilter]);
 
   // get
-  const [todos, loading, error] = useCollectionData<ITodo>(query, {
+  const [todos, loading] = useCollectionData<ITodo>(query, {
     idField: "id",
   });
 
