@@ -7,7 +7,7 @@ import Skeleton from "react-loading-skeleton";
 import SkeletonThemeWrapper from "./SkeletonThemeWrapper";
 import DeleteTodoIconButton from "./IconButton";
 import { firebaseClient } from "../lib/firebaseClient";
-import ThreeDots from "./threeDots";
+import ThreeDots from "./ThreeDots";
 
 interface Props {
   placeholder?: string;
