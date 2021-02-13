@@ -1,9 +1,9 @@
 import { GetServerSideProps } from "next";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Layout from "../components/Layout";
 import Filterbar from "../components/Filterbar";
 import Paper from "../components/Paper";
-import { ITodoStatusEnum } from "../utils/interfaces/todos";
+import { ITodo, ITodoStatusEnum } from "../utils/interfaces/todos";
 import TodosList from "../components/TodosList";
 import CreateTodoField from "../components/CreateTodoField";
 import { getSession } from "next-auth/client";
@@ -14,6 +14,13 @@ import registerToastServiceWorker from "../utils/registerToastServiceWorker";
 import useFirebaseCloudMessaging from "../hooks/useFirebaseCloudMessaging";
 import Todo from "../components/Todo";
 import { firebaseClient } from "../lib/firebaseClient";
+import {
+  DragDropContext,
+  DropResult,
+  ResponderProvided,
+} from "react-beautiful-dnd";
+import { useCollectionData } from "react-firebase-hooks/firestore";
+
 interface Props {
   userId: string;
 }
@@ -29,17 +36,38 @@ export default function TodoApp({ userId }: Props) {
   useEffect(() => {
     firebaseClient.analytics().setUserId(userId);
     firebaseClient.analytics().setCurrentScreen("home_screen");
-  }, [userId, selectedFilter]);
+  }, [userId]);
+
+  // get todos from database
+  const query = useMemo(() => {
+    const collection = firebaseClient.firestore().collection("todos");
+
+    const baseQuery = collection
+      .where("userId", "==", userId)
+      .orderBy("order", "asc");
+
+    // return baseQuery;
+    switch (selectedFilter) {
+      case ITodoStatusEnum.ALL:
+        return baseQuery;
+      case ITodoStatusEnum.ACTIVE:
+        return baseQuery.where("completed", "==", false);
+      case ITodoStatusEnum.COMPLETED:
+        return baseQuery.where("completed", "==", true);
+    }
+  }, [firebaseClient, userId, selectedFilter]);
+
+  // get
+  const [todos, loading, error] = useCollectionData<ITodo>(query, {
+    idField: "id",
+  });
+
+  query.get();
 
   // this shows a toast when a foreground message arrives from Firebase Cloud Messsaging
   useFirebaseCloudMessaging();
 
-  const { getTodos, deleteTodo } = useTodos();
-
-  const { todos, loading } = getTodos({
-    userId,
-    filter: selectedFilter,
-  });
+  const { deleteTodo, reorderTodos } = useTodos();
 
   // handlers
   const handleClearCompleted = () => {
@@ -63,6 +91,42 @@ export default function TodoApp({ userId }: Props) {
     setSelectedFilter(newFilter);
   };
 
+  const handleDragEnd = (result: DropResult, _provided: ResponderProvided) => {
+    const { source, destination } = result;
+    // dropped outside list
+    if (!destination || destination.index === source.index) {
+      return;
+    }
+
+    // updateTodo(draggableId, { updatedAt: firestoreTimestamp.now() });
+
+    const reorderedTodos = reorder<ITodo>(
+      todos,
+      source.index,
+      destination.index
+    );
+    const reorderedTodoIds = reorderedTodos.map(({ id }) => id);
+    // // save new order in the database
+    reorderTodos(reorderedTodoIds);
+    // log analytics event
+    firebaseClient.analytics().logEvent("changed_todos_order", {
+      before: todos?.map(({ id }) => id) || [],
+      after: reorderedTodoIds,
+    });
+  };
+
+  // helper function
+  function reorder<T>(
+    list: T[] = [],
+    startIndex: number,
+    endIndex: number
+  ): T[] {
+    const [removed] = list.splice(startIndex, 1);
+    list.splice(endIndex, 0, removed!);
+
+    return list;
+  }
+
   return (
     <Layout>
       <Paper rounded shadow className="w-full">
@@ -70,7 +134,11 @@ export default function TodoApp({ userId }: Props) {
       </Paper>
       <Paper rounded shadow verticalDivider className="w-full">
         {loading && <Todo />}
-        {!loading && todos && <TodosList todos={todos || []} />}
+        {!loading && todos && (
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <TodosList todos={todos || []} />
+          </DragDropContext>
+        )}
         <Filterbar
           itemsLeft={todos?.length || 0}
           filters={[

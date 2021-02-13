@@ -26,6 +26,8 @@ export const firebaseClient = initializeFirebaseApp({
 export const firestoreServerTimestamp =
   firebase.firestore.FieldValue.serverTimestamp;
 
+export const firestoreTimestamp = firebase.firestore.Timestamp;
+
 export const providers = {
   github: new firebase.auth.GithubAuthProvider(),
 };
