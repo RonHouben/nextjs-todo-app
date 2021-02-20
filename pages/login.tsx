@@ -26,7 +26,7 @@ function LoginPage() {
     firebase
       .auth()
       .getRedirectResult()
-      .then((result) => {})
+      .then(() => {})
       .catch((error) => toast.error(error.message))
   }, [])
 
