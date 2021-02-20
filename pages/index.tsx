@@ -1,119 +1,115 @@
-import { GetServerSideProps } from "next";
-import React, { useEffect, useMemo, useState } from "react";
-import Layout from "../components/Layout";
-import Filterbar from "../components/Filterbar";
-import Paper from "../components/Paper";
-import { ITodo, ITodoStatusEnum } from "../utils/interfaces/todos";
-import TodosList from "../components/TodosList";
-import CreateTodoField from "../components/CreateTodoField";
-import { getSession } from "next-auth/client";
-import { ISession } from "../lib/firebaseAdapter";
-import useTodos from "../hooks/useTodos";
-import { toast } from "react-toastify";
-import registerToastServiceWorker from "../utils/registerToastServiceWorker";
-import useFirebaseCloudMessaging from "../hooks/useFirebaseCloudMessaging";
-import Todo from "../components/Todo";
-import { firebaseClient } from "../lib/firebaseClient";
+import React, { useEffect, useMemo, useState } from 'react'
+import firebase from 'firebase/app'
+import { AuthAction, useAuthUser, withAuthUser } from 'next-firebase-auth'
+import { useCollectionData } from 'react-firebase-hooks/firestore'
+import Layout from '../components/Layout'
+import Filterbar from '../components/Filterbar'
+import Paper from '../components/Paper'
+import { ITodo, ITodoStatusEnum } from '../utils/interfaces/todos'
+import TodosList from '../components/TodosList'
+import CreateTodoField from '../components/CreateTodoField'
+import useTodos from '../hooks/useTodos'
+import { toast } from 'react-toastify'
+import registerToastServiceWorker from '../utils/registerToastServiceWorker'
+import useFirebaseCloudMessaging from '../hooks/useFirebaseCloudMessaging'
+import Todo from '../components/Todo'
 import {
   DragDropContext,
   DropResult,
   ResponderProvided,
-} from "react-beautiful-dnd";
-import { useCollectionData } from "react-firebase-hooks/firestore";
-
-interface Props {
-  userId: string;
-}
+} from 'react-beautiful-dnd'
 
 // This shows a toast on service worker lifecycle changes
-registerToastServiceWorker(toast);
+registerToastServiceWorker(toast)
 
-export default function TodoApp({ userId }: Props) {
+function TodoApp() {
+  const { id: userId } = useAuthUser()
+
   const [selectedFilter, setSelectedFilter] = useState<ITodoStatusEnum>(
     ITodoStatusEnum.ALL
-  );
+  )
   // set the userId for Firebase Analytics
   useEffect(() => {
-    firebaseClient.analytics().setUserId(userId);
-    firebaseClient.analytics().setCurrentScreen("home_screen");
-  }, [userId]);
+    if (userId) {
+      firebase.analytics().setUserId(userId)
+      firebase.analytics().setCurrentScreen('home_screen')
+    }
+  }, [userId])
 
   // get todos from database
   const query = useMemo(() => {
-    const collection = firebaseClient.firestore().collection("todos");
+    if (!userId) return
+
+    const collection = firebase.firestore().collection('todos')
 
     const baseQuery = collection
-      .where("userId", "==", userId)
-      .orderBy("order", "asc");
+      .where('userId', '==', userId)
+      .orderBy('order', 'asc')
 
     // return baseQuery;
     switch (selectedFilter) {
       case ITodoStatusEnum.ALL:
-        return baseQuery;
+        return baseQuery
       case ITodoStatusEnum.ACTIVE:
-        return baseQuery.where("completed", "==", false);
+        return baseQuery.where('completed', '==', false)
       case ITodoStatusEnum.COMPLETED:
-        return baseQuery.where("completed", "==", true);
+        return baseQuery.where('completed', '==', true)
     }
-  }, [firebaseClient, userId, selectedFilter]);
+  }, [firebase, userId, selectedFilter])
 
   // get
   const [todos, loading] = useCollectionData<ITodo>(query, {
-    idField: "id",
-  });
-
-  query.get();
+    idField: 'id',
+  })
 
   // this shows a toast when a foreground message arrives from Firebase Cloud Messsaging
-  useFirebaseCloudMessaging();
+  useFirebaseCloudMessaging()
 
-  const { deleteTodo, reorderTodos } = useTodos();
+  const { deleteTodo, reorderTodos } = useTodos()
 
   // handlers
   const handleClearCompleted = () => {
     // get all completed todos
-    const completedTodos = todos?.filter((todo) => todo.completed) || [];
+    const completedTodos = todos?.filter((todo) => todo.completed) || []
     // remove each complete todo
-    completedTodos.forEach(async ({ id }) => deleteTodo(id));
+    completedTodos.forEach(async ({ id }) => deleteTodo(id))
     // log analytics event
-    firebaseClient.analytics().logEvent("cleared_completed", {
+    firebase.analytics().logEvent('cleared_completed', {
       todos: completedTodos.map((todo) => todo.id),
-    });
-  };
+    })
+  }
 
   const handleChangeFilter = (newFilter: ITodoStatusEnum) => {
     // log analytics event
-    firebaseClient.analytics().logEvent("changed_todos_filter", {
+    firebase.analytics().logEvent('changed_todos_filter', {
       before: selectedFilter,
       after: newFilter,
-    });
+    })
     // setSelectedFilter local state
-    setSelectedFilter(newFilter);
-  };
+    setSelectedFilter(newFilter)
+  }
 
   const handleDragEnd = (result: DropResult, _provided: ResponderProvided) => {
-    const { source, destination } = result;
+    const { source, destination } = result
     // dropped outside list
     if (!destination || destination.index === source.index) {
-      return;
+      return
     }
-
-    // updateTodo(draggableId, { updatedAt: firestoreTimestamp.now() });
 
     const reorderedTodos = reorder<ITodo>(
       todos,
       source.index,
       destination.index
-    );
-    const reorderedTodoIds = reorderedTodos.map(({ id }) => id);
+    )
+    const reorderedTodoIds = reorderedTodos.map(({ id }) => id)
     // // save new order in the database
-    reorderTodos(reorderedTodoIds);
+    reorderTodos(reorderedTodoIds)
     // log analytics event
-    firebaseClient.analytics().logEvent("changed_todos_order", {
+    firebase.analytics().logEvent('changed_todos_order', {
       before: todos?.map(({ id }) => id) || [],
       after: reorderedTodoIds,
-    });
-  };
+    })
+  }
 
   // helper function
   function reorder<T>(
@@ -121,10 +117,10 @@ export default function TodoApp({ userId }: Props) {
     startIndex: number,
     endIndex: number
   ): T[] {
-    const [removed] = list.splice(startIndex, 1);
-    list.splice(endIndex, 0, removed!);
+    const [removed] = list.splice(startIndex, 1)
+    list.splice(endIndex, 0, removed!)
 
-    return list;
+    return list
   }
 
   return (
@@ -152,26 +148,9 @@ export default function TodoApp({ userId }: Props) {
         />
       </Paper>
     </Layout>
-  );
+  )
 }
 
-export const getServerSideProps: GetServerSideProps<Props> = async ({
-  req,
-}) => {
-  const session = ((await getSession({ req })) as unknown) as ISession;
-
-  if (!session) {
-    return {
-      redirect: {
-        permanent: false,
-        destination: "/login",
-      },
-    };
-  }
-
-  return {
-    props: {
-      userId: session.userId,
-    },
-  };
-};
+export default withAuthUser({
+  whenUnauthedAfterInit: AuthAction.REDIRECT_TO_LOGIN,
+})(TodoApp)

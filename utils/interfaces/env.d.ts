@@ -18,6 +18,10 @@ declare global {
       NEXT_PUBLIC_FIRESTORE_EMULATOR_HOST?: string;
       NEXTAUTH_URL: string;
 
+      // next-firebase-auth
+      COOKIE_SECRET_CURRENT: string;
+      COOKIE_SECRET_PREVIOUS: string;
+
       // Github signin provider variables
       GITHUB_CLIENT_ID: string;
       GITHUB_CLIENT_SECRET: string;
