@@ -17,8 +17,9 @@ export default function LoadingScreen() {
   return (
     <div className="flex h-screen w-screen justify-center items-center bg-light-background dark:bg-dark-background">
       <div className="flex group gap-1 animate-wiggle">
-        {percentages.map(() => (
+        {percentages.map((k) => (
           <div
+            key={k}
             className={`flex justify-center items-center h-8 w-8 rounded-full bg-gradient-to-tr from-background-purple-pink to-background-cyan hover:to-red-${randomSaturation()} transform hover:${randomNegative()}translate-y-10 transition ease-in duration-${randomDuration(
               { min: 300 }
             )} animate-slow-ping`}
