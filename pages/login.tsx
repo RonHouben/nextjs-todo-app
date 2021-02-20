@@ -1,28 +1,68 @@
-import Layout from "../components/Layout";
-import Paper from "../components/Paper";
-import Textbox from "../components/Textbox";
-import { getSession, signIn } from "next-auth/client";
-import GithubIconButton from "../components/IconButton";
-import GoogleIconButton from "../components/IconButton";
-import { GetServerSideProps } from "next";
-import { useTheme } from "next-themes";
-import { useEffect } from "react";
-import { firebaseClient } from "../lib/firebaseClient";
+import { useEffect, useState } from 'react'
+import firebase from 'firebase/app'
+import { withAuthUser, AuthAction } from 'next-firebase-auth'
+import Layout from '../components/Layout'
+import Paper from '../components/Paper'
+import Textbox from '../components/Textbox'
+import GithubIconButton from '../components/IconButton'
+import GoogleIconButton from '../components/IconButton'
+import { useTheme } from 'next-themes'
+import LoadingScreen from '../components/LoadingScreen'
+import { toast } from 'react-toastify'
 
-export default function LoginPage() {
-  const { theme } = useTheme();
+function LoginPage() {
+  const { theme } = useTheme()
 
+  const [email, setEmail] = useState<string>('')
+  const [password, setPassword] = useState<string>('')
+
+  // set firebase analytics current screen
   useEffect(() => {
-    firebaseClient.analytics().setCurrentScreen("login_screen");
-  }, []);
+    firebase.analytics().setCurrentScreen('login_screen')
+  }, [])
+
+  // handle login redirect result
+  useEffect(() => {
+    firebase
+      .auth()
+      .getRedirectResult()
+      .then(() => {})
+      .catch((error) => toast.error(error.message))
+  }, [])
 
   // handlers
-  const handleLogin = (provider: "github" | "google") => {
+  interface LoginProps {
+    provider: 'email-password' | 'github' | 'google'
+    email?: string
+    password?: string
+  }
+
+  const handleLogin = async ({ provider, email, password }: LoginProps) => {
     // log analytics event
-    firebaseClient.analytics().logEvent("login", { provider });
+    firebase.analytics().logEvent('login', { provider, email })
     // call signIn function
-    signIn(provider, { callbackUrl: "/" });
-  };
+    if (provider === 'email-password' && email && password) {
+      try {
+        await firebase.auth().signInWithEmailAndPassword(email, password)
+      } catch (error) {
+        if (error.code === 'auth/wrong-password') {
+          toast.error('Wrong password.')
+        } else {
+          toast.error(error.message)
+        }
+      }
+
+      return
+    }
+    if (provider === 'github') {
+      firebase.auth().signInWithRedirect(new firebase.auth.GithubAuthProvider())
+      return
+    }
+    if (provider === 'google') {
+      firebase.auth().signInWithRedirect(new firebase.auth.GoogleAuthProvider())
+      return
+    }
+  }
 
   // render component
   return (
@@ -35,56 +75,56 @@ export default function LoginPage() {
       >
         <h2 className="">Log In</h2>
         <Textbox
-          // disabled
-          value=""
+          disabled
+          value={email}
+          onChange={setEmail}
           placeholder="Email address"
           type="email"
           border
         />
         <Textbox
-          // disabled
-          value=""
+          disabled
+          value={password}
+          onChange={setPassword}
           placeholder="Password"
           type="password"
           border
         />
-        <button className="w-full p-2 border-2 rounded-lg">Log in</button>
+        <button
+          disabled
+          className="w-full p-2 border-2 rounded-lg"
+          onClick={() =>
+            handleLogin({ provider: 'email-password', email, password })
+          }
+        >
+          Log in
+        </button>
         <div className="flex">
           <GithubIconButton
             alt="Sign In with GitHub"
             src={
-              theme === "light"
-                ? "/icons/github-icon-dark.png"
-                : "/icons/github-icon-light.png"
+              theme === 'light'
+                ? '/icons/github-icon-dark.png'
+                : '/icons/github-icon-light.png'
             }
             size="lg"
-            // className="bg-light-background"
-            onClick={() => handleLogin("github")}
+            onClick={() => handleLogin({ provider: 'github' })}
           />
           <GoogleIconButton
             alt="Sign in with Google"
             src="/icons/google-icon.png"
             size="lg"
-            // className="bg-light-background"
-            onClick={() => handleLogin("google")}
+            onClick={() => handleLogin({ provider: 'google' })}
           />
         </div>
       </Paper>
     </Layout>
-  );
+  )
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ req }) => {
-  const session = await getSession({ req });
-
-  if (session) {
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-      props: {},
-    };
-  }
-  return { props: {} };
-};
+export default withAuthUser({
+  whenAuthed: AuthAction.REDIRECT_TO_APP,
+  whenUnauthedBeforeInit: AuthAction.SHOW_LOADER,
+  whenUnauthedAfterInit: AuthAction.RENDER,
+  LoaderComponent: LoadingScreen,
+})(LoginPage)
