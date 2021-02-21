@@ -1,8 +1,9 @@
 import firebase from 'firebase/app'
 import { useCollectionData } from 'react-firebase-hooks/firestore'
 import { toast } from 'react-toastify'
-import { ITodo, ITodoStatusEnum } from '../utils/interfaces/todo'
-import { IUser } from '../utils/interfaces/user'
+import type { ITodo } from '../utils/interfaces/todo'
+import { ITodoStatusEnum } from '../utils/interfaces/todo'
+import type { IUser } from '../utils/interfaces/user'
 
 type GetWhereFilterOptionsResult = [
   string | firebase.firestore.FieldPath,
