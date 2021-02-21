@@ -1,6 +1,5 @@
 import { ITodo, ITodoStatusEnum } from '../utils/interfaces/todos'
 import firebase from 'firebase/app'
-// import { firebaseClient, firestoreTimestamp } from "../lib/firebaseClient";
 import { toast } from 'react-toastify'
 import { useCollectionData } from 'react-firebase-hooks/firestore'
 
@@ -22,7 +21,6 @@ interface GetQueryProps {
 
 export default function useTodos() {
   // initiate Firebase
-  // const FIRESTORE = firebase.firestore()
 
   function getTodos({ filter, userId }: GetTodosProps) {
     // get the query
@@ -32,9 +30,7 @@ export default function useTodos() {
           whereFilterOptions: getWhereFilterOptions(filter),
           userId,
         })
-      : // .orderBy("completed")
-        // .orderBy("order")
-        getQuery({ collectionPath: 'todos', userId }).orderBy('order')
+      : getQuery({ collectionPath: 'todos', userId }).orderBy('order')
 
     const [todos, loading, error] = useCollectionData<ITodo>(query, {
       idField: 'id',
@@ -81,14 +77,19 @@ export default function useTodos() {
     id: ITodo['id'],
     update: Partial<ITodo>
   ): Promise<void> {
-    await firebase
-      .firestore()
-      .collection('todos')
-      .doc(id)
-      .update({
-        ...update,
-        updatedAt: firebase.firestore.Timestamp.now(),
-      })
+    try {
+      await firebase
+        .firestore()
+        .collection('todos')
+        .doc(id)
+        .update({
+          ...update,
+          updatedAt: firebase.firestore.Timestamp.now(),
+        })
+    } catch (error) {
+      console.error('[useTodos][updateTodo]', error.message)
+      toast.error(error.message)
+    }
   }
 
   async function deleteTodo(id: ITodo['id']): Promise<void> {
@@ -98,28 +99,32 @@ export default function useTodos() {
         .collection('todos')
         .doc(id)
         .get()
-      const data = (await snapshot.data()) as ITodo
+      const data = snapshot.data() as ITodo
 
-      snapshot.ref.delete()
+      await snapshot.ref.delete()
 
       toast(`Deleted "${data.title}`, { type: 'success' })
     } catch (error) {
       console.error('[useTodos][deleteTod]', error.message)
+      toast.error(error.message)
     }
   }
 
   // TODO: implement more efficient ordering
   async function reorderTodos(ids: ITodo['id'][]) {
     try {
-      ids.forEach(async (id, i) => {
-        await firebase
-          .firestore()
-          .collection('todos')
-          .doc(id)
-          .update({ order: i })
-      })
+      await Promise.all(
+        ids.map(async (id, i) => {
+          await firebase
+            .firestore()
+            .collection('todos')
+            .doc(id)
+            .update({ order: i })
+        })
+      )
     } catch (error) {
       console.error('[useTodos][reorderTodos]', error.message)
+      toast.error(error.message)
     }
   }
 
