@@ -1,23 +1,23 @@
-import React, { useEffect, useMemo, useState } from 'react'
 import firebase from 'firebase/app'
 import { AuthAction, useAuthUser, withAuthUser } from 'next-firebase-auth'
-import { useCollectionData } from 'react-firebase-hooks/firestore'
-import Layout from '../components/Layout'
-import Filterbar from '../components/Filterbar'
-import Paper from '../components/Paper'
-import { ITodo, ITodoStatusEnum } from '../utils/interfaces/todos'
-import TodosList from '../components/TodosList'
-import CreateTodoField from '../components/CreateTodoField'
-import useTodos from '../hooks/useTodos'
-import { toast } from 'react-toastify'
-import registerToastServiceWorker from '../utils/registerToastServiceWorker'
-import useFirebaseCloudMessaging from '../hooks/useFirebaseCloudMessaging'
-import Todo from '../components/Todo'
+import React, { useEffect, useMemo, useState } from 'react'
 import {
   DragDropContext,
   DropResult,
   ResponderProvided,
 } from 'react-beautiful-dnd'
+import { useCollectionData } from 'react-firebase-hooks/firestore'
+import { toast } from 'react-toastify'
+import CreateTodoField from '../components/CreateTodoField'
+import Filterbar from '../components/Filterbar'
+import Layout from '../components/Layout'
+import Paper from '../components/Paper'
+import Todo from '../components/Todo'
+import TodosList from '../components/TodosList'
+import useFirebaseCloudMessaging from '../hooks/useFirebaseCloudMessaging'
+import useTodos from '../hooks/useTodos'
+import { ITodo, ITodoStatusEnum } from '../utils/interfaces/todo'
+import registerToastServiceWorker from '../utils/registerToastServiceWorker'
 
 // This shows a toast on service worker lifecycle changes
 registerToastServiceWorker(toast)

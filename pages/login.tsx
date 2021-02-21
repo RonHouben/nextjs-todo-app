@@ -1,14 +1,16 @@
-import { useEffect, useState } from 'react'
 import firebase from 'firebase/app'
-import { withAuthUser, AuthAction } from 'next-firebase-auth'
+import { AuthAction, withAuthUser } from 'next-firebase-auth'
+import { useTheme } from 'next-themes'
+import { useEffect, useState } from 'react'
+import { toast } from 'react-toastify'
+import {
+  default as GithubIconButton,
+  default as GoogleIconButton,
+} from '../components/IconButton'
 import Layout from '../components/Layout'
+import LoadingScreen from '../components/LoadingScreen'
 import Paper from '../components/Paper'
 import Textbox from '../components/Textbox'
-import GithubIconButton from '../components/IconButton'
-import GoogleIconButton from '../components/IconButton'
-import { useTheme } from 'next-themes'
-import LoadingScreen from '../components/LoadingScreen'
-import { toast } from 'react-toastify'
 
 function LoginPage() {
   const { theme } = useTheme()
@@ -26,7 +28,7 @@ function LoginPage() {
     firebase
       .auth()
       .getRedirectResult()
-      .then(() => {})
+      .then((result) => {})
       .catch((error) => toast.error(error.message))
   }, [])
 

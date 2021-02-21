@@ -1,7 +1,8 @@
-import { ITodo, ITodoStatusEnum } from '../utils/interfaces/todos'
 import firebase from 'firebase/app'
-import { toast } from 'react-toastify'
 import { useCollectionData } from 'react-firebase-hooks/firestore'
+import { toast } from 'react-toastify'
+import { ITodo, ITodoStatusEnum } from '../utils/interfaces/todo'
+import { IUser } from '../utils/interfaces/user'
 
 type GetWhereFilterOptionsResult = [
   string | firebase.firestore.FieldPath,
@@ -20,8 +21,6 @@ interface GetQueryProps {
 }
 
 export default function useTodos() {
-  // initiate Firebase
-
   function getTodos({ filter, userId }: GetTodosProps) {
     // get the query
     const query = filter
@@ -45,7 +44,7 @@ export default function useTodos() {
   }
 
   async function createTodo(
-    userId: string = '',
+    userId: string,
     newTodo: Partial<ITodo>
   ): Promise<void> {
     try {
@@ -54,7 +53,8 @@ export default function useTodos() {
           'please specify a userId when initializing the useTodos hook'
         )
 
-      await firebase
+      // create the todo
+      const { id: newTodoId } = await firebase
         .firestore()
         .collection('todos')
         .add({
@@ -64,6 +64,21 @@ export default function useTodos() {
           updatedAt: firebase.firestore.Timestamp.now(),
           order: 0,
         } as ITodo)
+
+      // add todo ID to the users todos array
+      const user = await firebase
+        .firestore()
+        .collection('users')
+        .doc(userId)
+        .get()
+
+      // get existing todo id's from the user data
+      const { todos: existingTodosIds } = user.data() as IUser
+      // append the newTodoId to the todos array
+      user.ref.update({
+        todos: [...existingTodosIds, newTodoId],
+      })
+
       toast(`Created "${newTodo.title}"`, {
         type: 'success',
       })

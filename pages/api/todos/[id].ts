@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { ITodo } from '../../../utils/interfaces/todos'
-import HttpStatusCode from '../../../utils/interfaces/HttpStatusCodes.enum'
 import firebaseAdmin from '../../../lib/firebaseAdmin'
 import HTTPMethod from '../../../utils/interfaces/HttpMethods.enum'
+import HttpStatusCode from '../../../utils/interfaces/HttpStatusCodes.enum'
+import { ITodo } from '../../../utils/interfaces/todo'
 
 export default async function handler(
   req: NextApiRequest,
