@@ -1,6 +1,5 @@
 export interface ITodo {
   id: string
-  uid: string
   title: string
   completed: boolean
   createdAt?: FirebaseFirestore.Timestamp

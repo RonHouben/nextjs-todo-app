@@ -23,28 +23,29 @@ import registerToastServiceWorker from '../utils/registerToastServiceWorker'
 registerToastServiceWorker(toast)
 
 function TodoApp() {
-  const { id: userId } = useAuthUser()
+  const { id: uid } = useAuthUser()
 
   const [selectedFilter, setSelectedFilter] = useState<ITodoStatusEnum>(
     ITodoStatusEnum.ALL
   )
   // set the userId for Firebase Analytics
   useEffect(() => {
-    if (userId) {
-      firebase.analytics().setUserId(userId)
+    if (uid) {
+      firebase.analytics().setUserId(uid)
       firebase.analytics().setCurrentScreen('home_screen')
     }
-  }, [userId])
+  }, [uid])
 
   // get todos from database
   const query = useMemo(() => {
-    if (!userId) return
+    if (!uid) return
 
-    const collection = firebase.firestore().collection('todos')
+    const collection = firebase
+      .firestore()
+      .collection(`users/${uid}/todos`)
+      .orderBy('order')
 
     const baseQuery = collection
-      .where('userId', '==', userId)
-      .orderBy('order', 'asc')
 
     // return baseQuery;
     switch (selectedFilter) {
@@ -55,7 +56,7 @@ function TodoApp() {
       case ITodoStatusEnum.COMPLETED:
         return baseQuery.where('completed', '==', true)
     }
-  }, [firebase, userId, selectedFilter])
+  }, [firebase, uid, selectedFilter])
 
   // get
   const [todos, loading] = useCollectionData<ITodo>(query, {

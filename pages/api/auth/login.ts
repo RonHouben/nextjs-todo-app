@@ -34,7 +34,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         .doc(uid)
         .set({
           name,
-          todos: [],
         } as IUser)
     }
   } catch (error) {
