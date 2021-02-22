@@ -1,9 +1,9 @@
-import React, { Fragment } from "react";
-import { ITodo } from "../utils/interfaces/todos";
-import Todo from "./Todo";
-import { Draggable, Droppable } from "react-beautiful-dnd";
+import React, { Fragment } from 'react'
+import { Draggable, Droppable } from 'react-beautiful-dnd'
+import { ITodo } from '../utils/interfaces/todo'
+import Todo from './Todo'
 interface Props {
-  todos: ITodo[];
+  todos: ITodo[]
 }
 export default function TodosList({ todos }: Props) {
   return (
@@ -30,5 +30,5 @@ export default function TodosList({ todos }: Props) {
         )}
       </Droppable>
     </Fragment>
-  );
+  )
 }

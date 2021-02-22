@@ -1,11 +1,11 @@
+import firebase from 'firebase/app'
+import { useAuthUser } from 'next-firebase-auth'
 import React, { useState } from 'react'
 import useTodos from '../hooks/useTodos'
-import { ITodo } from '../utils/interfaces/todos'
+import { ITodo } from '../utils/interfaces/todo'
 import ClearTextIconButton from './IconButton'
 import CompleteTodoRoundCheckbox from './RoundCheckbox'
 import Textbox from './Textbox'
-import firebase from 'firebase/app'
-import { useAuthUser } from 'next-firebase-auth'
 interface Props {
   autoFocus?: boolean
 }

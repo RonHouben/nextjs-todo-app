@@ -1,69 +1,45 @@
-import { ITodo, ITodoStatusEnum } from '../utils/interfaces/todos'
 import firebase from 'firebase/app'
+import { useAuthUser } from 'next-firebase-auth'
 import { toast } from 'react-toastify'
-import { useCollectionData } from 'react-firebase-hooks/firestore'
+import type { ITodo } from '../utils/interfaces/todo'
+import { ITodoStatusEnum } from '../utils/interfaces/todo'
 
 type GetWhereFilterOptionsResult = [
   string | firebase.firestore.FieldPath,
   firebase.firestore.WhereFilterOp,
   any
 ]
-interface GetTodosProps {
-  filter?: ITodoStatusEnum
-  userId: string
-}
-
-interface GetQueryProps {
-  whereFilterOptions?: GetWhereFilterOptionsResult
-  collectionPath: string
-  userId?: string
-}
 
 export default function useTodos() {
-  // initiate Firebase
-
-  function getTodos({ filter, userId }: GetTodosProps) {
-    // get the query
-    const query = filter
-      ? getQuery({
-          collectionPath: 'todos',
-          whereFilterOptions: getWhereFilterOptions(filter),
-          userId,
-        })
-      : getQuery({ collectionPath: 'todos', userId }).orderBy('order')
-
-    const [todos, loading, error] = useCollectionData<ITodo>(query, {
-      idField: 'id',
-    })
-
-    if (error) {
-      console.error('[useTodos][getTodos]', error.message)
-      toast.error(error.message)
-    }
-
-    return { todos, loading, error }
-  }
+  const { id: uid } = useAuthUser()
 
   async function createTodo(
-    userId: string = '',
+    uid: string,
     newTodo: Partial<ITodo>
   ): Promise<void> {
     try {
-      if (!userId)
+      if (!uid)
         throw new Error(
           'please specify a userId when initializing the useTodos hook'
         )
 
+      // get existing todo id's from the user data
+      const snapshot = await firebase
+        .firestore()
+        .collection(`/users/${uid}/todos`)
+        .get()
+
+      // create the todo
       await firebase
         .firestore()
-        .collection('todos')
+        .collection(`/users/${uid}/todos`)
         .add({
           ...newTodo,
-          userId,
+          order: snapshot.size || 0,
           createdAt: firebase.firestore.Timestamp.now(),
           updatedAt: firebase.firestore.Timestamp.now(),
-          order: 0,
         } as ITodo)
+
       toast(`Created "${newTodo.title}"`, {
         type: 'success',
       })
@@ -80,7 +56,7 @@ export default function useTodos() {
     try {
       await firebase
         .firestore()
-        .collection('todos')
+        .collection(`users/${uid}/todos`)
         .doc(id)
         .update({
           ...update,
@@ -94,14 +70,14 @@ export default function useTodos() {
 
   async function deleteTodo(id: ITodo['id']): Promise<void> {
     try {
-      const snapshot = await firebase
+      const snapshotTodo = await firebase
         .firestore()
-        .collection('todos')
+        .collection(`users/${uid}/todos`)
         .doc(id)
         .get()
-      const data = snapshot.data() as ITodo
+      const data = snapshotTodo.data() as ITodo
 
-      await snapshot.ref.delete()
+      await snapshotTodo.ref.delete()
 
       toast(`Deleted "${data.title}`, { type: 'success' })
     } catch (error) {
@@ -117,7 +93,7 @@ export default function useTodos() {
         ids.map(async (id, i) => {
           await firebase
             .firestore()
-            .collection('todos')
+            .collection(`users/${uid}/todos`)
             .doc(id)
             .update({ order: i })
         })
@@ -142,39 +118,11 @@ export default function useTodos() {
     }
   }
 
-  function getQuery({
-    collectionPath,
-    whereFilterOptions,
-    userId,
-  }: GetQueryProps) {
-    if (userId && whereFilterOptions) {
-      return firebase
-        .firestore()
-        .collection(collectionPath)
-        .where(...whereFilterOptions)
-        .where('userId', '==', userId)
-    } else if (!userId && whereFilterOptions) {
-      return firebase
-        .firestore()
-        .collection(collectionPath)
-        .where(...whereFilterOptions)
-    } else if (userId && !whereFilterOptions) {
-      return firebase
-        .firestore()
-        .collection(collectionPath)
-        .where('userId', '==', userId)
-    } else {
-      return firebase.firestore().collection(collectionPath)
-    }
-  }
-
   return {
-    getTodos,
     createTodo,
     updateTodo,
     deleteTodo,
     reorderTodos,
     getWhereFilterOptions,
-    getQuery,
   }
 }

@@ -1,16 +1,16 @@
-import { ITodoStatusEnum } from "../utils/interfaces/todos";
+import { ITodoStatusEnum } from '../utils/interfaces/todo'
 
 interface Props {
-  itemsLeft: number;
-  filters: ITodoStatusEnum[];
-  selected: ITodoStatusEnum;
-  onChangeFilter: (newStatus: ITodoStatusEnum) => void;
-  onClearCompleted: () => void;
+  itemsLeft: number
+  filters: ITodoStatusEnum[]
+  selected: ITodoStatusEnum
+  onChangeFilter: (newStatus: ITodoStatusEnum) => void
+  onClearCompleted: () => void
 }
 
 interface Filter {
-  label: ITodoStatusEnum;
-  active: boolean;
+  label: ITodoStatusEnum
+  active: boolean
 }
 
 export default function Filterbar({
@@ -24,7 +24,7 @@ export default function Filterbar({
     filterLabel === selected
       ? { label: filterLabel, active: true }
       : { label: filterLabel, active: false }
-  );
+  )
 
   return (
     <div
@@ -37,8 +37,8 @@ export default function Filterbar({
             key={i}
             className={`${
               active
-                ? "text-active"
-                : "hover:text-light-4 dark:hover:text-dark-2"
+                ? 'text-active'
+                : 'hover:text-light-4 dark:hover:text-dark-2'
             } cursor-pointer px-3`}
             onClick={() => onChangeFilter(label)}
             onKeyPress={() => onChangeFilter(label)}
@@ -57,5 +57,5 @@ export default function Filterbar({
         Clear Completed
       </div>
     </div>
-  );
+  )
 }

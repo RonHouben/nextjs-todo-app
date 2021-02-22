@@ -1,50 +1,51 @@
-import React, { useEffect, useMemo, useState } from 'react'
 import firebase from 'firebase/app'
 import { AuthAction, useAuthUser, withAuthUser } from 'next-firebase-auth'
-import { useCollectionData } from 'react-firebase-hooks/firestore'
-import Layout from '../components/Layout'
-import Filterbar from '../components/Filterbar'
-import Paper from '../components/Paper'
-import { ITodo, ITodoStatusEnum } from '../utils/interfaces/todos'
-import TodosList from '../components/TodosList'
-import CreateTodoField from '../components/CreateTodoField'
-import useTodos from '../hooks/useTodos'
-import { toast } from 'react-toastify'
-import registerToastServiceWorker from '../utils/registerToastServiceWorker'
-import useFirebaseCloudMessaging from '../hooks/useFirebaseCloudMessaging'
-import Todo from '../components/Todo'
+import React, { useEffect, useMemo, useState } from 'react'
 import {
   DragDropContext,
   DropResult,
   ResponderProvided,
 } from 'react-beautiful-dnd'
+import { useCollectionData } from 'react-firebase-hooks/firestore'
+import { toast } from 'react-toastify'
+import CreateTodoField from '../components/CreateTodoField'
+import Filterbar from '../components/Filterbar'
+import Layout from '../components/Layout'
+import Paper from '../components/Paper'
+import Todo from '../components/Todo'
+import TodosList from '../components/TodosList'
+import useFirebaseCloudMessaging from '../hooks/useFirebaseCloudMessaging'
+import useTodos from '../hooks/useTodos'
+import { ITodo, ITodoStatusEnum } from '../utils/interfaces/todo'
+import registerToastServiceWorker from '../utils/registerToastServiceWorker'
 
 // This shows a toast on service worker lifecycle changes
 registerToastServiceWorker(toast)
 
 function TodoApp() {
-  const { id: userId } = useAuthUser()
+  const { id: uid } = useAuthUser()
 
   const [selectedFilter, setSelectedFilter] = useState<ITodoStatusEnum>(
     ITodoStatusEnum.ALL
   )
   // set the userId for Firebase Analytics
   useEffect(() => {
-    if (userId) {
-      firebase.analytics().setUserId(userId)
+    if (uid) {
+      firebase.analytics().setUserId(uid)
       firebase.analytics().setCurrentScreen('home_screen')
     }
-  }, [userId])
+  }, [uid])
 
   // get todos from database
   const query = useMemo(() => {
-    if (!userId) return
+    if (!uid) return
 
-    const collection = firebase.firestore().collection('todos')
+    const collection = firebase
+      .firestore()
+      .collection(`users/${uid}/todos`)
+      .orderBy('order')
 
     const baseQuery = collection
-      .where('userId', '==', userId)
-      .orderBy('order', 'asc')
 
     // return baseQuery;
     switch (selectedFilter) {
@@ -55,7 +56,7 @@ function TodoApp() {
       case ITodoStatusEnum.COMPLETED:
         return baseQuery.where('completed', '==', true)
     }
-  }, [firebase, userId, selectedFilter])
+  }, [firebase, uid, selectedFilter])
 
   // get
   const [todos, loading] = useCollectionData<ITodo>(query, {

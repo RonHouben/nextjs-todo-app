@@ -1,13 +1,13 @@
-import CompleteTodoRoundCheckbox from './RoundCheckbox'
-import Textbox from './Textbox'
-import React, { Fragment } from 'react'
-import { ITodo } from '../utils/interfaces/todos'
-import useTodos from '../hooks/useTodos'
-import Skeleton from 'react-loading-skeleton'
-import SkeletonThemeWrapper from './SkeletonThemeWrapper'
-import DeleteTodoIconButton from './IconButton'
-import ThreeDots from './ThreeDots'
 import firebase from 'firebase/app'
+import React, { Fragment } from 'react'
+import Skeleton from 'react-loading-skeleton'
+import useTodos from '../hooks/useTodos'
+import { ITodo } from '../utils/interfaces/todo'
+import DeleteTodoIconButton from './IconButton'
+import CompleteTodoRoundCheckbox from './RoundCheckbox'
+import SkeletonThemeWrapper from './SkeletonThemeWrapper'
+import Textbox from './Textbox'
+import ThreeDots from './ThreeDots'
 
 interface Props {
   placeholder?: string
