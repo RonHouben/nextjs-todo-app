@@ -1,6 +1,6 @@
 import firebase from 'firebase/app'
 import { AuthAction, useAuthUser, withAuthUser } from 'next-firebase-auth'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   DragDropContext,
   DropResult,
@@ -16,6 +16,7 @@ import Todo from '../components/Todo'
 import TodosList from '../components/TodosList'
 import useFirebaseCloudMessaging from '../hooks/useFirebaseCloudMessaging'
 import useTodos from '../hooks/useTodos'
+import { reorder } from '../utils/arrays'
 import { ITodo, ITodoStatusEnum } from '../utils/interfaces/todo'
 import registerToastServiceWorker from '../utils/registerToastServiceWorker'
 
@@ -25,9 +26,6 @@ registerToastServiceWorker(toast)
 function TodoApp() {
   const { id: uid } = useAuthUser()
 
-  const [selectedFilter, setSelectedFilter] = useState<ITodoStatusEnum>(
-    ITodoStatusEnum.ALL
-  )
   // set the userId for Firebase Analytics
   useEffect(() => {
     if (uid) {
@@ -36,37 +34,22 @@ function TodoApp() {
     }
   }, [uid])
 
-  // get todos from database
-  const query = useMemo(() => {
-    if (!uid) return
-
-    const collection = firebase
-      .firestore()
-      .collection(`users/${uid}/todos`)
-      .orderBy('order')
-
-    const baseQuery = collection
-
-    // return baseQuery;
-    switch (selectedFilter) {
-      case ITodoStatusEnum.ALL:
-        return baseQuery
-      case ITodoStatusEnum.ACTIVE:
-        return baseQuery.where('completed', '==', false)
-      case ITodoStatusEnum.COMPLETED:
-        return baseQuery.where('completed', '==', true)
-    }
-  }, [firebase, uid, selectedFilter])
-
-  // get
-  const [todos, loading] = useCollectionData<ITodo>(query, {
-    idField: 'id',
-  })
-
   // this shows a toast when a foreground message arrives from Firebase Cloud Messsaging
   useFirebaseCloudMessaging()
 
-  const { deleteTodo, reorderTodos } = useTodos()
+  // get todo functions
+  const { deleteTodo, reorderTodos, getTodosQuery } = useTodos()
+  // selectedFilter state for the filterbar
+  const [selectedFilter, setSelectedFilter] = useState<ITodoStatusEnum>(
+    ITodoStatusEnum.ALL
+  )
+
+  // get the todos from the database
+  const query = getTodosQuery(selectedFilter)
+
+  const [todos, loading] = useCollectionData<ITodo>(query, {
+    idField: 'id',
+  })
 
   // handlers
   const handleClearCompleted = () => {
@@ -97,31 +80,20 @@ function TodoApp() {
       return
     }
 
-    const reorderedTodos = reorder<ITodo>(
-      todos,
-      source.index,
-      destination.index
-    )
+    const reorderedTodos = reorder<ITodo>({
+      array: todos || [],
+      sourceIndex: source.index,
+      destinationIndex: destination.index,
+    })
+
     const reorderedTodoIds = reorderedTodos.map(({ id }) => id)
-    // // save new order in the database
+    // save new order in the database
     reorderTodos(reorderedTodoIds)
     // log analytics event
     firebase.analytics().logEvent('changed_todos_order', {
       before: todos?.map(({ id }) => id) || [],
       after: reorderedTodoIds,
     })
-  }
-
-  // helper function
-  function reorder<T>(
-    list: T[] = [],
-    startIndex: number,
-    endIndex: number
-  ): T[] {
-    const [removed] = list.splice(startIndex, 1)
-    list.splice(endIndex, 0, removed!)
-
-    return list
   }
 
   return (
@@ -133,7 +105,7 @@ function TodoApp() {
         {loading && <Todo />}
         {!loading && todos && (
           <DragDropContext onDragEnd={handleDragEnd}>
-            <TodosList todos={todos || []} />
+            <TodosList todos={todos} />
           </DragDropContext>
         )}
         <Filterbar
