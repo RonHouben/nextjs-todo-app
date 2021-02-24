@@ -1,27 +1,28 @@
-import Image from "next/image";
+import Image from 'next/image'
 
 interface Props {
-  id: string;
-  checked: boolean;
-  onToggle: (checked: boolean) => void;
+  id: string
+  checked: boolean
+  onToggle: (checked: boolean) => void
 }
 
 export default function RoundCheckbox({ id, checked, onToggle }: Props) {
   const handleChange = () => {
-    onToggle(!checked);
-  };
+    onToggle(!checked)
+  }
 
   return (
     <div className="p-3" tabIndex={0} onKeyPress={handleChange}>
       <input
         className="hidden"
         type="checkbox"
-        id={id + "rounded-checkbox"}
+        id={id + 'rounded-checkbox'}
         checked={checked}
         onChange={handleChange}
       />
       <label
-        htmlFor={id + "rounded-checkbox"}
+        title={checked ? 'Toggle Completed' : 'Complete Todo'}
+        htmlFor={id + 'rounded-checkbox'}
         className="flex rounded-full h-6 w-6 justify-center items-center text-xs cursor-pointer select-none bg-light-1 dark:bg-dark-6 bg-gradient-to-br hover:from-background-cyan hover:to-background-purple-pink"
       >
         {!checked && (
@@ -36,5 +37,5 @@ export default function RoundCheckbox({ id, checked, onToggle }: Props) {
         )}
       </label>
     </div>
-  );
+  )
 }

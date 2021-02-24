@@ -28,8 +28,22 @@ function LoginPage() {
     firebase
       .auth()
       .getRedirectResult()
-      .then(() => {})
-      .catch((error) => toast.error(error.message))
+      .catch((error) => {
+        if (error.code === 'auth/account-exists-with-different-credential') {
+          if (error.credential.providerId === 'github.com') {
+            // TODO:
+            //  - get existing user out of the DB by e-mail address to check which provider they have; => security issue
+            //  - tell user what the existing provider is and give them the choice to:
+            //    1. login & link the Github account automatically;
+            //    2. login with existing provider (so they can later link another provider in the profile page);
+            //    3. cancel the login;
+            toast.error(error.message, { autoClose: false })
+            return
+          }
+        }
+        console.error(error)
+        toast.error(error.message)
+      })
   }, [])
 
   // handlers
