@@ -1,5 +1,4 @@
 import { useAuthUser } from 'next-firebase-auth'
-import { useRouter } from 'next/router'
 import ProfileIconButton from './IconButton'
 import ThemeSwitcherButton from './ThemeSwitcherButton'
 
@@ -8,8 +7,7 @@ interface Props {
 }
 
 export default function Navbar({ pageTitle }: Props) {
-  const { firebaseUser, signOut } = useAuthUser()
-  const router = useRouter()
+  const { firebaseUser } = useAuthUser()
 
   return (
     <div className="flex justify-between items-center pb-10">
