@@ -1,9 +1,9 @@
-import { AppProps } from 'next/app'
-import '../styles/global.css'
-import 'react-toastify/dist/ReactToastify.css'
 import { ThemeProvider } from 'next-themes'
+import { AppProps } from 'next/app'
 import { Flip, ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 import initAuth from '../lib/initAuth'
+import '../styles/global.css'
 
 type TToastContextClass = {
   [key: string]: string

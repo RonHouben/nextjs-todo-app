@@ -1,8 +1,8 @@
-import { init } from 'next-firebase-auth'
 import 'firebase/analytics'
 import 'firebase/firestore'
+import { init } from 'next-firebase-auth'
 
-const initAuth = () => {
+export default function initAuth() {
   init({
     authPageURL: '/login',
     appPageURL: '/',
@@ -50,5 +50,3 @@ const initAuth = () => {
     },
   })
 }
-
-export default initAuth

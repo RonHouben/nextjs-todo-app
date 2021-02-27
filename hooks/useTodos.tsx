@@ -13,6 +13,24 @@ type GetWhereFilterOptionsResult = [
 export default function useTodos() {
   const { id: uid } = useAuthUser()
 
+  function getTodosQuery(filter: ITodoStatusEnum) {
+    if (firebase.apps.length === 0 && !uid) return
+
+    const baseQuery = firebase
+      .firestore()
+      .collection(`users/${uid}/todos`)
+      .orderBy('order')
+
+    switch (filter) {
+      case ITodoStatusEnum.ALL:
+        return baseQuery
+      case ITodoStatusEnum.ACTIVE:
+        return baseQuery.where('completed', '==', false)
+      case ITodoStatusEnum.COMPLETED:
+        return baseQuery.where('completed', '==', true)
+    }
+  }
+
   async function createTodo(
     uid: string,
     newTodo: Partial<ITodo>
@@ -75,6 +93,7 @@ export default function useTodos() {
         .collection(`users/${uid}/todos`)
         .doc(id)
         .get()
+
       const data = snapshotTodo.data() as ITodo
 
       await snapshotTodo.ref.delete()
@@ -119,6 +138,7 @@ export default function useTodos() {
   }
 
   return {
+    getTodosQuery,
     createTodo,
     updateTodo,
     deleteTodo,

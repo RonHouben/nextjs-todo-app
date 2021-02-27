@@ -19,7 +19,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const token = req.headers.authorization
 
-    const { user_id: uid, name } = jwt.decode(token) as { [key: string]: any }
+    const { user_id: uid, name, email } = jwt.decode(token) as {
+      [key: string]: any
+    }
 
     // check if the user already exists in the database
     const user = await firebaseAdmin()
@@ -34,6 +36,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         .doc(uid)
         .set({
           name,
+          email,
         } as IUser)
     }
   } catch (error) {

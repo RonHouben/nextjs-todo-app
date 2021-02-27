@@ -11,6 +11,7 @@ import Layout from '../components/Layout'
 import LoadingScreen from '../components/LoadingScreen'
 import Paper from '../components/Paper'
 import Textbox from '../components/Textbox'
+import { ProviderId } from '../utils/interfaces/user'
 
 function LoginPage() {
   const { theme } = useTheme()
@@ -28,13 +29,27 @@ function LoginPage() {
     firebase
       .auth()
       .getRedirectResult()
-      .then(() => {})
-      .catch((error) => toast.error(error.message))
+      .catch((error) => {
+        if (error.code === 'auth/account-exists-with-different-credential') {
+          if (error.credential.providerId === 'github.com') {
+            // TODO:
+            //  - get existing user out of the DB by e-mail address to check which provider they have; => security issue
+            //  - tell user what the existing provider is and give them the choice to:
+            //    1. login & link the Github account automatically;
+            //    2. login with existing provider (so they can later link another provider in the profile page);
+            //    3. cancel the login;
+            toast.error(error.message, { autoClose: false })
+            return
+          }
+        }
+        console.error(error)
+        toast.error(error.message)
+      })
   }, [])
 
   // handlers
   interface LoginProps {
-    provider: 'email-password' | 'github' | 'google'
+    provider: ProviderId
     email?: string
     password?: string
   }
@@ -56,11 +71,11 @@ function LoginPage() {
 
       return
     }
-    if (provider === 'github') {
+    if (provider === 'github.com') {
       firebase.auth().signInWithRedirect(new firebase.auth.GithubAuthProvider())
       return
     }
-    if (provider === 'google') {
+    if (provider === 'google.com') {
       firebase.auth().signInWithRedirect(new firebase.auth.GoogleAuthProvider())
       return
     }
@@ -110,13 +125,13 @@ function LoginPage() {
                 : '/icons/github-icon-light.png'
             }
             size="lg"
-            onClick={() => handleLogin({ provider: 'github' })}
+            onClick={() => handleLogin({ provider: 'github.com' })}
           />
           <GoogleIconButton
             alt="Sign in with Google"
             src="/icons/google-icon.png"
             size="lg"
-            onClick={() => handleLogin({ provider: 'google' })}
+            onClick={() => handleLogin({ provider: 'google.com' })}
           />
         </div>
       </Paper>
