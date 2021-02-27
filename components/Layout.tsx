@@ -1,26 +1,24 @@
-import React, { ReactNode, useEffect, useState } from "react";
-import Head from "next/head";
-import Navbar from "./Navbar";
-import { useTheme } from "next-themes";
-import tailwindConfig from "../tailwind.config";
+import { useTheme } from 'next-themes'
+import Head from 'next/head'
+import React, { ReactNode, useEffect, useState } from 'react'
+import tailwindConfig from '../tailwind.config'
+import Navbar from './Navbar'
 
 type Props = {
-  children?: ReactNode;
-  pageTitle?: string;
-};
+  children?: ReactNode
+  pageTitle?: string
+}
 
 export default function Layout({ children, pageTitle }: Props) {
-  const [mounted, setMounted] = useState(false);
-  const { theme } = useTheme();
+  const [mounted, setMounted] = useState(false)
+  const { theme } = useTheme()
 
-  useEffect(() => setMounted(true));
+  useEffect(() => setMounted(true))
 
-  if (!mounted) return null;
+  if (!mounted) return null
 
   return (
-    <div
-      className={`h-screen w-screen font-josefin-sans prose-lg sm:prose-sm md:prose-md lg:prose-lg`}
-    >
+    <div className={`h-screen w-screen`}>
       <Head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />
@@ -48,7 +46,7 @@ export default function Layout({ children, pageTitle }: Props) {
         <meta
           name="theme-color"
           content={
-            theme === "light"
+            theme === 'light'
               ? tailwindConfig.theme.extend.colors.light.background
               : tailwindConfig.theme.extend.colors.dark.background
           }
@@ -57,9 +55,9 @@ export default function Layout({ children, pageTitle }: Props) {
       {/* TOP BACKGROUND */}
       <div
         className={`h-1/3 bg-no-repeat bg-cover ${
-          theme === "dark"
-            ? "bg-mobile-dark sm:bg-desktop-dark"
-            : "bg-mobile-light sm:bg-desktop-light"
+          theme === 'dark'
+            ? 'bg-mobile-dark sm:bg-desktop-dark'
+            : 'bg-mobile-light sm:bg-desktop-light'
         }`}
       >
         {/* CONTENT */}
@@ -73,5 +71,5 @@ export default function Layout({ children, pageTitle }: Props) {
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -11,6 +11,7 @@ import Layout from '../components/Layout'
 import LoadingScreen from '../components/LoadingScreen'
 import Paper from '../components/Paper'
 import Textbox from '../components/Textbox'
+import { ProviderId } from '../utils/interfaces/user'
 
 function LoginPage() {
   const { theme } = useTheme()
@@ -48,7 +49,7 @@ function LoginPage() {
 
   // handlers
   interface LoginProps {
-    provider: 'email-password' | 'github' | 'google'
+    provider: ProviderId
     email?: string
     password?: string
   }
@@ -70,11 +71,11 @@ function LoginPage() {
 
       return
     }
-    if (provider === 'github') {
+    if (provider === 'github.com') {
       firebase.auth().signInWithRedirect(new firebase.auth.GithubAuthProvider())
       return
     }
-    if (provider === 'google') {
+    if (provider === 'google.com') {
       firebase.auth().signInWithRedirect(new firebase.auth.GoogleAuthProvider())
       return
     }
@@ -124,13 +125,13 @@ function LoginPage() {
                 : '/icons/github-icon-light.png'
             }
             size="lg"
-            onClick={() => handleLogin({ provider: 'github' })}
+            onClick={() => handleLogin({ provider: 'github.com' })}
           />
           <GoogleIconButton
             alt="Sign in with Google"
             src="/icons/google-icon.png"
             size="lg"
-            onClick={() => handleLogin({ provider: 'google' })}
+            onClick={() => handleLogin({ provider: 'google.com' })}
           />
         </div>
       </Paper>
