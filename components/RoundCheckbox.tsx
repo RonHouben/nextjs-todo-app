@@ -1,4 +1,12 @@
+import {
+  Box,
+  Flex,
+  FormLabel,
+  Input,
+  useColorModeValue,
+} from '@chakra-ui/react'
 import Image from 'next/image'
+import React from 'react'
 
 interface Props {
   id: string
@@ -7,35 +15,63 @@ interface Props {
 }
 
 export default function RoundCheckbox({ id, checked, onToggle }: Props) {
+  const borderColor = useColorModeValue('secondary.light', 'secondary.dark')
+  const bgColorUnchecked = useColorModeValue('primary.light', 'primary.dark')
+  const bgColorChecked = useColorModeValue('secondary.light', 'secondary.dark')
+
   const handleChange = () => {
     onToggle(!checked)
   }
 
   return (
-    <div className="p-3" tabIndex={0} onKeyPress={handleChange}>
-      <input
-        className="hidden"
+    <Flex
+      justifyContent="center"
+      alignItems="center"
+      padding="3"
+      tabIndex={0}
+      onKeyPress={handleChange}
+    >
+      <Input
         type="checkbox"
-        id={id + 'rounded-checkbox'}
+        id={id + '-rounded-checkbox'}
+        hidden
         checked={checked}
         onChange={handleChange}
       />
-      <label
+      <FormLabel
+        display="flex"
+        position="relative"
+        margin="0"
         title={checked ? 'Toggle Completed' : 'Complete Todo'}
         htmlFor={id + 'rounded-checkbox'}
-        className="flex rounded-full h-6 w-6 justify-center items-center text-xs cursor-pointer select-none bg-light-1 dark:bg-dark-6 bg-gradient-to-br hover:from-background-cyan hover:to-background-purple-pink"
+        rounded="full"
+        h="6"
+        w="6"
+        justifyContent="center"
+        alignItems="center"
+        userSelect="none"
+        cursor="pointer"
+        bgColor={borderColor}
+        onClick={handleChange}
       >
         {!checked && (
-          <div className="bg-light-0 dark:bg-dark-1 h-5/6 w-5/6 rounded-full" />
+          <Box bgColor={bgColorUnchecked} h="5" w="5" rounded="full" />
         )}
         {checked && (
-          <div className="relative flex justify-center items-center rounded-full bg-gradient-to-br from-background-cyan to-background-purple-pink h-full w-full">
-            <div className="absolute mx-auto h-3 w-3">
-              <Image layout="fill" src="/icons/icon-check.svg" />
-            </div>
-          </div>
+          <Flex
+            justifyContent="center"
+            alignItems="center"
+            bgColor={bgColorChecked}
+          >
+            <Image
+              layout="fixed"
+              src="/icons/icon-check.svg"
+              height="10px"
+              width="10px"
+            />
+          </Flex>
         )}
-      </label>
-    </div>
+      </FormLabel>
+    </Flex>
   )
 }

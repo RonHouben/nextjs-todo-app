@@ -45,7 +45,7 @@ export default function initAuth() {
       overwrite: true,
       path: '/',
       sameSite: 'strict',
-      secure: true, // set this to false in local (non-HTTPS) development
+      secure: process.env.NODE_ENV === 'development' ? false : true, // set this to false in local (non-HTTPS) development
       signed: true,
     },
   })

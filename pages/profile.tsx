@@ -1,3 +1,11 @@
+import {
+  Flex,
+  Heading,
+  IconButton,
+  Stack,
+  Text,
+  useColorModeValue,
+} from '@chakra-ui/react'
 import firebase from 'firebase/app'
 import {
   AuthAction,
@@ -6,9 +14,10 @@ import {
   withAuthUserSSR,
 } from 'next-firebase-auth'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { BiChevronLeftCircle as BackIcon } from 'react-icons/bi'
+import { RiLogoutCircleRLine as LogoutIcon } from 'react-icons/ri'
 import { toast } from 'react-toastify'
-import BackIconButton from '../components/IconButton'
 import Layout from '../components/Layout'
 import Paper from '../components/Paper'
 import ProviderList from '../components/ProviderList'
@@ -23,6 +32,7 @@ function Profile({ userProfileData }: Props) {
   const user = JSON.parse(userProfileData)
   const router = useRouter()
   const { signOut, firebaseUser } = useAuthUser()
+  const iconColor = useColorModeValue('secondary.light', 'secondary.dark')
 
   const [linkedProviders, setLinkedProviders] = useState<
     IUserProfileData['providerIds']
@@ -50,6 +60,14 @@ function Profile({ userProfileData }: Props) {
     signOut()
     // route to login page
     router.push('/login')
+  }
+
+  const handleSwitchProvider = (providerId: ProviderId) => {
+    const linked: boolean = linkedProviders.some((p) => p === providerId)
+
+    return linked
+      ? handleUnlinkProvider(providerId)
+      : handleLinkProvider(providerId)
   }
 
   const handleUnlinkProvider = async (providerId: ProviderId) => {
@@ -95,42 +113,42 @@ function Profile({ userProfileData }: Props) {
 
   return (
     <Layout>
-      <Paper rounded shadow className="w-full px-5">
-        <header className="flex items-center justify-between">
-          <BackIconButton
-            src="/icons/back-arrow.svg"
-            alt="Go Back"
-            size="xl"
+      <Paper rounded shadow padding="6">
+        <Flex justifyContent="space-between" alignItems="center" mb="6">
+          <IconButton
+            as={BackIcon}
+            title="Go Back"
+            aria-label="Go Back"
+            size="md"
+            rounded="full"
+            variant="ghost"
+            color={iconColor}
+            cursor="pointer"
             onClick={handleBackButtonClick}
           />
-          <h1 className="m-1">Hi {user.name}!</h1>
-          <button
+          <Heading as="h3">Hi {user.name}!</Heading>
+          <IconButton
+            as={LogoutIcon}
+            title="Logout"
+            aria-label="Logout"
+            size="md"
+            rounded="full"
+            variant="ghost"
+            color={iconColor}
+            cursor="pointer"
             onClick={handleSignOut}
-            className="border-2 border-black m-1 p-1 rounded-sm"
-          >
-            Sign Out
-          </button>
-        </header>
+          />
+        </Flex>
         <main>
           <section>
-            {linkedProviders.length > 0 && (
-              <div className="flex flex-wrap gap-5 items-center">
-                <div>Linked providers:</div>
-                <ProviderList
-                  onClick={handleUnlinkProvider}
-                  providers={linkedProviders}
-                />
-              </div>
-            )}
-          </section>
-          <section>
-            <div className="flex flex-wrap gap-5 items-start">
-              <div>Link more providers:</div>
+            <Stack direction="row" wrap="wrap" spacing="6">
+              <Text fontSize="lg">Social Login Providers:</Text>
               <ProviderList
-                filterOut={linkedProviders}
-                onClick={handleLinkProvider}
+                onSwitchProvider={handleSwitchProvider}
+                linkedProviders={linkedProviders}
+                direction="column"
               />
-            </div>
+            </Stack>
           </section>
         </main>
       </Paper>

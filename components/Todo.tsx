@@ -1,21 +1,29 @@
+import { CloseIcon, DragHandleIcon } from '@chakra-ui/icons'
+import {
+  Flex,
+  IconButton,
+  InputGroup,
+  InputLeftAddon,
+  InputRightAddon,
+  useColorModeValue,
+} from '@chakra-ui/react'
 import firebase from 'firebase/app'
-import React, { Fragment } from 'react'
-import Skeleton from 'react-loading-skeleton'
+import React from 'react'
 import useTodos from '../hooks/useTodos'
 import { ITodo } from '../utils/interfaces/todo'
-import DeleteTodoIconButton from './IconButton'
-import CompleteTodoRoundCheckbox from './RoundCheckbox'
-import SkeletonThemeWrapper from './SkeletonThemeWrapper'
+import RoundCheckbox from './RoundCheckbox'
 import Textbox from './Textbox'
-import ThreeDots from './ThreeDots'
 
 interface Props {
+  todo: ITodo
   placeholder?: string
-  todo?: ITodo
+  isDragging?: boolean
 }
 
-export default function Todo({ todo, placeholder }: Props) {
+export default function Todo({ todo, placeholder, isDragging = false }: Props) {
   const { updateTodo, deleteTodo } = useTodos()
+
+  const iconColor = useColorModeValue('secondary.light', 'secondary.dark')
 
   // handlers
   const handleChangeTitle = (title: string): void => {
@@ -63,38 +71,36 @@ export default function Todo({ todo, placeholder }: Props) {
   }
 
   return (
-    <div
-      id={todo?.id || 'loadig-todo'}
-      className={`flex w-full h-full justify-center items-center p-2 bg-light-0 dark:bg-dark-1 rounded-md`}
-      tabIndex={0}
+    <Flex
+      id={todo?.id || 'loading-todo'}
+      p="2"
+      justifyContent="space-between"
+      shadow={isDragging ? 'dark-lg' : undefined}
+      style={{
+        backdropFilter: 'blur(15px)',
+        WebkitBackdropFilter: 'blur(5rem)',
+      }}
     >
-      {/* loading completed checkbox state*/}
-      {!todo && (
-        <div className="p-2">
-          <Skeleton
-            wrapper={SkeletonThemeWrapper}
-            circle
-            width="1.5rem"
-            height="1.5rem"
-          />
-        </div>
-      )}
-      {todo && (
-        <Fragment>
-          <ThreeDots orientation="vertical" />
-          <CompleteTodoRoundCheckbox
-            id={todo.id}
-            checked={todo.completed || false}
-            onToggle={handleToggleCompleted}
-          />
-        </Fragment>
-      )}
-      {!todo && (
-        <div className="h-full w-full pl-4">
-          <Skeleton wrapper={SkeletonThemeWrapper} />
-        </div>
-      )}
-      {todo && (
+      <InputGroup size="lg" alignItems="center">
+        <InputLeftAddon
+          background="transparent"
+          padding="0"
+          border="none"
+          color={iconColor}
+          children={<DragHandleIcon />}
+        />
+        <InputLeftAddon
+          background="transparent"
+          border="none"
+          padding="0"
+          children={
+            <RoundCheckbox
+              id={todo.id}
+              checked={todo.completed || false}
+              onToggle={handleToggleCompleted}
+            />
+          }
+        />
         <Textbox
           value={todo.title}
           placeholder={placeholder || 'Add a title'}
@@ -104,17 +110,22 @@ export default function Todo({ todo, placeholder }: Props) {
           submitOnEnterKey
           submitOnBlur
         />
-      )}
-      {/* delete Todo button */}
-      {todo && (
-        <DeleteTodoIconButton
-          alt="Delete Todo"
-          src="/icons/icon-cross.svg"
-          size="md"
-          onClick={() => handleDelete(todo.id)}
-          focusable
+        <InputRightAddon
+          background="transparent"
+          border="none"
+          children={
+            <IconButton
+              aria-label="Clear Text"
+              size="md"
+              variant="ghost"
+              onClick={() => handleDelete(todo.id)}
+              isRound
+              color={iconColor}
+              icon={<CloseIcon />}
+            />
+          }
         />
-      )}
-    </div>
+      </InputGroup>
+    </Flex>
   )
 }

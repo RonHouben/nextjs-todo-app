@@ -1,3 +1,5 @@
+import { Button, Stack, Text, useColorModeValue } from '@chakra-ui/react'
+import React from 'react'
 import { ITodoStatusEnum } from '../utils/interfaces/todo'
 
 interface Props {
@@ -20,6 +22,7 @@ export default function Filterbar({
   onChangeFilter,
   onClearCompleted,
 }: Props) {
+  const activeTextColor = useColorModeValue('secondary.light', 'secondary.dark')
   const filters: Filter[] = filterLabels.map((filterLabel) =>
     filterLabel === selected
       ? { label: filterLabel, active: true }
@@ -27,35 +30,37 @@ export default function Filterbar({
   )
 
   return (
-    <div
-      className={`flex flex-wrap w-full h-full justify-center items-center p-2 text-dark-5 bg-light-0 dark:bg-dark-1 divide-x-2 xs:divide-x-0 xs:divide-y-2 divide-light-1 dark:divide-dark-6 divide-solid divide-opacity-50`}
+    <Stack
+      direction="row"
+      wrap="wrap"
+      py="2"
+      spacing={2}
+      align="center"
+      justifyContent="center"
     >
-      <div className="px-4">{itemsLeft} items left</div>
-      <div className="flex justify-between space-x-3 px-3">
+      <Text fontSize="md" px="5">
+        {itemsLeft} items left
+      </Text>
+      <div>
         {filters.map(({ label, active }, i) => (
-          <div
+          <Button
             key={i}
-            className={`${
-              active
-                ? 'text-active'
-                : 'hover:text-light-4 dark:hover:text-dark-2'
-            } cursor-pointer px-3`}
+            variant="ghost"
+            color={active ? activeTextColor : undefined}
             onClick={() => onChangeFilter(label)}
             onKeyPress={() => onChangeFilter(label)}
-            tabIndex={0}
           >
             {label}
-          </div>
+          </Button>
         ))}
       </div>
-      <div
-        className="px-3 hover:text-light-4 dark:hover:text-dark-2 cursor-pointer"
+      <Button
+        variant="ghost"
         onClick={onClearCompleted}
         onKeyPress={onClearCompleted}
-        tabIndex={0}
       >
         Clear Completed
-      </div>
-    </div>
+      </Button>
+    </Stack>
   )
 }

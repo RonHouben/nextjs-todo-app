@@ -84,12 +84,7 @@ function LoginPage() {
   // render component
   return (
     <Layout>
-      <Paper
-        centerContent
-        shadow
-        rounded
-        className="w-full p-4 prose dark:prose-dark lg:prose-lg space-y-5 px-10"
-      >
+      <Paper centerContent shadow rounded>
         <h2 className="">Log In</h2>
         <Textbox
           disabled
@@ -97,7 +92,6 @@ function LoginPage() {
           onChange={setEmail}
           placeholder="Email address"
           type="email"
-          border
         />
         <Textbox
           disabled
@@ -105,7 +99,6 @@ function LoginPage() {
           onChange={setPassword}
           placeholder="Password"
           type="password"
-          border
         />
         <button
           disabled

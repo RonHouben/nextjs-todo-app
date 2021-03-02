@@ -1,18 +1,13 @@
 import firebase from 'firebase/app'
 import { AuthAction, useAuthUser, withAuthUser } from 'next-firebase-auth'
 import React, { useEffect, useState } from 'react'
-import {
-  DragDropContext,
-  DropResult,
-  ResponderProvided,
-} from 'react-beautiful-dnd'
+import { DropResult, ResponderProvided } from 'react-beautiful-dnd'
 import { useCollectionData } from 'react-firebase-hooks/firestore'
 import { toast } from 'react-toastify'
-import CreateTodoField from '../components/CreateTodoField'
+import CreateTodo from '../components/CreateTodo'
 import Filterbar from '../components/Filterbar'
 import Layout from '../components/Layout'
 import Paper from '../components/Paper'
-import Todo from '../components/Todo'
 import TodosList from '../components/TodosList'
 import useFirebaseCloudMessaging from '../hooks/useFirebaseCloudMessaging'
 import useTodos from '../hooks/useTodos'
@@ -98,15 +93,10 @@ function TodoApp() {
 
   return (
     <Layout>
-      <Paper rounded shadow className="w-full">
-        <CreateTodoField autoFocus />
-      </Paper>
-      <Paper rounded shadow verticalDivider className="w-full">
-        {loading && <Todo />}
+      <Paper rounded shadow>
+        <CreateTodo autoFocus />
         {!loading && todos && (
-          <DragDropContext onDragEnd={handleDragEnd}>
-            <TodosList todos={todos} />
-          </DragDropContext>
+          <TodosList todos={todos} onDragEnd={handleDragEnd} />
         )}
         <Filterbar
           itemsLeft={todos?.length || 0}

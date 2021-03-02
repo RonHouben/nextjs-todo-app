@@ -1,35 +1,37 @@
+import { Flex, SpaceProps } from '@chakra-ui/react'
 import { ReactNode } from 'react'
 
 interface Props {
   children: ReactNode
-  className?: string
-  verticalDivider?: boolean
   shadow?: boolean
   rounded?: boolean
   centerContent?: boolean
+  bgColor?: string
+  padding?: SpaceProps['padding']
 }
 export default function Paper({
   children,
-  className,
-  verticalDivider,
   shadow,
   rounded,
   centerContent,
+  padding,
 }: Props) {
   return (
-    <div
-      className={`flex flex-col h-full bg-light-0 dark:bg-dark-1 text-dark-5 dark:text-light-0 p-2 space-y-2
-      ${
-        verticalDivider
-          ? 'divide-y divide-light-2 dark:divide-dark-6 divide-opacity-50 divide-y-2'
-          : ''
-      }
-      ${shadow ? 'shadow-md' : ''}
-      ${rounded ? 'rounded-md' : ''}
-      ${centerContent ? 'text-center items-center justify-center' : ''}
-      ${className}`}
+    <Flex
+      flexDir="column"
+      padding={padding || '2'}
+      shadow={shadow ? 'dark-lg' : undefined}
+      rounded={rounded ? 'md' : undefined}
+      textAlign={centerContent ? 'center' : undefined}
+      justifyContent={centerContent ? 'center' : undefined}
+      alignItems={centerContent ? 'center' : undefined}
+      style={{
+        backdropFilter: 'blur(2.5rem)',
+        WebkitBackdropFilter: 'blur(2.5rem)',
+      }}
+      zIndex={100}
     >
       {children}
-    </div>
+    </Flex>
   )
 }

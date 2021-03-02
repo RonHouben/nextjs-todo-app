@@ -1,39 +1,37 @@
-import React from 'react'
+import { MoonIcon, SunIcon } from '@chakra-ui/icons'
+import { IconButton, useColorMode, useColorModeValue } from '@chakra-ui/react'
 import firebase from 'firebase/app'
-import { useTheme } from 'next-themes'
-import IconButton from './IconButton'
+import React from 'react'
 
 export default function ThemeSwitcherButton() {
-  const { theme, setTheme } = useTheme()
+  const { colorMode, toggleColorMode } = useColorMode()
+  const iconColor = useColorModeValue('secondary.light', 'secondary.dark')
 
-  const handleSwitchTheme = (newTheme: 'light' | 'dark') => {
+  const handleSwitchTheme = (newTheme: typeof colorMode) => {
     // log analytics event
     firebase.analytics().logEvent('switched_theme', {
-      before: theme,
+      before: colorMode,
       after: newTheme,
     })
-    // set the theme in local state
-    setTheme(newTheme)
+    // toggle color mode
+    toggleColorMode()
   }
 
   return (
-    <React.Fragment>
-      {theme === 'light' && (
-        <IconButton
-          alt="Switch to Dark Mode"
-          src="/icons/icon-moon.svg"
-          size="lg"
-          onClick={() => handleSwitchTheme('dark')}
-        />
-      )}
-      {theme === 'dark' && (
-        <IconButton
-          alt="Switch to Light Mode"
-          src="/icons/icon-sun.svg"
-          size="lg"
-          onClick={() => handleSwitchTheme('light')}
-        />
-      )}
-    </React.Fragment>
+    <IconButton
+      title={`Switch to ${colorMode === 'light' ? 'Dark' : 'Light'} Mode`}
+      aria-label={`Switch to ${colorMode === 'light' ? 'Dark' : 'Light'} Mode`}
+      variant="outline"
+      size="lg"
+      isRound
+      color={iconColor}
+      borderColor={iconColor}
+      icon={colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
+      onClick={() =>
+        colorMode === 'light'
+          ? handleSwitchTheme('dark')
+          : handleSwitchTheme('light')
+      }
+    />
   )
 }
