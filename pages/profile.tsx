@@ -1,11 +1,4 @@
-import {
-  Flex,
-  Heading,
-  IconButton,
-  Stack,
-  Text,
-  useColorModeValue,
-} from '@chakra-ui/react'
+import { Flex, Heading, Stack, Text, useColorModeValue } from '@chakra-ui/react'
 import firebase from 'firebase/app'
 import {
   AuthAction,
@@ -18,6 +11,7 @@ import React, { useEffect, useState } from 'react'
 import { BiChevronLeftCircle as BackIcon } from 'react-icons/bi'
 import { RiLogoutCircleRLine as LogoutIcon } from 'react-icons/ri'
 import { toast } from 'react-toastify'
+import IconButton from '../components/IconButton'
 import Layout from '../components/Layout'
 import Paper from '../components/Paper'
 import ProviderList from '../components/ProviderList'
@@ -118,31 +112,23 @@ function Profile({ userProfileData }: Props) {
           <IconButton
             as={BackIcon}
             title="Go Back"
-            aria-label="Go Back"
+            ariaLabel="Go Back"
             size="md"
-            rounded="full"
-            variant="ghost"
-            color={iconColor}
-            cursor="pointer"
             onClick={handleBackButtonClick}
           />
-          <Heading as="h3">Hi {user.name}!</Heading>
+          <Heading size="md">Profile</Heading>
           <IconButton
             as={LogoutIcon}
             title="Logout"
-            aria-label="Logout"
+            ariaLabel="Logout"
             size="md"
-            rounded="full"
-            variant="ghost"
-            color={iconColor}
-            cursor="pointer"
             onClick={handleSignOut}
           />
         </Flex>
         <main>
           <section>
             <Stack direction="row" wrap="wrap" spacing="6">
-              <Text fontSize="lg">Social Login Providers:</Text>
+              <Text fontSize="md">Social Login Providers:</Text>
               <ProviderList
                 onSwitchProvider={handleSwitchProvider}
                 linkedProviders={linkedProviders}

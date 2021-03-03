@@ -1,6 +1,5 @@
 import { CloseIcon } from '@chakra-ui/icons'
 import {
-  Flex,
   IconButton,
   InputGroup,
   InputLeftAddon,
@@ -78,47 +77,53 @@ export default function CreateTodo({ autoFocus = false }: Props) {
   }
 
   return (
-    <Flex id="create-todo" p="2" justifyContent="space-between">
-      <InputGroup size="lg" alignItems="center">
-        <InputLeftAddon
-          background="transparent"
-          border="none"
-          paddingLeft="17px"
-          paddingRight="0"
-          children={
-            <RoundCheckbox
-              id="create-todo-checkbox"
-              checked={completed}
-              onToggle={handleToggleCompleted}
-            />
-          }
-        />
-        <Textbox
-          value={title || ''}
-          placeholder="Create a new todo..."
-          onChange={handleChangeTitle}
-          onSubmit={handleSubmitTodo}
-          debounceDelay={0}
-          autoFocus={autoFocus}
-          submitOnEnterKey
-          clearOnEnterKey
-        />
-        <InputRightAddon
-          background="transparent"
-          border="none"
-          children={
-            <IconButton
-              aria-label="Clear Text"
-              size="md"
-              variant="ghost"
-              onClick={handleClearTodo}
-              isRound
-              color={iconColor}
-              icon={<CloseIcon />}
-            />
-          }
-        />
-      </InputGroup>
-    </Flex>
+    <InputGroup
+      id="create-todo"
+      size="lg"
+      justifyContent="space-between"
+      alignItems="center"
+      py="2"
+    >
+      <InputLeftAddon
+        background="transparent"
+        border="none"
+        paddingLeft="17px"
+        paddingRight="0"
+        children={
+          <RoundCheckbox
+            id="create-todo-checkbox"
+            checked={completed}
+            onToggle={handleToggleCompleted}
+          />
+        }
+      />
+      <Textbox
+        value={title || ''}
+        width="full"
+        placeholder="Create a new todo..."
+        variant="unstyled"
+        onChange={handleChangeTitle}
+        onSubmit={handleSubmitTodo}
+        debounceDelay={0}
+        autoFocus={autoFocus}
+        submitOnEnterKey
+        clearOnEnterKey
+      />
+      <InputRightAddon
+        background="transparent"
+        border="none"
+        children={
+          <IconButton
+            aria-label="Clear Text"
+            size="md"
+            variant="ghost"
+            onClick={handleClearTodo}
+            isRound
+            color={iconColor}
+            icon={<CloseIcon />}
+          />
+        }
+      />
+    </InputGroup>
   )
 }

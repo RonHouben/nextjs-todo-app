@@ -73,7 +73,6 @@ export default function Todo({ todo, placeholder, isDragging = false }: Props) {
   return (
     <Flex
       id={todo?.id || 'loading-todo'}
-      p="2"
       justifyContent="space-between"
       shadow={isDragging ? 'dark-lg' : undefined}
       style={{
@@ -104,6 +103,8 @@ export default function Todo({ todo, placeholder, isDragging = false }: Props) {
         <Textbox
           value={todo.title}
           placeholder={placeholder || 'Add a title'}
+          variant="unstyled"
+          width="full"
           onChange={handleChangeTitle}
           onSubmit={handleChangeTitle}
           debounceDelay={1000}

@@ -1,12 +1,16 @@
+import {
+  Button,
+  Heading,
+  HStack,
+  useColorModeValue,
+  VStack,
+} from '@chakra-ui/react'
 import firebase from 'firebase/app'
 import { AuthAction, withAuthUser } from 'next-firebase-auth'
-import { useTheme } from 'next-themes'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { FaGithub as GithubIcon, FaGoogle as GoogleIcon } from 'react-icons/fa'
 import { toast } from 'react-toastify'
-import {
-  default as GithubIconButton,
-  default as GoogleIconButton,
-} from '../components/IconButton'
+import IconButton from '../components/IconButton'
 import Layout from '../components/Layout'
 import LoadingScreen from '../components/LoadingScreen'
 import Paper from '../components/Paper'
@@ -14,7 +18,7 @@ import Textbox from '../components/Textbox'
 import { ProviderId } from '../utils/interfaces/user'
 
 function LoginPage() {
-  const { theme } = useTheme()
+  const formFieldsColor = useColorModeValue('secondary.light', 'secondary.dark')
 
   const [email, setEmail] = useState<string>('')
   const [password, setPassword] = useState<string>('')
@@ -84,49 +88,55 @@ function LoginPage() {
   // render component
   return (
     <Layout>
-      <Paper centerContent shadow rounded>
-        <h2 className="">Log In</h2>
-        <Textbox
-          disabled
-          value={email}
-          onChange={setEmail}
-          placeholder="Email address"
-          type="email"
-        />
-        <Textbox
-          disabled
-          value={password}
-          onChange={setPassword}
-          placeholder="Password"
-          type="password"
-        />
-        <button
-          disabled
-          className="w-full p-2 border-2 rounded-lg"
-          onClick={() =>
-            handleLogin({ provider: 'email-password', email, password })
-          }
-        >
-          Log in
-        </button>
-        <div className="flex">
-          <GithubIconButton
-            alt="Sign In with GitHub"
-            src={
-              theme === 'light'
-                ? '/icons/github-icon-dark.png'
-                : '/icons/github-icon-light.png'
+      <Paper centerContent shadow rounded padding="6">
+        <Heading size="md" mb="6">
+          Log In
+        </Heading>
+        <VStack spacing="2">
+          <Textbox
+            disabled
+            value={email}
+            onChange={setEmail}
+            placeholder="Email address"
+            type="email"
+          />
+          <Textbox
+            disabled
+            value={password}
+            onChange={setPassword}
+            placeholder="Password"
+            type="password"
+          />
+          <Button
+            disabled
+            variant="outline"
+            width="full"
+            borderColor={formFieldsColor}
+            _focus={{
+              outline: 'none',
+              borderColor: formFieldsColor,
+            }}
+            onClick={() =>
+              handleLogin({ provider: 'email-password', email, password })
             }
-            size="lg"
+          >
+            Log in
+          </Button>
+        </VStack>
+        <HStack mt="5" spacing="4">
+          <IconButton
+            title="Login with Github"
+            ariaLabel="Login with Github"
+            as={GithubIcon}
             onClick={() => handleLogin({ provider: 'github.com' })}
           />
-          <GoogleIconButton
-            alt="Sign in with Google"
-            src="/icons/google-icon.png"
-            size="lg"
+          <IconButton
+            title="Login with Google"
+            ariaLabel="Login with Google"
+            as={GoogleIcon}
             onClick={() => handleLogin({ provider: 'google.com' })}
           />
-        </div>
+        </HStack>
       </Paper>
     </Layout>
   )

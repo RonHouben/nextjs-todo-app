@@ -1,14 +1,7 @@
-import {
-  BackgroundProps,
-  Box,
-  Container,
-  LayoutProps,
-  PositionProps,
-  useColorModeValue,
-} from '@chakra-ui/react'
+import { Box, Container, useColorModeValue } from '@chakra-ui/react'
 import { useTheme } from 'next-themes'
 import Head from 'next/head'
-import React, { Fragment, ReactNode, useEffect, useState } from 'react'
+import React, { Fragment, ReactNode } from 'react'
 import tailwindConfig from '../tailwind.config'
 import Navbar from './Navbar'
 
@@ -18,16 +11,11 @@ type Props = {
 }
 
 export default function Layout({ children, pageTitle }: Props) {
-  const [mounted, setMounted] = useState(false)
   const { theme } = useTheme()
   const bgColor = useColorModeValue('primary.light', 'primary.dark')
 
-  useEffect(() => setMounted(true))
-
-  if (!mounted) return null
-
   return (
-    <>
+    <Fragment>
       <Head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />
@@ -73,7 +61,7 @@ export default function Layout({ children, pageTitle }: Props) {
         <Navbar pageTitle={pageTitle} />
         <Container maxW="container.sm">{children}</Container>
       </Box>
-    </>
+    </Fragment>
   )
 }
 

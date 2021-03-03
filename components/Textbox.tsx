@@ -1,8 +1,7 @@
-import { Input, useColorModeValue } from '@chakra-ui/react'
+import { Input, InputProps, useColorModeValue } from '@chakra-ui/react'
 import React, {
   ChangeEvent,
   FocusEvent,
-  InputHTMLAttributes,
   KeyboardEvent,
   useEffect,
   useMemo,
@@ -13,24 +12,27 @@ import { useDebounce } from '../hooks/useDebounce'
 import { Key } from '../utils/interfaces/Key.enum'
 
 interface Props {
-  value: string
+  value: InputProps['value']
+  variant?: InputProps['variant']
   onChange?: (text: string) => void
-  onSubmit?: (text: string) => void
-  placeholder?: string
+  onSubmit?: (text: strin) => void
+  placeholder?: InputProps['placeholder']
   debounceDelay?: number
   autoSubmit?: boolean
   submitOnEnterKey?: boolean
   submitOnBlur?: boolean
   autoFocus?: boolean
   clearOnEnterKey?: boolean
-  className?: string
-  type?: InputHTMLAttributes<HTMLInputElement>['type']
+  type?: InputProps['type']
+  width?: InputProps['width']
   disabled?: boolean
 }
 
 export default function Textbox({
-  value: initialValue = '',
+  value: initialValue,
   placeholder,
+  variant,
+  width,
   onChange = () => {},
   onSubmit = () => {},
   debounceDelay = 0,
@@ -39,12 +41,11 @@ export default function Textbox({
   submitOnEnterKey = false,
   autoFocus = false,
   clearOnEnterKey = false,
-  className,
   type,
   disabled,
 }: Props) {
   // set textValue state
-  const [textValue, setTextValue] = useState<string>(initialValue)
+  const [textValue, setTextValue] = useState<InputProps['value']>(initialValue)
   const textChanged: boolean = useMemo(() => initialValue !== textValue, [
     textValue,
   ])
@@ -52,7 +53,11 @@ export default function Textbox({
   // hooks
   const inputRef = useRef<HTMLInputElement>(null)
   const textColor = useColorModeValue('text.light', 'text.dark')
-  const [debouncedValue, setDebouncedValue] = useDebounce<string>({
+  const focusBorderColor = useColorModeValue(
+    'secondary.light',
+    'secondary.dark'
+  )
+  const [debouncedValue, setDebouncedValue] = useDebounce<InputProps['value']>({
     initialState: textValue,
     wait: debounceDelay,
   })
@@ -79,7 +84,7 @@ export default function Textbox({
       // update local state
       setDebouncedValue(e.target.value)
       // call external onChange
-      onChange(textValue)
+      onChange(textValue?.toString() || '')
     }
   }
 
@@ -104,11 +109,12 @@ export default function Textbox({
 
   return (
     <Input
+      width={width || 'sm'}
       ref={inputRef}
-      variant="unstyled"
+      variant={variant}
       isDisabled={disabled}
       color={textColor}
-      className={className}
+      focusBorderColor={focusBorderColor}
       placeholder={placeholder}
       value={textValue}
       type={type}
