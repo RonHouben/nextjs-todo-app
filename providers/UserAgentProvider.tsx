@@ -12,7 +12,7 @@ export const UserAgentContext = createContext<IUserAgentContext>({
   browser: undefined,
   isChrome: false,
   isSafari: false,
-  isFirefox: true,
+  isFirefox: false,
 })
 
 export interface IUserAgentProviderProps {

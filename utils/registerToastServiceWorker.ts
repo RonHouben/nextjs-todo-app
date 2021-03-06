@@ -1,6 +1,8 @@
 import { createStandaloneToast } from '@chakra-ui/toast'
 
-const toast = createStandaloneToast()
+const toast = createStandaloneToast({
+  defaultOptions: { position: 'top-right' },
+})
 
 export default function register() {
   if (
