@@ -41,7 +41,7 @@ function TodoApp({}: Props) {
   )
 
   // get the todos from the database
-  const query = getTodosQuery(selectedFilter)
+  const query = getTodosQuery<ITodo>(selectedFilter)
 
   const [todos, loading] = useCollectionData<ITodo>(query, {
     idField: 'id',

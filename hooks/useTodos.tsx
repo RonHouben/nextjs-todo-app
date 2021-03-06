@@ -14,7 +14,9 @@ export default function useTodos() {
   const { id: uid } = useAuthUser()
   const toast = useToast({ position: 'top-right', isClosable: true })
 
-  function getTodosQuery(filter: ITodoStatusEnum) {
+  function getTodosQuery<T>(
+    filter: ITodoStatusEnum
+  ): firebase.firestore.Query<T> | undefined {
     if (firebase.apps.length === 0 && !uid) return
 
     const baseQuery = firebase
@@ -24,11 +26,19 @@ export default function useTodos() {
 
     switch (filter) {
       case ITodoStatusEnum.ALL:
-        return baseQuery
+        return baseQuery as firebase.firestore.Query<T>
       case ITodoStatusEnum.ACTIVE:
-        return baseQuery.where('completed', '==', false)
+        return baseQuery.where(
+          'completed',
+          '==',
+          false
+        ) as firebase.firestore.Query<T>
       case ITodoStatusEnum.COMPLETED:
-        return baseQuery.where('completed', '==', true)
+        return baseQuery.where(
+          'completed',
+          '==',
+          true
+        ) as firebase.firestore.Query<T>
     }
   }
 
