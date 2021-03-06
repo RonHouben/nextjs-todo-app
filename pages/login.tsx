@@ -19,7 +19,7 @@ import { ProviderId } from '../utils/interfaces/user'
 
 function LoginPage() {
   const formFieldsColor = useColorModeValue('secondary.light', 'secondary.dark')
-  const toast = useToast()
+  const toast = useToast({ position: 'top-right' })
 
   const [email, setEmail] = useState<string>('')
   const [password, setPassword] = useState<string>('')
