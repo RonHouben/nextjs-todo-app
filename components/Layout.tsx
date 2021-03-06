@@ -1,4 +1,11 @@
-import { Box, Container, useColorModeValue } from '@chakra-ui/react'
+import {
+  BackgroundProps,
+  Box,
+  Container,
+  LayoutProps,
+  PositionProps,
+  useColorModeValue,
+} from '@chakra-ui/react'
 import { useTheme } from 'next-themes'
 import Head from 'next/head'
 import React, { Fragment, ReactNode } from 'react'
@@ -76,7 +83,13 @@ const Planets = () => (
         filter="brightness(.5) blur(2px)"
       />
     </Circle>
-    <Circle h="xs" w="xs" top="14%" right="15%" filter="brightness(2)" />
+    <Circle
+      h="xs"
+      w="xs"
+      top="14%"
+      right="15%"
+      filter="brightness(2) blur(2px)"
+    />
   </Fragment>
 )
 
