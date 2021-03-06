@@ -1,3 +1,4 @@
+import { Flex, Heading, Stack, Text, useToast } from '@chakra-ui/react'
 import firebase from 'firebase/app'
 import {
   AuthAction,
@@ -6,9 +7,10 @@ import {
   withAuthUserSSR,
 } from 'next-firebase-auth'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
-import { toast } from 'react-toastify'
-import BackIconButton from '../components/IconButton'
+import React, { useEffect, useState } from 'react'
+import { BiChevronLeftCircle as BackIcon } from 'react-icons/bi'
+import { RiLogoutCircleRLine as LogoutIcon } from 'react-icons/ri'
+import IconButton from '../components/IconButton'
 import Layout from '../components/Layout'
 import Paper from '../components/Paper'
 import ProviderList from '../components/ProviderList'
@@ -23,6 +25,7 @@ function Profile({ userProfileData }: Props) {
   const user = JSON.parse(userProfileData)
   const router = useRouter()
   const { signOut, firebaseUser } = useAuthUser()
+  const toast = useToast()
 
   const [linkedProviders, setLinkedProviders] = useState<
     IUserProfileData['providerIds']
@@ -52,6 +55,14 @@ function Profile({ userProfileData }: Props) {
     router.push('/login')
   }
 
+  const handleSwitchProvider = (providerId: ProviderId) => {
+    const linked: boolean = linkedProviders.some((p) => p === providerId)
+
+    return linked
+      ? handleUnlinkProvider(providerId)
+      : handleLinkProvider(providerId)
+  }
+
   const handleUnlinkProvider = async (providerId: ProviderId) => {
     if (firebaseUser) {
       try {
@@ -61,9 +72,9 @@ function Profile({ userProfileData }: Props) {
 
         setLinkedProviders((prev) => prev.filter((p) => p !== providerId))
 
-        toast.success(`Unlinked ${providerId}`)
+        toast({ status: 'success', description: `Unlinked ${providerId}` })
       } catch (error) {
-        toast.error(error.message)
+        toast({ status: 'error', description: error.message })
       }
     }
   }
@@ -85,52 +96,44 @@ function Profile({ userProfileData }: Props) {
     if (provider) {
       try {
         await firebaseUser?.linkWithPopup(provider)
-        toast.success(`Linked ${providerId}`)
+        toast({ status: 'success', description: `Linked ${providerId}` })
         setLinkedProviders((prev) => [...prev, providerId])
       } catch (error) {
-        toast.error(error.message)
+        toast({ status: 'error', description: error.message })
       }
     }
   }
 
   return (
     <Layout>
-      <Paper rounded shadow className="w-full px-5">
-        <header className="flex items-center justify-between">
-          <BackIconButton
-            src="/icons/back-arrow.svg"
-            alt="Go Back"
-            size="xl"
+      <Paper rounded shadow padding="6">
+        <Flex justifyContent="space-between" alignItems="center" mb="6">
+          <IconButton
+            as={BackIcon}
+            title="Go Back"
+            ariaLabel="Go Back"
+            size="md"
             onClick={handleBackButtonClick}
           />
-          <h1 className="m-1">Hi {user.name}!</h1>
-          <button
+          <Heading size="md">Profile</Heading>
+          <IconButton
+            as={LogoutIcon}
+            title="Logout"
+            ariaLabel="Logout"
+            size="md"
             onClick={handleSignOut}
-            className="border-2 border-black m-1 p-1 rounded-sm"
-          >
-            Sign Out
-          </button>
-        </header>
+          />
+        </Flex>
         <main>
           <section>
-            {linkedProviders.length > 0 && (
-              <div className="flex flex-wrap gap-5 items-center">
-                <div>Linked providers:</div>
-                <ProviderList
-                  onClick={handleUnlinkProvider}
-                  providers={linkedProviders}
-                />
-              </div>
-            )}
-          </section>
-          <section>
-            <div className="flex flex-wrap gap-5 items-start">
-              <div>Link more providers:</div>
+            <Stack direction="row" wrap="wrap" spacing="6">
+              <Text fontSize="md">Social Login Providers:</Text>
               <ProviderList
-                filterOut={linkedProviders}
-                onClick={handleLinkProvider}
+                onSwitchProvider={handleSwitchProvider}
+                linkedProviders={linkedProviders}
+                direction="column"
               />
-            </div>
+            </Stack>
           </section>
         </main>
       </Paper>

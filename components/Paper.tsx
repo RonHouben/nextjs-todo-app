@@ -1,35 +1,54 @@
+import {
+  BorderProps,
+  Flex,
+  SpaceProps,
+  useColorModeValue,
+} from '@chakra-ui/react'
 import { ReactNode } from 'react'
+import { useUserAgent } from '../hooks/useUserAgent'
 
 interface Props {
   children: ReactNode
-  className?: string
-  verticalDivider?: boolean
   shadow?: boolean
   rounded?: boolean
   centerContent?: boolean
+  bgColor?: string
+  padding?: SpaceProps['padding']
 }
 export default function Paper({
   children,
-  className,
-  verticalDivider,
   shadow,
   rounded,
   centerContent,
+  padding,
 }: Props) {
+  const defaultRounded: BorderProps['rounded'] = 'lg'
+  const bgColor = useColorModeValue('primary.light', 'primary.dark')
+  const { isFirefox } = useUserAgent()
+
   return (
-    <div
-      className={`flex flex-col h-full bg-light-0 dark:bg-dark-1 text-dark-5 dark:text-light-0 p-2 space-y-2
-      ${
-        verticalDivider
-          ? 'divide-y divide-light-2 dark:divide-dark-6 divide-opacity-50 divide-y-2'
-          : ''
+    <Flex
+      flexDir="column"
+      padding={padding || '2'}
+      shadow={shadow ? 'dark-lg' : undefined}
+      rounded={rounded ? defaultRounded : undefined}
+      textAlign={centerContent ? 'center' : undefined}
+      justifyContent={centerContent ? 'center' : undefined}
+      alignItems={centerContent ? 'center' : undefined}
+      zIndex={100}
+      position="relative"
+      // The following is needed to make react-beautiful-dnd work with a backdropFilter
+      background={isFirefox ? bgColor : undefined}
+      style={
+        !isFirefox
+          ? {
+              backdropFilter: 'blur(2.5rem)',
+              WebkitBackdropFilter: 'blur(2.5rem)',
+            }
+          : undefined
       }
-      ${shadow ? 'shadow-md' : ''}
-      ${rounded ? 'rounded-md' : ''}
-      ${centerContent ? 'text-center items-center justify-center' : ''}
-      ${className}`}
     >
       {children}
-    </div>
+    </Flex>
   )
 }

@@ -1,6 +1,9 @@
+import { createStandaloneToast } from '@chakra-ui/toast'
 import firebase from 'firebase/app'
 import 'firebase/messaging'
-import { toast } from 'react-toastify'
+const toast = createStandaloneToast({
+  defaultOptions: { position: 'top-right' },
+})
 
 export default class FirebaseCloudMessagingService {
   public FCMToken: string | undefined
@@ -30,7 +33,10 @@ export default class FirebaseCloudMessagingService {
     }
     if (permission === 'denied') {
       console.warn('Please allow notifications for the best user experience')
-      toast.warn('Please allow notifications for the best user experience')
+      toast({
+        status: 'warning',
+        description: 'Please allow notifications for the best user experience',
+      })
     }
   }
 
@@ -39,12 +45,14 @@ export default class FirebaseCloudMessagingService {
       firebase.messaging().onMessage((payload) => {
         const { title, body } = payload.notification
 
-        toast.info(`${title} - ${body}`)
+        toast({ status: 'info', title, description: body })
       })
     } else {
-      toast.error(
-        'No FCM token found. Initialization of Firebase Cloud Messaging probably went wrong'
-      )
+      toast({
+        status: 'error',
+        description:
+          'No FCM token found. Initialization of Firebase Cloud Messaging probably went wrong',
+      })
       throw new Error('No FCM token found. Initialization probably went wrong')
     }
   }

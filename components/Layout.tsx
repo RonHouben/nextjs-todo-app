@@ -1,7 +1,15 @@
-import { useTheme } from 'next-themes'
+import {
+  BackgroundProps,
+  Box,
+  Container,
+  LayoutProps,
+  PositionProps,
+  useColorModePreference,
+  useColorModeValue,
+} from '@chakra-ui/react'
 import Head from 'next/head'
-import React, { ReactNode, useEffect, useState } from 'react'
-import tailwindConfig from '../tailwind.config'
+import React, { Fragment, ReactNode } from 'react'
+import { useUserAgent } from '../hooks/useUserAgent'
 import Navbar from './Navbar'
 
 type Props = {
@@ -10,15 +18,11 @@ type Props = {
 }
 
 export default function Layout({ children, pageTitle }: Props) {
-  const [mounted, setMounted] = useState(false)
-  const { theme } = useTheme()
-
-  useEffect(() => setMounted(true))
-
-  if (!mounted) return null
+  const theme = useColorModePreference()
+  const bgColor = useColorModeValue('primary.light', 'primary.dark')
 
   return (
-    <div className={`h-screen w-screen`}>
+    <Fragment>
       <Head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />
@@ -43,33 +47,101 @@ export default function Layout({ children, pageTitle }: Props) {
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
 
         <meta name="theme" content={theme} />
-        <meta
-          name="theme-color"
-          content={
-            theme === 'light'
-              ? tailwindConfig.theme.extend.colors.light.background
-              : tailwindConfig.theme.extend.colors.dark.background
-          }
-        />
+        <meta name="theme-color" content={bgColor} />
       </Head>
-      {/* TOP BACKGROUND */}
-      <div
-        className={`h-1/3 bg-no-repeat bg-cover ${
-          theme === 'dark'
-            ? 'bg-mobile-dark sm:bg-desktop-dark'
-            : 'bg-mobile-light sm:bg-desktop-light'
-        }`}
+      <Box
+        display="flex"
+        flexDir="column"
+        bgColor={bgColor}
+        minH="100vh"
+        h="full"
+        position="relative"
       >
-        {/* CONTENT */}
-        <div className="relative container mx-auto w-screen h-2/3 md:w-1/2 bg-transparent">
-          <div className="absolute top-10 w-full bg-transparent">
-            <Navbar pageTitle={pageTitle} />
-            <div className="flex flex-col justify-start items-center space-y-7 w-full">
-              {children}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+        <Planets />
+        <Navbar pageTitle={pageTitle} />
+        <Container maxW="container.sm">{children}</Container>
+      </Box>
+    </Fragment>
+  )
+}
+
+const Planets = () => {
+  return (
+    <Fragment>
+      <Circle
+        w="10%"
+        top="50%"
+        left="15%"
+        bgColor="orange.400"
+        border="0.3em solid rgba(160, 147, 130, 0.7)"
+      >
+        <Circle
+          w="15%"
+          top="50%"
+          left="5%"
+          bgColor="red.700"
+          border="0.3em solid rgba(160, 147, 130, 0.7)"
+        />
+      </Circle>
+      <Circle
+        w="xs"
+        top="14%"
+        right="15%"
+        bgColor="yellow.500"
+        border="0.3em solid rgba(160, 147, 130, 0.7)"
+      />
+    </Fragment>
+  )
+}
+
+interface CircleProps {
+  w: LayoutProps['w']
+  top?: PositionProps['top']
+  bottom?: PositionProps['bottom']
+  left?: PositionProps['left']
+  right?: PositionProps['right']
+  bgColor?: BackgroundProps['bgClip']
+  border?: string
+  filter?: string
+  children?: ReactNode
+}
+
+const Circle = ({
+  w,
+  top,
+  bottom,
+  left,
+  right,
+  bgColor,
+  filter,
+  border,
+  children,
+}: CircleProps) => {
+  const { isFirefox } = useUserAgent()
+
+  return (
+    <Box
+      display="flex"
+      border={border}
+      style={{
+        backdropFilter: !isFirefox ? filter : undefined,
+        WebkitBackdropFilter: !isFirefox ? filter : undefined,
+      }}
+      w={w}
+      _after={{
+        content: '""',
+        display: 'block',
+        paddingBottom: '100%',
+      }}
+      top={top}
+      bottom={bottom}
+      left={left}
+      right={right}
+      bgColor={isFirefox || !filter ? bgColor : undefined}
+      rounded="full"
+      position="absolute"
+    >
+      {children}
+    </Box>
   )
 }

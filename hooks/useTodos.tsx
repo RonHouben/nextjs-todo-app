@@ -1,6 +1,6 @@
+import { useToast } from '@chakra-ui/toast'
 import firebase from 'firebase/app'
 import { useAuthUser } from 'next-firebase-auth'
-import { toast } from 'react-toastify'
 import type { ITodo } from '../utils/interfaces/todo'
 import { ITodoStatusEnum } from '../utils/interfaces/todo'
 
@@ -12,8 +12,11 @@ type GetWhereFilterOptionsResult = [
 
 export default function useTodos() {
   const { id: uid } = useAuthUser()
+  const toast = useToast({ position: 'top-right', isClosable: true })
 
-  function getTodosQuery(filter: ITodoStatusEnum) {
+  function getTodosQuery<T>(
+    filter: ITodoStatusEnum
+  ): firebase.firestore.Query<T> | undefined {
     if (firebase.apps.length === 0 && !uid) return
 
     const baseQuery = firebase
@@ -23,11 +26,19 @@ export default function useTodos() {
 
     switch (filter) {
       case ITodoStatusEnum.ALL:
-        return baseQuery
+        return baseQuery as firebase.firestore.Query<T>
       case ITodoStatusEnum.ACTIVE:
-        return baseQuery.where('completed', '==', false)
+        return baseQuery.where(
+          'completed',
+          '==',
+          false
+        ) as firebase.firestore.Query<T>
       case ITodoStatusEnum.COMPLETED:
-        return baseQuery.where('completed', '==', true)
+        return baseQuery.where(
+          'completed',
+          '==',
+          true
+        ) as firebase.firestore.Query<T>
     }
   }
 
@@ -58,12 +69,10 @@ export default function useTodos() {
           updatedAt: firebase.firestore.Timestamp.now(),
         } as ITodo)
 
-      toast(`Created "${newTodo.title}"`, {
-        type: 'success',
-      })
+      toast({ status: 'success', description: `Created "${newTodo.title}"` })
     } catch (error) {
       console.error('[useTodos][createTodo]', error.message)
-      toast(error.message, { type: 'error' })
+      toast({ status: 'error', description: error.message })
     }
   }
 
@@ -80,9 +89,14 @@ export default function useTodos() {
           ...update,
           updatedAt: firebase.firestore.Timestamp.now(),
         })
+      toast({
+        status: 'success',
+        title: 'updated todo',
+        description: `updated todo`,
+      })
     } catch (error) {
       console.error('[useTodos][updateTodo]', error.message)
-      toast.error(error.message)
+      toast({ status: 'error', description: error.message })
     }
   }
 
@@ -98,10 +112,10 @@ export default function useTodos() {
 
       await snapshotTodo.ref.delete()
 
-      toast(`Deleted "${data.title}`, { type: 'success' })
+      toast({ status: 'success', description: `Deleted "${data.title}` })
     } catch (error) {
       console.error('[useTodos][deleteTod]', error.message)
-      toast.error(error.message)
+      toast({ status: 'error', description: error.message })
     }
   }
 
@@ -117,9 +131,11 @@ export default function useTodos() {
             .update({ order: i })
         })
       )
+
+      toast({ status: 'success', description: 'changed the order' })
     } catch (error) {
       console.error('[useTodos][reorderTodos]', error.message)
-      toast.error(error.message)
+      toast({ status: 'error', description: error.message })
     }
   }
 
