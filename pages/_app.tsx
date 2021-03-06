@@ -3,7 +3,7 @@ import React from 'react'
 import { Flip, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import initAuth from '../lib/initAuth'
-import Chakra from '../providers/Chakra'
+import ChakraProvider from '../providers/Chakra'
 import '../styles/global.css'
 
 type TToastContextClass = {
@@ -26,7 +26,7 @@ interface Props extends AppProps {
 
 function App({ Component, pageProps, cookies }: Props) {
   return (
-    <Chakra cookies={cookies}>
+    <ChakraProvider cookies={cookies}>
       <ToastContainer
         transition={Flip}
         toastClassName={(toast) =>
@@ -36,7 +36,7 @@ function App({ Component, pageProps, cookies }: Props) {
         bodyClassName={() => 'text-sm font-white font-med block p-3'}
       />
       <Component {...pageProps} />
-    </Chakra>
+    </ChakraProvider>
   )
 }
 
