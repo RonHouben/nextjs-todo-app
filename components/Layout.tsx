@@ -1,5 +1,6 @@
 import {
   BackgroundProps,
+  BorderProps,
   Box,
   Container,
   LayoutProps,
@@ -73,23 +74,38 @@ const Planets = () => {
         top="50%"
         left="15%"
         bgColor="orange.400"
-        border="0.3em solid rgba(160, 147, 130, 0.7)"
+        borderWidth="0.3rem"
+        borderColor="orange.300"
+        borderStyle="double"
       >
         <Circle
           w="15%"
           top="50%"
           left="5%"
-          bgColor="red.700"
-          border="0.3em solid rgba(160, 147, 130, 0.7)"
+          bgColor="orange.600"
+          borderColor="orange.500"
+          borderWidth=".15rem"
         />
+        <Circle w="5%" bottom="50%" left="15%" bgColor="orange.600" />
       </Circle>
       <Circle
         w="xs"
         top="14%"
         right="15%"
-        bgColor="yellow.500"
-        border="0.3em solid rgba(160, 147, 130, 0.7)"
-      />
+        bgColor="orange.500"
+        borderWidth="0.5rem"
+        borderColor="orange.300"
+        borderStyle="double"
+      >
+        <Circle
+          w="10%"
+          top="25%"
+          right="25%"
+          bgColor="orange.900"
+          borderColor="purple.800"
+          borderWidth="1px"
+        />
+      </Circle>
     </Fragment>
   )
 }
@@ -101,7 +117,9 @@ interface CircleProps {
   left?: PositionProps['left']
   right?: PositionProps['right']
   bgColor?: BackgroundProps['bgClip']
-  border?: string
+  borderWidth?: BorderProps['borderWidth']
+  borderColor?: BorderProps['borderColor']
+  borderStyle?: BorderProps['borderStyle']
   filter?: string
   children?: ReactNode
 }
@@ -114,7 +132,9 @@ const Circle = ({
   right,
   bgColor,
   filter,
-  border,
+  borderWidth,
+  borderColor,
+  borderStyle,
   children,
 }: CircleProps) => {
   const { isFirefox } = useUserAgent()
@@ -122,7 +142,9 @@ const Circle = ({
   return (
     <Box
       display="flex"
-      border={border}
+      borderWidth={borderWidth}
+      borderColor={borderColor}
+      borderStyle={borderStyle || 'solid'}
       style={{
         backdropFilter: !isFirefox ? filter : undefined,
         WebkitBackdropFilter: !isFirefox ? filter : undefined,
