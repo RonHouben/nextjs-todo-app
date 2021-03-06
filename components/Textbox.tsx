@@ -5,7 +5,6 @@ import React, {
   KeyboardEvent,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react'
 import { useDebounce } from '../hooks/useDebounce'
@@ -15,7 +14,7 @@ interface Props {
   value: InputProps['value']
   variant?: InputProps['variant']
   onChange?: (text: string) => void
-  onSubmit?: (text: strin) => void
+  onSubmit?: (text: string) => void
   placeholder?: InputProps['placeholder']
   debounceDelay?: number
   autoSubmit?: boolean
@@ -51,12 +50,9 @@ export default function Textbox({
   ])
 
   // hooks
-  const inputRef = useRef<HTMLInputElement>(null)
+  // const inputRef = useRef<HTMLInputElement>(null)
   const textColor = useColorModeValue('text.light', 'text.dark')
-  const focusBorderColor = useColorModeValue(
-    'secondary.light',
-    'secondary.dark'
-  )
+  const borderColor = useColorModeValue('secondary.dark', 'secondary.dark')
   const [debouncedValue, setDebouncedValue] = useDebounce<InputProps['value']>({
     initialState: textValue,
     wait: debounceDelay,
@@ -67,7 +63,7 @@ export default function Textbox({
     // call external onChange
     if (autoSubmit && debouncedValue && textChanged) {
       // call external onSubmit
-      onSubmit(debouncedValue)
+      onSubmit(debouncedValue.toString())
     }
   }, [debouncedValue, autoSubmit, debouncedValue, textChanged])
 
@@ -80,18 +76,18 @@ export default function Textbox({
   // handlers
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value)
-    if (textChanged) {
+    if (textChanged && textValue) {
       // update local state
       setDebouncedValue(e.target.value)
       // call external onChange
-      onChange(textValue?.toString() || '')
+      onChange(textValue?.toString())
     }
   }
 
   const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
     if (submitOnEnterKey && e.key === Key.Enter && textValue) {
       // call external onSubmit
-      onSubmit(textValue)
+      onSubmit(textValue.toString())
 
       if (clearOnEnterKey) {
         setTextValue('')
@@ -101,20 +97,19 @@ export default function Textbox({
   }
 
   const handleOnBlur = (_e: FocusEvent<HTMLInputElement>) => {
-    if (submitOnBlur && textChanged) {
+    if (submitOnBlur && textChanged && textValue) {
       // call external onSubmit
-      onSubmit(textValue)
+      onSubmit(textValue.toString())
     }
   }
 
   return (
     <Input
       width={width || 'sm'}
-      ref={inputRef}
+      // ref={inputRef}
       variant={variant}
       isDisabled={disabled}
       color={textColor}
-      focusBorderColor={focusBorderColor}
       placeholder={placeholder}
       value={textValue}
       type={type}
@@ -123,9 +118,13 @@ export default function Textbox({
       onChange={handleChange}
       onKeyDown={handleKeyPress}
       onBlur={handleOnBlur}
-      onFocus={() => inputRef.current?.select()}
+      // onFocus={() => inputRef.current?.select()}
       autoFocus={autoFocus}
       disabled={disabled}
+      _focus={{
+        // borderWidth: '1px',
+        borderColor: borderColor,
+      }}
       _placeholder={{
         color: textColor,
       }}

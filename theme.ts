@@ -12,14 +12,6 @@ const theme = extendTheme({
       dark: '#FFFFFA',
       light: '#34495E',
     },
-    keppel: {
-      main: '#3BBA9C',
-      transparent: '#3BBA9CBB',
-    },
-    gunMetal: '#2E3047',
-    outSpace: '#43455C',
-    arsenic: '#3C3F58',
-    rhythm: '#707793',
   },
 })
 

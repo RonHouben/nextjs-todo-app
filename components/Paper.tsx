@@ -25,7 +25,6 @@ export default function Paper({
   const defaultRounded: BorderProps['rounded'] = 'lg'
   const bgColor = useColorModeValue('primary.light', 'primary.dark')
   const { isFirefox } = useUserAgent()
-  console.log('isFirefox', isFirefox)
 
   return (
     <Flex

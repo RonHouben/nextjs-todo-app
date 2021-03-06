@@ -3,13 +3,13 @@ import {
   Heading,
   HStack,
   useColorModeValue,
+  useToast,
   VStack,
 } from '@chakra-ui/react'
 import firebase from 'firebase/app'
 import { AuthAction, withAuthUser } from 'next-firebase-auth'
 import React, { useEffect, useState } from 'react'
 import { FaGithub as GithubIcon, FaGoogle as GoogleIcon } from 'react-icons/fa'
-import { toast } from 'react-toastify'
 import IconButton from '../components/IconButton'
 import Layout from '../components/Layout'
 import LoadingScreen from '../components/LoadingScreen'
@@ -19,6 +19,7 @@ import { ProviderId } from '../utils/interfaces/user'
 
 function LoginPage() {
   const formFieldsColor = useColorModeValue('secondary.light', 'secondary.dark')
+  const toast = useToast()
 
   const [email, setEmail] = useState<string>('')
   const [password, setPassword] = useState<string>('')
@@ -42,12 +43,12 @@ function LoginPage() {
             //    1. login & link the Github account automatically;
             //    2. login with existing provider (so they can later link another provider in the profile page);
             //    3. cancel the login;
-            toast.error(error.message, { autoClose: false })
+            toast({ description: error.message, status: 'error', duration: 0 })
             return
           }
         }
         console.error(error)
-        toast.error(error.message)
+        toast({ description: error.message, status: 'error', duration: 0 })
       })
   }, [])
 
@@ -67,9 +68,9 @@ function LoginPage() {
         await firebase.auth().signInWithEmailAndPassword(email, password)
       } catch (error) {
         if (error.code === 'auth/wrong-password') {
-          toast.error('Wrong password.')
+          toast({ status: 'error', title: 'Wrong password!' })
         } else {
-          toast.error(error.message)
+          toast({ status: 'error', description: error.message })
         }
       }
 

@@ -1,4 +1,4 @@
-import { Flex, Heading, Stack, Text } from '@chakra-ui/react'
+import { Flex, Heading, Stack, Text, useToast } from '@chakra-ui/react'
 import firebase from 'firebase/app'
 import {
   AuthAction,
@@ -10,7 +10,6 @@ import { useRouter } from 'next/router'
 import React, { useEffect, useState } from 'react'
 import { BiChevronLeftCircle as BackIcon } from 'react-icons/bi'
 import { RiLogoutCircleRLine as LogoutIcon } from 'react-icons/ri'
-import { toast } from 'react-toastify'
 import IconButton from '../components/IconButton'
 import Layout from '../components/Layout'
 import Paper from '../components/Paper'
@@ -26,7 +25,7 @@ function Profile({ userProfileData }: Props) {
   const user = JSON.parse(userProfileData)
   const router = useRouter()
   const { signOut, firebaseUser } = useAuthUser()
-  // const iconColor = useColorModeValue('secondary.light', 'secondary.dark')
+  const toast = useToast()
 
   const [linkedProviders, setLinkedProviders] = useState<
     IUserProfileData['providerIds']
@@ -73,9 +72,9 @@ function Profile({ userProfileData }: Props) {
 
         setLinkedProviders((prev) => prev.filter((p) => p !== providerId))
 
-        toast.success(`Unlinked ${providerId}`)
+        toast({ status: 'success', description: `Unlinked ${providerId}` })
       } catch (error) {
-        toast.error(error.message)
+        toast({ status: 'error', description: error.message })
       }
     }
   }
@@ -97,10 +96,10 @@ function Profile({ userProfileData }: Props) {
     if (provider) {
       try {
         await firebaseUser?.linkWithPopup(provider)
-        toast.success(`Linked ${providerId}`)
+        toast({ status: 'success', description: `Linked ${providerId}` })
         setLinkedProviders((prev) => [...prev, providerId])
       } catch (error) {
-        toast.error(error.message)
+        toast({ status: 'error', description: error.message })
       }
     }
   }

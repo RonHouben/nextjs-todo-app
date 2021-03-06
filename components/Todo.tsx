@@ -111,7 +111,7 @@ export default function Todo({ todo, placeholder, isDragging = false }: Props) {
         <Textbox
           value={todo.title}
           placeholder={placeholder || 'Add a title'}
-          variant="unstyled"
+          variant="outline"
           width="full"
           onChange={handleChangeTitle}
           onSubmit={handleChangeTitle}

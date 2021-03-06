@@ -4,13 +4,12 @@ import {
   Container,
   LayoutProps,
   PositionProps,
+  useColorModePreference,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { useTheme } from 'next-themes'
 import Head from 'next/head'
 import React, { Fragment, ReactNode } from 'react'
 import { useUserAgent } from '../hooks/useUserAgent'
-import tailwindConfig from '../tailwind.config'
 import Navbar from './Navbar'
 
 type Props = {
@@ -19,7 +18,7 @@ type Props = {
 }
 
 export default function Layout({ children, pageTitle }: Props) {
-  const { theme } = useTheme()
+  const theme = useColorModePreference()
   const bgColor = useColorModeValue('primary.light', 'primary.dark')
 
   return (
@@ -48,14 +47,7 @@ export default function Layout({ children, pageTitle }: Props) {
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
 
         <meta name="theme" content={theme} />
-        <meta
-          name="theme-color"
-          content={
-            theme === 'light'
-              ? tailwindConfig.theme.extend.colors.light.background
-              : tailwindConfig.theme.extend.colors.dark.background
-          }
-        />
+        <meta name="theme-color" content={bgColor} />
       </Head>
       <Box
         display="flex"

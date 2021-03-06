@@ -3,7 +3,6 @@ import { AuthAction, useAuthUser, withAuthUser } from 'next-firebase-auth'
 import React, { useEffect, useState } from 'react'
 import { DropResult, ResponderProvided } from 'react-beautiful-dnd'
 import { useCollectionData } from 'react-firebase-hooks/firestore'
-import { toast } from 'react-toastify'
 import CreateTodo from '../components/CreateTodo'
 import Filterbar from '../components/Filterbar'
 import Layout from '../components/Layout'
@@ -16,7 +15,7 @@ import { ITodo, ITodoStatusEnum } from '../utils/interfaces/todo'
 import registerToastServiceWorker from '../utils/registerToastServiceWorker'
 
 // This shows a toast on service worker lifecycle changes
-registerToastServiceWorker(toast)
+registerToastServiceWorker()
 
 interface Props {}
 
