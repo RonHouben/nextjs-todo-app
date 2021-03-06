@@ -1,5 +1,9 @@
-import { Flex, SpaceProps } from '@chakra-ui/react'
-import { ReactNode } from 'react'
+import { BorderProps, Flex, SpaceProps } from '@chakra-ui/react'
+import { ReactNode, useContext } from 'react'
+import {
+  IUserAgentContext,
+  UserAgentContext,
+} from '../providers/UserAgentProvider'
 
 interface Props {
   children: ReactNode
@@ -16,20 +20,37 @@ export default function Paper({
   centerContent,
   padding,
 }: Props) {
+  const defaultRounded: BorderProps['rounded'] = 'lg'
+  const { isFirefox } = useContext<IUserAgentContext>(UserAgentContext)
+
   return (
     <Flex
       flexDir="column"
       padding={padding || '2'}
       shadow={shadow ? 'dark-lg' : undefined}
-      rounded={rounded ? 'md' : undefined}
+      rounded={rounded ? defaultRounded : undefined}
       textAlign={centerContent ? 'center' : undefined}
       justifyContent={centerContent ? 'center' : undefined}
       alignItems={centerContent ? 'center' : undefined}
-      style={{
-        backdropFilter: 'blur(2.5rem)',
-        WebkitBackdropFilter: 'blur(2.5rem)',
-      }}
       zIndex={100}
+      background={isFirefox ? 'green' : undefined}
+      position="relative"
+      // The following is needed to make react-beautiful-dnd work with a backdropFilter
+      _before={
+        !isFirefox
+          ? {
+              content: '""',
+              backdropFilter: 'blur(2.5rem)',
+              WebkitBackdropFilter: 'blur(2.5rem)',
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              width: '100%',
+              height: '100%',
+              rounded: rounded ? defaultRounded : undefined,
+            }
+          : undefined
+      }
     >
       {children}
     </Flex>

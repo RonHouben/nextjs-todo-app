@@ -76,8 +76,8 @@ export default function Todo({ todo, placeholder, isDragging = false }: Props) {
       justifyContent="space-between"
       shadow={isDragging ? 'dark-lg' : undefined}
       style={{
-        backdropFilter: 'blur(15px)',
-        WebkitBackdropFilter: 'blur(5rem)',
+        backdropFilter: isDragging ? 'blur(2.5rem)' : undefined,
+        WebkitBackdropFilter: isDragging ? 'blur(2.5rem)' : undefined,
       }}
     >
       <InputGroup size="lg" alignItems="center">
