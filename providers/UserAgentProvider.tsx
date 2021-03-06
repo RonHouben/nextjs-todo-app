@@ -12,7 +12,7 @@ export const UserAgentContext = createContext<IUserAgentContext>({
   browser: undefined,
   isChrome: false,
   isSafari: false,
-  isFirefox: false,
+  isFirefox: true,
 })
 
 export interface IUserAgentProviderProps {
@@ -32,7 +32,9 @@ export const UserAgentProvider = ({
       value={{
         browser,
         isChrome: browser === 'Chrome',
-        isFirefox: browser === 'Firefox',
+        // setting isFirefox to true by default to give Firebox styling priority.
+        // this is needed because else Firefox will render with the unsupported CSS properties
+        isFirefox: !browser ? true : browser === 'Firefox',
         isSafari: browser === 'Safari',
       }}
     >

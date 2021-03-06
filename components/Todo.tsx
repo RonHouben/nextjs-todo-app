@@ -10,6 +10,7 @@ import {
 import firebase from 'firebase/app'
 import React from 'react'
 import useTodos from '../hooks/useTodos'
+import { useUserAgent } from '../hooks/useUserAgent'
 import { ITodo } from '../utils/interfaces/todo'
 import RoundCheckbox from './RoundCheckbox'
 import Textbox from './Textbox'
@@ -22,7 +23,9 @@ interface Props {
 
 export default function Todo({ todo, placeholder, isDragging = false }: Props) {
   const { updateTodo, deleteTodo } = useTodos()
+  const { isFirefox } = useUserAgent()
 
+  const bgColor = useColorModeValue('primary.light', 'primary.dark')
   const iconColor = useColorModeValue('secondary.light', 'secondary.dark')
 
   // handlers
@@ -75,10 +78,15 @@ export default function Todo({ todo, placeholder, isDragging = false }: Props) {
       id={todo?.id || 'loading-todo'}
       justifyContent="space-between"
       shadow={isDragging ? 'dark-lg' : undefined}
-      style={{
-        backdropFilter: isDragging ? 'blur(2.5rem)' : undefined,
-        WebkitBackdropFilter: isDragging ? 'blur(2.5rem)' : undefined,
-      }}
+      background={isFirefox ? bgColor : undefined}
+      style={
+        !isFirefox // this is necessary because backdropFilter is not compatible with Firefox
+          ? {
+              backdropFilter: isDragging ? 'blur(2.5rem)' : undefined,
+              WebkitBackdropFilter: isDragging ? 'blur(2.5rem)' : undefined,
+            }
+          : undefined
+      }
     >
       <InputGroup size="lg" alignItems="center">
         <InputLeftAddon

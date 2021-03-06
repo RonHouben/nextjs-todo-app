@@ -1,5 +1,4 @@
 import firebase from 'firebase/app'
-import { GetServerSideProps, GetServerSidePropsContext } from 'next'
 import { AuthAction, useAuthUser, withAuthUser } from 'next-firebase-auth'
 import React, { useEffect, useState } from 'react'
 import { DropResult, ResponderProvided } from 'react-beautiful-dnd'
@@ -12,10 +11,6 @@ import Paper from '../components/Paper'
 import TodosList from '../components/TodosList'
 import useFirebaseCloudMessaging from '../hooks/useFirebaseCloudMessaging'
 import useTodos from '../hooks/useTodos'
-import {
-  IUserAgentProviderProps,
-  UserAgentProvider,
-} from '../providers/UserAgentProvider'
 import { reorder } from '../utils/arrays'
 import { ITodo, ITodoStatusEnum } from '../utils/interfaces/todo'
 import registerToastServiceWorker from '../utils/registerToastServiceWorker'
@@ -23,11 +18,9 @@ import registerToastServiceWorker from '../utils/registerToastServiceWorker'
 // This shows a toast on service worker lifecycle changes
 registerToastServiceWorker(toast)
 
-interface Props {
-  userAgent: IUserAgentProviderProps['userAgent']
-}
+interface Props {}
 
-function TodoApp({ userAgent }: Props) {
+function TodoApp({}: Props) {
   const { id: uid } = useAuthUser()
 
   // set the userId for Firebase Analytics
@@ -101,37 +94,26 @@ function TodoApp({ userAgent }: Props) {
   }
 
   return (
-    <UserAgentProvider userAgent={userAgent}>
-      <Layout>
-        <Paper rounded shadow>
-          <CreateTodo autoFocus />
-          {!loading && todos && (
-            <TodosList todos={todos} onDragEnd={handleDragEnd} />
-          )}
-          <Filterbar
-            itemsLeft={todos?.length || 0}
-            filters={[
-              ITodoStatusEnum.ALL,
-              ITodoStatusEnum.ACTIVE,
-              ITodoStatusEnum.COMPLETED,
-            ]}
-            selected={selectedFilter}
-            onChangeFilter={handleChangeFilter}
-            onClearCompleted={handleClearCompleted}
-          />
-        </Paper>
-      </Layout>
-    </UserAgentProvider>
+    <Layout>
+      <Paper rounded shadow>
+        <CreateTodo autoFocus />
+        {!loading && todos && (
+          <TodosList todos={todos} onDragEnd={handleDragEnd} />
+        )}
+        <Filterbar
+          itemsLeft={todos?.length || 0}
+          filters={[
+            ITodoStatusEnum.ALL,
+            ITodoStatusEnum.ACTIVE,
+            ITodoStatusEnum.COMPLETED,
+          ]}
+          selected={selectedFilter}
+          onChangeFilter={handleChangeFilter}
+          onClearCompleted={handleClearCompleted}
+        />
+      </Paper>
+    </Layout>
   )
-}
-
-// SSR to get the client browser. This can later be used to apply styling for a specific browser
-export const getServerSideProps: GetServerSideProps<Props> = async ({
-  req,
-}: GetServerSidePropsContext) => {
-  return {
-    props: { userAgent: req.headers['user-agent'] },
-  }
 }
 
 export default withAuthUser<Props>({

@@ -9,6 +9,7 @@ import {
 import { useTheme } from 'next-themes'
 import Head from 'next/head'
 import React, { Fragment, ReactNode } from 'react'
+import { useUserAgent } from '../hooks/useUserAgent'
 import tailwindConfig from '../tailwind.config'
 import Navbar from './Navbar'
 
@@ -72,41 +73,48 @@ export default function Layout({ children, pageTitle }: Props) {
   )
 }
 
-const Planets = () => (
-  <Fragment>
-    <Circle h="xs" w="xs" top="50%" left="15%" bgColor="gray.400">
+const Planets = () => {
+  return (
+    <Fragment>
       <Circle
-        h="2rem"
-        w="2rem"
+        w="10%"
         top="50%"
-        left="5%"
-        filter="brightness(.5) blur(2px)"
+        left="15%"
+        bgColor="orange.400"
+        border="0.3em solid rgba(160, 147, 130, 0.7)"
+      >
+        <Circle
+          w="15%"
+          top="50%"
+          left="5%"
+          bgColor="red.700"
+          border="0.3em solid rgba(160, 147, 130, 0.7)"
+        />
+      </Circle>
+      <Circle
+        w="xs"
+        top="14%"
+        right="15%"
+        bgColor="yellow.500"
+        border="0.3em solid rgba(160, 147, 130, 0.7)"
       />
-    </Circle>
-    <Circle
-      h="xs"
-      w="xs"
-      top="14%"
-      right="15%"
-      filter="brightness(2) blur(2px)"
-    />
-  </Fragment>
-)
+    </Fragment>
+  )
+}
 
 interface CircleProps {
-  h: LayoutProps['h']
   w: LayoutProps['w']
   top?: PositionProps['top']
   bottom?: PositionProps['bottom']
   left?: PositionProps['left']
   right?: PositionProps['right']
   bgColor?: BackgroundProps['bgClip']
+  border?: string
   filter?: string
   children?: ReactNode
 }
 
 const Circle = ({
-  h,
   w,
   top,
   bottom,
@@ -114,25 +122,34 @@ const Circle = ({
   right,
   bgColor,
   filter,
+  border,
   children,
-}: CircleProps) => (
-  <Box
-    display="flex"
-    style={{
-      backdropFilter: filter,
-      WebkitBackdropFilter: filter,
-      border: '0.3em solid rgba(160, 147, 130, 0.7)',
-    }}
-    h={h}
-    w={w}
-    top={top}
-    bottom={bottom}
-    left={left}
-    right={right}
-    bgColor={!filter ? bgColor : undefined}
-    rounded="full"
-    position="absolute"
-  >
-    {children}
-  </Box>
-)
+}: CircleProps) => {
+  const { isFirefox } = useUserAgent()
+
+  return (
+    <Box
+      display="flex"
+      border={border}
+      style={{
+        backdropFilter: !isFirefox ? filter : undefined,
+        WebkitBackdropFilter: !isFirefox ? filter : undefined,
+      }}
+      w={w}
+      _after={{
+        content: '""',
+        display: 'block',
+        paddingBottom: '100%',
+      }}
+      top={top}
+      bottom={bottom}
+      left={left}
+      right={right}
+      bgColor={isFirefox || !filter ? bgColor : undefined}
+      rounded="full"
+      position="absolute"
+    >
+      {children}
+    </Box>
+  )
+}

@@ -1,9 +1,11 @@
-import { AppProps } from 'next/app'
+import { AppContext, AppProps } from 'next/app'
+import { IncomingHttpHeaders } from 'node:http'
 import React from 'react'
 import { Flip, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import initAuth from '../lib/initAuth'
 import ChakraProvider from '../providers/Chakra'
+import { UserAgentProvider } from '../providers/UserAgentProvider'
 import '../styles/global.css'
 
 type TToastContextClass = {
@@ -22,22 +24,30 @@ initAuth()
 
 interface Props extends AppProps {
   cookies: string
+  userAgent: IncomingHttpHeaders['user-agent']
 }
 
-function App({ Component, pageProps, cookies }: Props) {
+function App({ Component, pageProps, cookies, userAgent }: Props) {
   return (
-    <ChakraProvider cookies={cookies}>
-      <ToastContainer
-        transition={Flip}
-        toastClassName={(toast) =>
-          toastContextClass[toast?.type || 'default'] +
-          ' flex p-1 min-h-10 rounded-md justify-between overflow-hidden cursor-pointer'
-        }
-        bodyClassName={() => 'text-sm font-white font-med block p-3'}
-      />
-      <Component {...pageProps} />
-    </ChakraProvider>
+    <UserAgentProvider userAgent={userAgent}>
+      <ChakraProvider cookies={cookies}>
+        <ToastContainer
+          transition={Flip}
+          toastClassName={(toast) =>
+            toastContextClass[toast?.type || 'default'] +
+            ' flex p-1 min-h-10 rounded-md justify-between overflow-hidden cursor-pointer'
+          }
+          bodyClassName={() => 'text-sm font-white font-med block p-3'}
+        />
+        <Component {...pageProps} />
+      </ChakraProvider>
+    </UserAgentProvider>
   )
+}
+
+// SSR to get the client browser. This can later be used to apply styling for a specific browser
+App.getInitialProps = async (app: AppContext) => {
+  return { userAgent: app.ctx.req?.headers['user-agent'] }
 }
 
 export default App

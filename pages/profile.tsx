@@ -1,4 +1,4 @@
-import { Flex, Heading, Stack, Text, useColorModeValue } from '@chakra-ui/react'
+import { Flex, Heading, Stack, Text } from '@chakra-ui/react'
 import firebase from 'firebase/app'
 import {
   AuthAction,
@@ -26,7 +26,7 @@ function Profile({ userProfileData }: Props) {
   const user = JSON.parse(userProfileData)
   const router = useRouter()
   const { signOut, firebaseUser } = useAuthUser()
-  const iconColor = useColorModeValue('secondary.light', 'secondary.dark')
+  // const iconColor = useColorModeValue('secondary.light', 'secondary.dark')
 
   const [linkedProviders, setLinkedProviders] = useState<
     IUserProfileData['providerIds']
