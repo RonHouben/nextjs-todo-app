@@ -30,21 +30,19 @@ export default function LoadingScreen() {
 
   return (
     <Flex h="xl" justifyContent="center" alignItems="center">
-      <Flex>
-        {randomArray.map((k) => (
-          <Flex
-            key={k}
-            justifyContent="center"
-            alignItems="center"
-            h="8"
-            w="8"
-            rounded="full"
-            shadow="dark-lg"
-            backgroundImage={`linear-gradient(to bottom right, ${colors[startColor][colorMode]}, ${colors[endColor][colorMode]})`}
-            animation={`ping ${randomDuration}s cubic-bezier(0, 0, 0.2, 1) infinite`}
-          />
-        ))}
-      </Flex>
+      {randomArray.map((k) => (
+        <Flex
+          key={k}
+          justifyContent="center"
+          alignItems="center"
+          h="8"
+          w="8"
+          rounded="full"
+          shadow="dark-lg"
+          bgGradient={`linear(to-br, ${colors[startColor][colorMode]}, ${colors[endColor][colorMode]})`}
+          animation={`ping ${randomDuration}s cubic-bezier(0, 0, 0.2, 1) infinite`}
+        />
+      ))}
     </Flex>
   )
 }
