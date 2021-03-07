@@ -6,6 +6,7 @@ import { useCollectionData } from 'react-firebase-hooks/firestore'
 import CreateTodo from '../components/CreateTodo'
 import Filterbar from '../components/Filterbar'
 import Layout from '../components/Layout'
+import LoadingScreen from '../components/LoadingScreen'
 import Paper from '../components/Paper'
 import TodosList from '../components/TodosList'
 import useFirebaseCloudMessaging from '../hooks/useFirebaseCloudMessaging'
@@ -94,23 +95,26 @@ function TodoApp({}: Props) {
 
   return (
     <Layout>
-      <Paper rounded shadow>
-        <CreateTodo autoFocus />
-        {!loading && todos && (
-          <TodosList todos={todos} onDragEnd={handleDragEnd} />
-        )}
-        <Filterbar
-          itemsLeft={todos?.length || 0}
-          filters={[
-            ITodoStatusEnum.ALL,
-            ITodoStatusEnum.ACTIVE,
-            ITodoStatusEnum.COMPLETED,
-          ]}
-          selected={selectedFilter}
-          onChangeFilter={handleChangeFilter}
-          onClearCompleted={handleClearCompleted}
-        />
-      </Paper>
+      {!uid && <LoadingScreen />}
+      {uid && (
+        <Paper rounded shadow>
+          <CreateTodo autoFocus />
+          {!loading && todos && (
+            <TodosList todos={todos} onDragEnd={handleDragEnd} />
+          )}
+          <Filterbar
+            itemsLeft={todos?.length || 0}
+            filters={[
+              ITodoStatusEnum.ALL,
+              ITodoStatusEnum.ACTIVE,
+              ITodoStatusEnum.COMPLETED,
+            ]}
+            selected={selectedFilter}
+            onChangeFilter={handleChangeFilter}
+            onClearCompleted={handleClearCompleted}
+          />
+        </Paper>
+      )}
     </Layout>
   )
 }
