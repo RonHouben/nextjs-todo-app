@@ -100,6 +100,7 @@ function LoginPage() {
             onChange={setEmail}
             placeholder="Email address"
             type="email"
+            width="auto"
           />
           <Textbox
             disabled
@@ -107,6 +108,7 @@ function LoginPage() {
             onChange={setPassword}
             placeholder="Password"
             type="password"
+            width="auto"
           />
           <Button
             disabled

@@ -5,11 +5,7 @@ const toast = createStandaloneToast({
 })
 
 export default function register() {
-  if (
-    // process.env.NODE_ENV === "development" &&
-    process.browser &&
-    'serviceWorker' in navigator
-  ) {
+  if (process.browser && 'serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       const swUrl = `service-worker.js`
       let isAppOnline = navigator.onLine
