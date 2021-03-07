@@ -1,3 +1,4 @@
+import { CheckIcon } from '@chakra-ui/icons'
 import {
   Box,
   Flex,
@@ -5,7 +6,6 @@ import {
   Input,
   useColorModeValue,
 } from '@chakra-ui/react'
-import Image from 'next/image'
 import React from 'react'
 
 interface Props {
@@ -16,8 +16,7 @@ interface Props {
 
 export default function RoundCheckbox({ id, checked, onToggle }: Props) {
   const borderColor = useColorModeValue('secondary.light', 'secondary.dark')
-  const bgColorUnchecked = useColorModeValue('primary.light', 'primary.dark')
-  const bgColorChecked = useColorModeValue('secondary.light', 'secondary.dark')
+  const bgColor = useColorModeValue('primary.light', 'primary.dark')
 
   const handleChange = () => {
     onToggle(!checked)
@@ -54,23 +53,8 @@ export default function RoundCheckbox({ id, checked, onToggle }: Props) {
         bgColor={borderColor}
         onClick={handleChange}
       >
-        {!checked && (
-          <Box bgColor={bgColorUnchecked} h="5" w="5" rounded="full" />
-        )}
-        {checked && (
-          <Flex
-            justifyContent="center"
-            alignItems="center"
-            bgColor={bgColorChecked}
-          >
-            <Image
-              layout="fixed"
-              src="/icons/icon-check.svg"
-              height="10px"
-              width="10px"
-            />
-          </Flex>
-        )}
+        {!checked && <Box bgColor={bgColor} h="5" w="5" rounded="full" />}
+        {checked && <CheckIcon color={bgColor} h="4" w="4" />}
       </FormLabel>
     </Flex>
   )
