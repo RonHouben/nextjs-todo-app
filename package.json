@@ -38,7 +38,7 @@
     "jsonwebtoken": "^8.5.1",
     "pnp-webpack-plugin": "^1.6.4",
     "typescript": "4.2.4",
-    "webpack": "^5.37.1"
+    "webpack": "^5.76.0"
   },
   "license": "MIT"
 }
